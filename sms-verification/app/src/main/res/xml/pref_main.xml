@@ -1,0 +1,16 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="secret_override"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/pref_desc_secret_override"
+        android:title="@string/pref_title_secret_override" />
+
+    <Preference
+        android:key="app_signature"
+        android:title="@string/pref_title_app_signature"
+        android:summary="@string/pref_desc_app_signature"/>
+
+</PreferenceScreen>

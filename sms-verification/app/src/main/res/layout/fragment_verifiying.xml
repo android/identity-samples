@@ -1,0 +1,75 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.google.samples.smartlock.sms_verify.ui.VerifyingFragment"
+    android:id="@+id/verifiying"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentStart="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/boarder_padding">
+        <TextView
+            android:id="@+id/verifying_menu_verification_label"
+            android:labelFor="@+id/verifying_menu_verification_field"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Widget.TextView"
+            android:text="@string/verifying_menu_verification"/>
+        <EditText
+            android:id="@+id/verifying_menu_verification_field"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:inputType="number"
+            style="@style/Widget.AppCompat.EditText" />
+        <Button
+            android:id="@+id/verifying_menu_verification_submit"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:text="@string/verifying_menu_verification_submit"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/verifying_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true">
+        <ProgressBar
+            android:id="@+id/verifying_progress"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+        <TextView
+            android:id="@+id/verifying_center_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/verifying_text"
+            android:layout_gravity="center"
+            />
+    </LinearLayout>
+
+
+
+    <Button
+        android:id="@+id/verifying_menu_verification_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:text="@string/verifying_menu_verification_cancel"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/boarder_padding"/>
+
+</RelativeLayout>

@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">SMS Verify</string>
+    <string name="sign_up_btn">Sign Up</string>
+    <string name="phone_label">Phone</string>
+    <string name="submit_sign_up">Submit</string>
+    <string name="phone_verify_notify_title">Confirming phone number</string>
+    <string name="phone_verify_notify_message">%s</string>
+    <string name="toast_verified">Verified Phone Number</string>
+    <string name="toast_unverified">Unverified Phone Number</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="welcome_text">For all your sms verification needs.</string>
+    <string name="status_text">Status: unverified</string>
+    <string name="status_text_template">Status: verified \'%s\'.</string>
+    <string name="toast_start_verify">Verifying phone number: %s</string>
+    <string name="pref_desc_secret_override">Server Secret Override</string>
+    <string name="pref_title_secret_override">Server Override</string>
+
+    <!-- This should point to your servers. -->
+    <string name="reset_btn">Reset Verification</string>
+    <string name="toast_unable_to_reset">Unable to reset verification, perhaps you weren\'t verified.</string>
+    <string name="toast_something_wrong">Something went wrong, please try again later.</string>
+    <string name="reset_title">Reset your verification</string>
+    <string name="sign_up_title">Sign Up to SMS Verify</string>
+    <string name="menu_setting_title">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="toast_request_error">Error in response from server</string>
+    <string name="pref_title_app_signature">App signature</string>
+    <string name="pref_desc_app_signature">Unknown</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="verifying_menu_verification">SMS Code</string>
+    <string name="verifying_menu_verification_submit">Submit</string>
+    <string name="verifying_menu_verification_cancel">Cancel Verification</string>
+    <string name="status_default_value">Unverified</string>
+    <string name="verifying_menu_verification_required_text">The SMS code is required</string>
+    <string name="toast_cancelled_verification">Cancelled verification</string>
+    <string name="cancel_verification">Cancel</string>
+    <string name="verifier_registered">Registered for SMS receiver</string>
+    <string name="verifier_server_response">Server sent SMS</string>
+    <string name="verifying_text">Verifying SMS</string>
+    <string name="menu_reset_verification_title">Reset Verification</string>
+</resources>
