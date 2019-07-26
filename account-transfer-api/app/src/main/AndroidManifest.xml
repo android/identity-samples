@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.accounttransfer.sample">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name="com.google.accounttransfer.sample.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="com.google.accounttransfer.sample.AccountTransferBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.START_ACCOUNT_EXPORT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.ACCOUNT_IMPORT_DATA_AVAILABLE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.ACCOUNT_EXPORT_DATA_AVAILABLE" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.google.accounttransfer.sample.AccountTransferService"
+            android:exported="false"></service>
+
+
+        <activity
+            android:label="@string/login_label"
+            android:name="com.google.accounttransfer.sample.authenticator.AuthenticatorActivity"/>
+
+        <service android:name="com.google.accounttransfer.sample.authenticator.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator"/>
+        </service>
+
+
+    </application>
+
+</manifest>
