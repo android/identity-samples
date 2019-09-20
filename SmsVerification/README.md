@@ -22,6 +22,7 @@ the HTTP endpoint the app uses to send the SMS). The format is:
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="server_client_secret">0000000000</string>
+  <string name="server_client_secret_v8">0000000000</string>
   <string name="url_verify">https://your-server.com/api/verify</string>
   <string name="url_request">https://your-server.com/api/request</string>
   <string name="url_reset">https://your-server.com/api/reset</string>
