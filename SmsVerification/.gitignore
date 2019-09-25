@@ -9,4 +9,3 @@
 .externalNativeBuild
 sensitive.xml
 debug.keystore
-app/google-services.json

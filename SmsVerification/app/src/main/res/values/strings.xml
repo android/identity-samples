@@ -42,4 +42,10 @@
     <string name="verifier_server_response">Server sent SMS</string>
     <string name="verifying_text">Verifying SMS</string>
     <string name="menu_reset_verification_title">Reset Verification</string>
+
+    <string name="server_client_secret">0000000000</string>
+    <string name="server_client_secret_v8">0000000000</string>
+    <string name="url_verify">https://your-server.com/api/verify</string>
+    <string name="url_request">https://your-server.com/api/request</string>
+    <string name="url_reset">https://your-server.com/api/reset</string>
 </resources>
