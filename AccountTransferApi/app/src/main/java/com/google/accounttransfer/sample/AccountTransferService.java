@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import com.google.android.gms.auth.api.accounttransfer.AccountTransfer;
 import com.google.android.gms.auth.api.accounttransfer.AccountTransferClient;
