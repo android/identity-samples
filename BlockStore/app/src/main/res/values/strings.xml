@@ -12,4 +12,7 @@
 -->
 <resources>
     <string name="app_name">Block Store App</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_in">Sign In</string>
+    <string name="name">Name</string>
 </resources>

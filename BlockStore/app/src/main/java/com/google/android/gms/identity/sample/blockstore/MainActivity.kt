@@ -16,11 +16,44 @@
 package com.google.android.gms.identity.sample.blockstore
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.identity.sample.blockstore.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    private val binding: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        setContentView(binding.root)
+
+        lifecycleScope.launch {
+            viewModel.state
+                .collect { state ->
+                    binding.buttonSignOut.isVisible = state.areBytesStored
+                    binding.buttonSignIn.isVisible = !state.areBytesStored
+                    binding.nameTextView.text = state.bytes ?: ""
+                }
+        }
+
+        binding.buttonSignIn.setOnClickListener {
+            viewModel.storeBytes(binding.editTextView.text.toString())
+        }
+
+        binding.buttonSignOut.setOnClickListener {
+            viewModel.clearBytes()
+        }
     }
+
 }
