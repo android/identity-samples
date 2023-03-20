@@ -4,7 +4,6 @@
 Credentials Manager Sample App
 ==================
 
-
 This is the repository for the Credential Manager api code integration. app. It is a **work in
 progress** 🚧.
 
@@ -90,6 +89,8 @@ Note : Wait for the Toast to appear for respose success/failure on eac step.
   call sendUsername() request from AuthRepository )
 * Check username, create a new account if it doesn't exist.
 * Set a `username` in the session.
+* Wait for the toast to appear saying "Username verified successfully".
+* If you don't see toast, check the logs for error.
 
 ## How to set a session on server
 
@@ -99,6 +100,8 @@ Note : Wait for the Toast to appear for respose success/failure on eac step.
   shows how 2FA can be done while using Passkeys for authentication.
 * Verifies user credential and let the user sign-in.
 * No preceding registration required.
+* Wait for the toast to appear saying "Session-id stored successfully, Do register!"
+* If you don't see toast, check the logs for error. 
 
 ## How to send Register Request to server and get req info to be passed to Create Passkey prompt
 
