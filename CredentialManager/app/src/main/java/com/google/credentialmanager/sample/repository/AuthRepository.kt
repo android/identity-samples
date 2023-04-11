@@ -29,11 +29,8 @@ import com.google.credentialmanager.sample.api.ApiResult
 import com.google.credentialmanager.sample.api.AuthApi
 import com.google.credentialmanager.sample.api.Credential
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -62,32 +59,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    private val signInStateMutable = MutableSharedFlow<SignInState>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-
-    init {
-        scope.launch {
-            val username = dataStore.read(USERNAME)
-            val sessionId = dataStore.read(SESSION_ID)
-            val initialState = when {
-                username.isNullOrBlank() -> SignInState.SignedOut
-                sessionId.isNullOrBlank() -> SignInState.SigningIn(username)
-                else -> SignInState.SignedIn(username)
-            }
-            signInStateMutable.emit(initialState)
-            if (initialState is SignInState.SignedIn) {
-                refreshCredentials()
-            }
-        }
-    }
-
     /**
      * Sends the username to the server. If it succeeds, the sign-in state will proceed to
      * [SignInState.SigningIn].
      */
-    suspend fun sendUsername(username: String): Boolean {
+    suspend fun login(username: String, password: String): Boolean {
         return when (val result = api.username(username)) {
             ApiResult.SignedOutFromServer -> {
                 forceSignOut()
@@ -98,7 +74,7 @@ class AuthRepository @Inject constructor(
                     prefs[USERNAME] = username
                     prefs[SESSION_ID] = result.sessionId!!
                 }
-                signInStateMutable.emit(SignInState.SigningIn(username))
+                setSessionWithPassword(password)
                 true
             }
         }
@@ -109,7 +85,7 @@ class AuthRepository @Inject constructor(
      * [SignInState.SigningIn]. If it succeeds, the sign-in state will proceed to
      * [SignInState.SignedIn].
      */
-    suspend fun password(password: String): Boolean {
+    suspend fun setSessionWithPassword(password: String): Boolean {
         val username = dataStore.read(USERNAME)
         val sessionId = dataStore.read(SESSION_ID)
         if (!username.isNullOrEmpty() && !sessionId.isNullOrEmpty()) {
@@ -125,7 +101,6 @@ class AuthRepository @Inject constructor(
                                 prefs[SESSION_ID] = result.sessionId
                             }
                         }
-                        signInStateMutable.emit(SignInState.SignedIn(username))
                         refreshCredentials()
                         return true
                     }
@@ -139,10 +114,6 @@ class AuthRepository @Inject constructor(
                     prefs.remove(SESSION_ID)
                     prefs.remove(CREDENTIALS)
                 }
-
-                signInStateMutable.emit(
-                    SignInState.SignInError(e.message ?: "Invalid login credentials")
-                )
             }
         } else {
             Log.e(TAG, "Please check if username and session id is present in your datastore")
@@ -185,7 +156,6 @@ class AuthRepository @Inject constructor(
         dataStore.edit { prefs ->
             prefs.remove(CREDENTIALS)
         }
-        signInStateMutable.emit(SignInState.SigningIn(username))
     }
 
     /**
@@ -198,7 +168,6 @@ class AuthRepository @Inject constructor(
             prefs.remove(SESSION_ID)
             prefs.remove(CREDENTIALS)
         }
-        signInStateMutable.emit(SignInState.SignedOut)
     }
 
     private suspend fun forceSignOut() {
@@ -207,7 +176,6 @@ class AuthRepository @Inject constructor(
             prefs.remove(SESSION_ID)
             prefs.remove(CREDENTIALS)
         }
-        signInStateMutable.emit(SignInState.SignInError("Signed out by server"))
     }
 
     /**
@@ -308,7 +276,6 @@ class AuthRepository @Inject constructor(
                             prefs[CREDENTIALS] = result.data.toStringSet()
                             prefs[LOCAL_CREDENTIAL_ID] = credentialId
                         }
-                        signInStateMutable.emit(SignInState.SignedIn(username))
                         refreshCredentials()
                     }
                 }

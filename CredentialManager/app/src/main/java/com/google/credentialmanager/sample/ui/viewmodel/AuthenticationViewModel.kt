@@ -16,7 +16,6 @@
 
 package com.google.credentialmanager.sample.ui.viewmodel
 
-import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,13 +35,28 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Empty)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    fun sendUsername(username: String) {
+    fun login(username: String, password: String) {
         viewModelScope.launch {
-            val isSuccess = repository.sendUsername(username)
+            val isSuccess = repository.login(username, password)
+            if (isSuccess) {
+                _uiState.update {
+                    AuthUiState.LoginResult(true, "Sign in successfully")
+                }
+            } else {
+                _uiState.update {
+                    AuthUiState.MsgString("Some error occurred, please check logs!", "", false)
+                }
+            }
+        }
+    }
+
+    fun sendPassword(password: String) {
+        viewModelScope.launch {
+            val isSuccess = repository.setSessionWithPassword(password)
             if (isSuccess) {
                 _uiState.update {
                     AuthUiState.MsgString(
-                        "UserName verified successfully",
+                        "Session-id stored successfully, Do register!",
                         "", false
                     )
                 }
@@ -54,112 +68,62 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
         }
     }
 
-        fun sendPassword(password: String) {
-            viewModelScope.launch {
-                val isSuccess = repository.password(password)
-                if (isSuccess) {
-                    _uiState.update {
-                        AuthUiState.MsgString(
-                            "Session-id stored successfully, Do register!",
-                            "", false
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        AuthUiState.MsgString("Some error occurred, please check logs!", "", false)
-                    }
-                }
-            }
-        }
-
-        fun registerRequest() {
-            viewModelScope.launch {
-                repository.registerRequest()?.let { data ->
-                    _uiState.update {
-                        AuthUiState.CreationResult(data)
-                    }
-                }
-            }
-        }
-
-        fun registerResponse(credential: CreatePublicKeyCredentialResponse) {
-            viewModelScope.launch {
-                val isRegisterResponseSuccess = repository.registerResponse(credential)
-                if (isRegisterResponseSuccess) {
-                    _uiState.update {
-                        AuthUiState.MsgString(
-                            "You have successfully created credentials. Now Sign in",
-                            "register", true
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        AuthUiState.MsgString(
-                            "Some error occurred, please check logs!",
-                            "register",
-                            false
-                        )
-                    }
-                }
-            }
-        }
-
-        fun signInRequest() {
-            viewModelScope.launch {
-                val data = repository.signinRequest()
-                data?.let { json ->
-                    _uiState.update {
-                        AuthUiState.RequestResult(json)
-                    }
-                }
-            }
-        }
-
-        fun signInResponse(credential: GetCredentialResponse) {
-            viewModelScope.launch {
-                val isSuccess = repository.signinResponse(credential)
-                if (isSuccess) {
-                    _uiState.update {
-
-                        AuthUiState.MsgString(
-                            "Successfully Sign in, Navigating to Home",
-                            "signin",
-                            true
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        AuthUiState.MsgString(
-                            "Some error occurred, please check logs!",
-                            "signin",
-                            false
-                        )
-                    }
+    fun signInRequest() {
+        viewModelScope.launch {
+            val data = repository.signinRequest()
+            data?.let { json ->
+                _uiState.update {
+                    AuthUiState.RequestResult(json)
                 }
             }
         }
     }
 
+    fun signInResponse(credential: GetCredentialResponse) {
+        viewModelScope.launch {
+            val isSuccess = repository.signinResponse(credential)
+            if (isSuccess) {
+                _uiState.update {
 
-    sealed class AuthUiState {
-
-        object Empty : AuthUiState()
-
-        class MsgString(
-
-            val msg: String,
-            val request: String,
-            val success: Boolean
-        ) : AuthUiState()
-
-        class CreationResult(
-
-            val data: JSONObject
-        ) : AuthUiState()
-
-        class RequestResult(
-
-            val data: JSONObject
-        ) : AuthUiState()
+                    AuthUiState.MsgString(
+                        "Successfully Sign in, Navigating to Home",
+                        "signin",
+                        true
+                    )
+                }
+            } else {
+                _uiState.update {
+                    AuthUiState.MsgString(
+                        "Some error occurred, please check logs!",
+                        "signin",
+                        false
+                    )
+                }
+            }
+        }
     }
+}
+
+sealed class AuthUiState {
+
+    object Empty : AuthUiState()
+
+    class MsgString(
+
+        val msg: String,
+        val request: String,
+        val success: Boolean
+    ) : AuthUiState()
+
+    class LoginResult(
+
+        val flag: Boolean,
+        val msg: String
+    ) : AuthUiState()
+
+    class RequestResult(
+
+        val data: JSONObject
+    ) : AuthUiState()
+}
 

@@ -18,7 +18,6 @@ package com.google.credentialmanager.sample.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,10 +65,7 @@ fun AuthenticationRoute(navigateToHome: () -> Unit, viewModel: AuthenticationVie
     val uiState = viewModel.uiState.collectAsState().value
     AuthenticationScreen(
         navigateToHome,
-        viewModel::sendUsername,
-        viewModel::sendPassword,
-        viewModel::registerRequest,
-        viewModel::registerResponse,
+        viewModel::login,
         viewModel::signInRequest,
         viewModel::signInResponse,
         uiState
@@ -80,10 +76,7 @@ fun AuthenticationRoute(navigateToHome: () -> Unit, viewModel: AuthenticationVie
 @Composable
 fun AuthenticationScreen(
     navigateToHome: () -> Unit,
-    onSendUserName: (String) -> Unit,
-    onSendPassword: (String) -> Unit,
-    onRegisterRequest: () -> Unit,
-    onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
+    onLogin: (String, String) -> Unit,
     onSignInRequest: () -> Unit,
     onSignInResponse: (GetCredentialResponse) -> Unit,
     uiState: AuthUiState
@@ -131,91 +124,59 @@ fun AuthenticationScreen(
                 Text("E-mail Address")
             })
 
+        OutlinedTextField(colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = Color.White,
+            cursorColor = Color.Black,
+            disabledLabelColor = Color.Blue,
+            focusedIndicatorColor = Color.Blue,
+            unfocusedIndicatorColor = Color.Blue,
+            placeholderColor = Color.Gray
+        ),
+            modifier = Modifier.padding(top = 16.dp),
+            value = password,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Password, contentDescription = "passwordIcon"
+                )
+            },
+            singleLine = true,
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            placeholder = {
+                Text("Password")
+            },
+            trailingIcon = {
+                val image = if (passwordVisible) {
+                    Icons.Filled.Visibility
+                } else {
+                    Icons.Filled.VisibilityOff
+                }
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, "Toggle password visibility")
+                }
+            })
+
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-            )
-            {
-                Button(onClick = {
-
-                    if (email.isNotEmpty()) {
-                        onSendUserName(email)
-                    } else {
-                        Toast.makeText(activity, "Enter username", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                }) {
-                    Text("Step 1 : Send Username to server")
-                }
-            }
-
-            OutlinedTextField(colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                cursorColor = Color.Black,
-                disabledLabelColor = Color.Blue,
-                focusedIndicatorColor = Color.Blue,
-                unfocusedIndicatorColor = Color.Blue,
-                placeholderColor = Color.Gray
-            ),
-                modifier = Modifier.padding(top = 16.dp),
-                value = password,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Password, contentDescription = "emailIcon"
-                    )
-                },
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                placeholder = {
-                    Text("Password")
-                },
-                trailingIcon = {
-                    val image = if (passwordVisible) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    }
-
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, "Toggle password visibility")
-                    }
-                })
-
-            Row(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-            )
-            {
-                Button(onClick = {
-
-                    if (password.isNotEmpty()) {
-                        onSendPassword(password)
-                    } else {
-                        Toast.makeText(activity, "Enter password", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                }) {
-                    Text("Step 2 : Send Password")
-                }
-            }
-            Row(
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 10.dp)
             ) {
                 Button(onClick = {
-                    //Fetch credentials for your account
-                    onRegisterRequest()
+
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        onLogin(email, password)
+                    } else {
+                        Toast.makeText(
+                            activity, "Enter username and password both", Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }) {
-                    Text("Step 3: Register")
+                    Text("Sign in with password")
                 }
             }
-
             Row(
                 modifier = Modifier.padding(top = 8.dp),
             ) {
@@ -223,7 +184,7 @@ fun AuthenticationScreen(
                     //Fetch credentials for your account
                     onSignInRequest()
                 }) {
-                    Text("Step 4 : Sign in")
+                    Text("Sign in with passkey")
                 }
             }
         }
@@ -231,19 +192,6 @@ fun AuthenticationScreen(
         //Handle UiState values
         when (uiState) {
             is AuthUiState.Empty -> {}
-
-            is AuthUiState.CreationResult -> coroutineScope.launch {
-                val data = auth.createPasskey(activity, uiState.data)
-                if (data != null) {
-                    onRegisterResponse(data)
-                } else {
-                    Toast.makeText(
-                        activity,
-                        "Some error occurred, Please try registering again",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
 
             is AuthUiState.RequestResult -> coroutineScope.launch {
                 val data = auth.getPasskey(activity, uiState.data)
@@ -259,6 +207,17 @@ fun AuthenticationScreen(
                     }
                 }
             }
+
+            is AuthUiState.LoginResult -> {
+                if (uiState.flag) {
+                    navigateToHome()
+                } else {
+                    LaunchedEffect(uiState) {
+                        Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
         }
     }
 }

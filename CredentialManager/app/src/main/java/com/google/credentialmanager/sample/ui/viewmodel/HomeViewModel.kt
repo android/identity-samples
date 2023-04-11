@@ -16,6 +16,7 @@
 
 package com.google.credentialmanager.sample.ui.viewmodel
 
+import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.credentialmanager.sample.repository.AuthRepository
@@ -23,31 +24,63 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Empty)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _uiState.value = HomeUiState(
-                repository.getUserName()
-            )
-        }
-    }
 
     fun signOut() {
         viewModelScope.launch {
             repository.signOut()
         }
     }
+
+    fun registerRequest() {
+        viewModelScope.launch {
+            repository.registerRequest()?.let { data ->
+                _uiState.update {
+                    HomeUiState.CreationResult(data)
+                }
+            }
+        }
+    }
+
+    fun registerResponse(credential: CreatePublicKeyCredentialResponse) {
+        viewModelScope.launch {
+            val isRegisterResponseSuccess = repository.registerResponse(credential)
+            if (isRegisterResponseSuccess) {
+                _uiState.update {
+                    HomeUiState.MsgString(
+                        "You have successfully created credentials. Now Sign in"
+                    )
+                }
+            } else {
+                _uiState.update {
+                    HomeUiState.MsgString(
+                        "Some error occurred, please check logs!"
+                    )
+                }
+            }
+        }
+    }
 }
 
-data class HomeUiState(
-    val userName: String = "User"
-)
+sealed class HomeUiState {
+    object Empty : HomeUiState()
 
+    class MsgString(
+
+        val msg: String
+    ) : HomeUiState()
+
+    class CreationResult(
+
+        val data: JSONObject
+    ) : HomeUiState()
+}
 
