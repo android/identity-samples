@@ -30,7 +30,7 @@ private val ourDarkColorScheme = darkColorScheme(
 
 private val ourLightColorScheme = lightColorScheme(
     primary = Color.Yellow,
-    secondary = Color.Black
+    secondary = Color.Black,
 )
 
 //Handling both dark and night themes for app as per device theme.

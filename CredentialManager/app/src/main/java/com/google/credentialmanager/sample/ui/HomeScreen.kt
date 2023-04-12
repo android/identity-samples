@@ -140,7 +140,6 @@ fun HomeScreen(
         //Handle UiState values
         when (uiState) {
             is HomeUiState.Empty -> {
-
                 enabled1 = true
                 enabled2 = true
             }

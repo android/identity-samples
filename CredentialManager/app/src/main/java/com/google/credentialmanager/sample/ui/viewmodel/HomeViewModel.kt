@@ -41,11 +41,19 @@ class HomeViewModel @Inject constructor(private val repository: AuthRepository) 
     }
 
     fun registerRequest() {
-        _uiState.update { HomeUiState.IsLoading }
+        _uiState.update {
+            HomeUiState.IsLoading
+        }
         viewModelScope.launch {
             repository.registerRequest()?.let { data ->
                 _uiState.update {
                     HomeUiState.CreationResult(data)
+                }
+            } ?: run {
+                _uiState.update {
+                    HomeUiState.MsgString(
+                        "Oops, An internal server error occurred."
+                    )
                 }
             }
         }
@@ -75,7 +83,6 @@ sealed class HomeUiState {
     object Empty : HomeUiState()
 
     object IsLoading : HomeUiState()
-
 
     class MsgString(
 

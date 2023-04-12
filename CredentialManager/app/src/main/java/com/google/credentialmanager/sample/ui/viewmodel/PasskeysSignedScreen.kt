@@ -77,7 +77,7 @@ fun PasskeysSignedInScreen(
     ) {
         Text(
             modifier = Modifier.padding(20.dp),
-            text = "Signed successfully with saved passkey/password",
+            text = "Signed successfully with passkeys",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center

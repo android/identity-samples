@@ -16,7 +16,9 @@
 
 package com.google.credentialmanager.sample.ui.viewmodel
 
+import androidx.credentials.Credential
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.credentialmanager.sample.repository.AuthRepository
@@ -45,7 +47,12 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
                 }
             } else {
                 _uiState.update {
-                    AuthUiState.MsgString("Some error occurred, please check logs!", "", false)
+                    AuthUiState.MsgString(
+                        null,
+                        "Some error occurred, please check logs!",
+                        "",
+                        false
+                    )
                 }
             }
             repository.setSignedInState(false)
@@ -64,13 +71,20 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
         }
     }
 
-    fun signInResponse(credential: GetCredentialResponse) {
+    fun signInResponse(response: GetCredentialResponse) {
         viewModelScope.launch {
-            val isSuccess = repository.signinResponse(credential)
+            val isSuccess = repository.signinResponse(response)
             if (isSuccess) {
-                _uiState.update {
+
+                if (response.credential is PasswordCredential) {
+                    repository.setSignedInState(false)
+                } else {
                     repository.setSignedInState(true)
+                }
+
+                _uiState.update {
                     AuthUiState.MsgString(
+                        response.credential,
                         "Successfully Sign in, Navigating to Home",
                         "signin",
                         true
@@ -80,6 +94,7 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
                 repository.setSignedInState(false)
                 _uiState.update {
                     AuthUiState.MsgString(
+                        null,
                         "Some error occurred, please check logs!",
                         "signin",
                         false
@@ -98,6 +113,7 @@ sealed class AuthUiState {
 
     class MsgString(
 
+        val credential: Credential?,
         val msg: String,
         val request: String,
         val success: Boolean

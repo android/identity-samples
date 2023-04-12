@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
 import com.google.credentialmanager.sample.Graph
 import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
@@ -240,7 +241,11 @@ fun AuthenticationScreen(
 
             is AuthUiState.MsgString -> {
                 if (uiState.success && uiState.request == "signin") {
-                    navigateToHome(false)
+                    if (uiState.credential != null && uiState.credential is PasswordCredential) {
+                        navigateToHome(true)
+                    } else {
+                        navigateToHome(false)
+                    }
                 } else {
                     LaunchedEffect(uiState) {
                         Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
@@ -264,6 +269,7 @@ fun AuthenticationScreen(
                 enabled1 = true
                 enabled2 = true
             }
+            else -> {}
         }
     }
 }
