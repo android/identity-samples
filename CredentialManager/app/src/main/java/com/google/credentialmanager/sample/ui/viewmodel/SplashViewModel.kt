@@ -30,6 +30,10 @@ class SplashViewModel @Inject constructor(
     suspend fun isSignedIn(): Boolean {
         return repository.isSignedIn()
     }
+
+    suspend fun isSignedInThroughPasskeys(): Boolean {
+        return repository.isSignedInThroughPasskeys()
+    }
 }
 
 

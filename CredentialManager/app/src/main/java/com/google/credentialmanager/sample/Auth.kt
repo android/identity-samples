@@ -16,15 +16,20 @@
 
 package com.google.credentialmanager.sample
 
+import android.R.drawable
 import android.app.Activity
+import android.app.AlertDialog.Builder
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.credentials.CreatePasswordRequest
+import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.CreateCredentialCancellationException
@@ -47,25 +52,55 @@ class Auth(context: Context) {
     suspend fun getPasskey(
         activity: Activity,
         creationResult: JSONObject
-    ): GetCredentialResponse {
+    ): GetCredentialResponse? {
         Toast.makeText(activity, "Fetching previously stored credentials", Toast.LENGTH_SHORT)
             .show()
-        val result: GetCredentialResponse?
-        val cr = GetCredentialRequest(
-            listOf(
-                GetPublicKeyCredentialOption(
-                    creationResult.toString(),
-                    false
+        var result: GetCredentialResponse? = null
+        try {
+            val cr = GetCredentialRequest(
+                listOf(
+                    GetPublicKeyCredentialOption(
+                        creationResult.toString(),
+                        false
+                    ),
+                    GetPasswordOption()
                 )
             )
-        )
-        result = credMan.getCredential(cr, activity)
-        if (result.credential is PublicKeyCredential) {
-            val cred = result.credential as PublicKeyCredential
-            Log.i("TAG", "Passkey ${cred.authenticationResponseJson}")
-            return result
+            result = credMan.getCredential(cr, activity)
+            if (result.credential is PublicKeyCredential) {
+                val cred = result.credential as PublicKeyCredential
+                Log.i("TAG", "Passkey ${cred.authenticationResponseJson}")
+                return result
+            }
+        } catch (e: Exception) {
+            showErrorAlert(activity, e)
         }
         return result
+    }
+
+    private fun showErrorAlert(activity: Activity, e: Exception) {
+        Builder(activity)
+            .setTitle("An error occurred")
+            .setMessage(e.message)
+            .setNegativeButton("Ok", null)
+            .setIcon(drawable.ic_dialog_alert)
+            .show()
+    }
+
+    suspend fun createPassword(
+        username: String,
+        password: String,
+        activity: Activity
+    ): String {
+        val cr = CreatePasswordRequest(
+            username, password
+        )
+        return try {
+            credMan.createCredential(cr, activity) as CreatePasswordResponse
+            "Password created and saved"
+        } catch (e: Exception) {
+            "Exception $e"
+        }
     }
 
     suspend fun createPasskey(
@@ -80,12 +115,15 @@ class Auth(context: Context) {
                 activity
             ) as CreatePublicKeyCredentialResponse
         } catch (e: CreateCredentialException) {
-            handleFailure(e)
+
+                showErrorAlert(activity, e)
+
+            return null
         }
         return ret
     }
 
-    private fun handleFailure(e: CreateCredentialException) {
+    private fun handleFailure(activity: Activity, e: CreateCredentialException) {
         when (e) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the

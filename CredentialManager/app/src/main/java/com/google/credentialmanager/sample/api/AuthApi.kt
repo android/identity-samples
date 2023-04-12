@@ -179,15 +179,10 @@ class AuthApi @Inject constructor(
      * @param credentialId The credential ID of this device.
      * @return a JSON object.
      */
-    suspend fun signinRequest(
-        sessionId: String, credentialId: String?
-    ): ApiResult<JSONObject> {
+    suspend fun signinRequest(): ApiResult<JSONObject> {
         val call = client.newCall(Builder().url(buildString {
             append("$BASE_URL/signinRequest")
-            if (credentialId != null) {
-                append("?credId=$credentialId")
-            }
-        }).addHeader("Cookie", formatCookie(sessionId)).method("POST", jsonRequestBody {})
+        }).method("POST", jsonRequestBody {})
             .build()
         )
         val response = call.await()

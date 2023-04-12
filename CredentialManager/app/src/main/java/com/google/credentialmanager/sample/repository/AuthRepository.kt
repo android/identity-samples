@@ -21,6 +21,7 @@ import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.GetCredentialResponse
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -50,6 +51,7 @@ class AuthRepository @Inject constructor(
 
         // Keys for SharedPreferences
         val USERNAME = stringPreferencesKey("username")
+        val IS_SIGNED_IN_THROUGH_PASSKEYS = booleanPreferencesKey("is_signed_passkeys")
         val SESSION_ID = stringPreferencesKey("session_id")
         val CREDENTIALS = stringSetPreferencesKey("credentials")
         val LOCAL_CREDENTIAL_ID = stringPreferencesKey("local_credential_id")
@@ -167,6 +169,7 @@ class AuthRepository @Inject constructor(
             prefs.remove(USERNAME)
             prefs.remove(SESSION_ID)
             prefs.remove(CREDENTIALS)
+            prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
         }
     }
 
@@ -175,6 +178,7 @@ class AuthRepository @Inject constructor(
             prefs.remove(USERNAME)
             prefs.remove(SESSION_ID)
             prefs.remove(CREDENTIALS)
+            prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
         }
     }
 
@@ -239,18 +243,15 @@ class AuthRepository @Inject constructor(
      * is [SignInState.SigningIn].
      */
     suspend fun signinRequest(): JSONObject? {
-        val sessionId = dataStore.read(SESSION_ID)
-        val credentialId = dataStore.read(LOCAL_CREDENTIAL_ID)
-        if (!sessionId.isNullOrEmpty() && credentialId != null) {
-            when (val apiResult = api.signinRequest(sessionId, credentialId)) {
-                ApiResult.SignedOutFromServer -> forceSignOut()
-                is ApiResult.Success -> {
-
-                    return apiResult.data
+        when (val apiResult = api.signinRequest()) {
+            ApiResult.SignedOutFromServer -> forceSignOut()
+            is ApiResult.Success -> {
+                dataStore.edit { prefs ->
+                    apiResult.sessionId?.let { prefs[SESSION_ID] = it }
                 }
+                return apiResult.data
             }
         }
-        Log.e(TAG, "Please check if session id is present")
         return null
     }
 
@@ -265,7 +266,6 @@ class AuthRepository @Inject constructor(
             signinResponse?.let {
                 val obj = JSONObject(it)
                 val response = obj.getJSONObject("response")
-                val username = dataStore.read(USERNAME)!!
                 val sessionId = dataStore.read(SESSION_ID)!!
                 val credentialId = obj.getString("rawId")
                 when (val result = api.signinResponse(sessionId, response, credentialId)) {
@@ -288,20 +288,24 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun isSignedIn(): Boolean {
-        val username = dataStore.read(USERNAME)
         val sessionId = dataStore.read(SESSION_ID)
         return when {
-            username.isNullOrBlank() -> false
             sessionId.isNullOrBlank() -> false
             else -> true
         }
     }
 
-    suspend fun getUserName(): String {
-        val username = dataStore.read(USERNAME)
-        return when {
-            username.isNullOrBlank() -> ""
-            else -> username
+    suspend fun isSignedInThroughPasskeys(): Boolean {
+        val isSignedInThroughPasskeys = dataStore.read(IS_SIGNED_IN_THROUGH_PASSKEYS)
+        isSignedInThroughPasskeys?.let {
+            return it
+        }
+        return false
+    }
+
+    suspend fun setSignedInState(flag: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[IS_SIGNED_IN_THROUGH_PASSKEYS] = flag
         }
     }
 

@@ -38,12 +38,17 @@ fun SplashScreen(
                 })
         )
         navController.navigate(
-            if (splashViewModel.isSignedIn())
-                CredManAppDestinations.HOME_ROUTE else CredManAppDestinations.AUTH_ROUTE
+            if (splashViewModel.isSignedIn()) {
+                if (splashViewModel.isSignedInThroughPasskeys()) {
+                    CredManAppDestinations.PASSKEYS_ROUTE
+                } else {
+                    CredManAppDestinations.HOME_ROUTE
+                }
+            } else CredManAppDestinations.AUTH_ROUTE
         )
     }
 
-    // Image
+// Image
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxWidth()

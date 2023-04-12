@@ -41,6 +41,7 @@ class HomeViewModel @Inject constructor(private val repository: AuthRepository) 
     }
 
     fun registerRequest() {
+        _uiState.update { HomeUiState.IsLoading }
         viewModelScope.launch {
             repository.registerRequest()?.let { data ->
                 _uiState.update {
@@ -56,7 +57,7 @@ class HomeViewModel @Inject constructor(private val repository: AuthRepository) 
             if (isRegisterResponseSuccess) {
                 _uiState.update {
                     HomeUiState.MsgString(
-                        "You have successfully created credentials. Now Sign in"
+                        "Passkey created. Try signin with passkeys"
                     )
                 }
             } else {
@@ -72,6 +73,9 @@ class HomeViewModel @Inject constructor(private val repository: AuthRepository) 
 
 sealed class HomeUiState {
     object Empty : HomeUiState()
+
+    object IsLoading : HomeUiState()
+
 
     class MsgString(
 

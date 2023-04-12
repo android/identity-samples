@@ -33,6 +33,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -98,6 +99,8 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
     implementation "ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation 'androidx.compose.material3:material3:1.1.0-beta02'
+
 
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.0-beta01"

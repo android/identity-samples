@@ -28,6 +28,7 @@ import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
+import com.google.credentialmanager.sample.ui.viewmodel.PasskeysSignedSRoute
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
 
 //This Navigation Graph is handling to and fro from Authentication to Contacts screens.
@@ -37,7 +38,7 @@ fun CredentialManagerNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = CredManAppDestinations.AUTH_ROUTE,
     navigateToLogin: () -> Unit,
-    navigateToHome: () -> Unit
+    navigateToHome: (Boolean) -> Unit
 ) {
 
     NavHost(
@@ -50,6 +51,13 @@ fun CredentialManagerNavGraph(
             AuthenticationRoute(
                 navigateToHome = navigateToHome,
                 viewModel = authViewModel
+            )
+        }
+        composable(CredManAppDestinations.PASSKEYS_ROUTE) {
+            val homeViewModel = hiltViewModel<HomeViewModel>()
+            PasskeysSignedSRoute(
+                navigateToLogin = navigateToLogin,
+                viewModel = homeViewModel
             )
         }
         composable(CredManAppDestinations.HOME_ROUTE) {

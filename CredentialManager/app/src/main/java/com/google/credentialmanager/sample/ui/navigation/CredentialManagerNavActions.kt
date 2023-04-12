@@ -20,16 +20,23 @@ import androidx.navigation.NavHostController
 
 object CredManAppDestinations {
     const val HOME_ROUTE = "home"
+    const val PASSKEYS_ROUTE = "passkeys"
     const val AUTH_ROUTE = "Auth"
     const val SPLASH_ROUTE = "splash"
 }
 
 //This controller will help decide where to navigate
 class CredentialManagerNavActions(navController: NavHostController) {
-    //Takes user to Contacts flow.
-    val navigateToHome: () -> Unit = {
-        navController.navigate(CredManAppDestinations.HOME_ROUTE) {
-            launchSingleTop = true
+    //Takes user to Home flow.
+    val navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit = {
+        if (it) {
+            navController.navigate(CredManAppDestinations.HOME_ROUTE) {
+                launchSingleTop = true
+            }
+        } else {
+            navController.navigate(CredManAppDestinations.PASSKEYS_ROUTE) {
+                launchSingleTop = true
+            }
         }
     }
 

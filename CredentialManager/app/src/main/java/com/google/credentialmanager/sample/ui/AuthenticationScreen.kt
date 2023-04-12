@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -41,28 +42,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.GetCredentialResponse
 import com.google.credentialmanager.sample.Graph
 import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
-import kotlinx.coroutines.launch
 
 @Composable
-fun AuthenticationRoute(navigateToHome: () -> Unit, viewModel: AuthenticationViewModel) {
+fun AuthenticationRoute(
+    navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit,
+    viewModel: AuthenticationViewModel
+) {
 
     val uiState = viewModel.uiState.collectAsState().value
+
     AuthenticationScreen(
         navigateToHome,
         viewModel::login,
@@ -75,7 +78,7 @@ fun AuthenticationRoute(navigateToHome: () -> Unit, viewModel: AuthenticationVie
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun AuthenticationScreen(
-    navigateToHome: () -> Unit,
+    navigateToHome: (flag: Boolean) -> Unit,
     onLogin: (String, String) -> Unit,
     onSignInRequest: () -> Unit,
     onSignInResponse: (GetCredentialResponse) -> Unit,
@@ -86,19 +89,21 @@ fun AuthenticationScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
+    var enabled1 by remember { mutableStateOf(false) }
+    var enabled2 by remember { mutableStateOf(false) }
 
     val auth = Graph.auth
     val activity = LocalContext.current as Activity
 
-
     Column(
         modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
-            text = "Sign in to CredMan",
+            text = "Try Passkeys Demo",
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-            fontSize = 34.sp
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold
         )
 
         OutlinedTextField(colors = TextFieldDefaults.textFieldColors(
@@ -164,60 +169,103 @@ fun AuthenticationScreen(
             Row(
                 modifier = Modifier.padding(top = 10.dp)
             ) {
-                Button(onClick = {
+                Button(
+                    onClick = {
 
-                    if (email.isNotEmpty() && password.isNotEmpty()) {
-                        onLogin(email, password)
-                    } else {
-                        Toast.makeText(
-                            activity, "Enter username and password both", Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }) {
-                    Text("Sign in with password")
+                        if (email.isNotEmpty() && password.isNotEmpty()) {
+                            Toast.makeText(
+                                activity, "Wait, signing you in.", Toast.LENGTH_SHORT
+                            ).show()
+
+                            onLogin(email, password)
+                        } else {
+                            Toast.makeText(
+                                activity, "Enter both username and password", Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    },
+                    enabled = enabled1
+                ) {
+                    Text("Create an account with password")
                 }
             }
+
+            Text(
+                modifier = Modifier.padding(20.dp),
+                text = "----------------     or     ----------------",
+                fontSize = 20.sp,
+                color = Color.Gray
+            )
+
+
             Row(
                 modifier = Modifier.padding(top = 8.dp),
             ) {
-                Button(onClick = {
-                    //Fetch credentials for your account
-                    onSignInRequest()
-                }) {
-                    Text("Sign in with passkey")
+                Button(
+                    onClick = {
+                        //Fetch credentials for your account
+                        onSignInRequest()
+                    },
+                    enabled = enabled2
+                ) {
+                    Text("Sign in with saved passkey/password")
                 }
             }
+
         }
 
         //Handle UiState values
         when (uiState) {
-            is AuthUiState.Empty -> {}
+            is AuthUiState.Empty -> {
+                enabled1 = true
+                enabled2 = true
+            }
 
-            is AuthUiState.RequestResult -> coroutineScope.launch {
+            is AuthUiState.IsLoading -> {
+                enabled1 = false
+                enabled2 = false
+            }
+
+            is AuthUiState.RequestResult -> LaunchedEffect(uiState) {
+                enabled1 = true
+                enabled2 = true
                 val data = auth.getPasskey(activity, uiState.data)
-                onSignInResponse(data)
+                data?.let {
+                    Toast.makeText(
+                        activity, "Wait for server validation. Letting you in", Toast.LENGTH_LONG
+                    ).show()
+                    onSignInResponse(data)
+                }
             }
 
             is AuthUiState.MsgString -> {
                 if (uiState.success && uiState.request == "signin") {
-                    navigateToHome()
+                    navigateToHome(false)
                 } else {
                     LaunchedEffect(uiState) {
                         Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
                     }
                 }
+                enabled1 = true
+                enabled2 = true
             }
 
             is AuthUiState.LoginResult -> {
                 if (uiState.flag) {
-                    navigateToHome()
+                    LaunchedEffect(uiState) {
+                        auth.createPassword(email, password, activity)
+                    }
+                    navigateToHome(true)
                 } else {
                     LaunchedEffect(uiState) {
                         Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
                     }
                 }
+                enabled1 = true
+                enabled2 = true
             }
-
         }
     }
 }
+
+

@@ -36,6 +36,7 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     fun login(username: String, password: String) {
+        _uiState.update { AuthUiState.IsLoading }
         viewModelScope.launch {
             val isSuccess = repository.login(username, password)
             if (isSuccess) {
@@ -47,28 +48,12 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
                     AuthUiState.MsgString("Some error occurred, please check logs!", "", false)
                 }
             }
-        }
-    }
-
-    fun sendPassword(password: String) {
-        viewModelScope.launch {
-            val isSuccess = repository.setSessionWithPassword(password)
-            if (isSuccess) {
-                _uiState.update {
-                    AuthUiState.MsgString(
-                        "Session-id stored successfully, Do register!",
-                        "", false
-                    )
-                }
-            } else {
-                _uiState.update {
-                    AuthUiState.MsgString("Some error occurred, please check logs!", "", false)
-                }
-            }
+            repository.setSignedInState(false)
         }
     }
 
     fun signInRequest() {
+        _uiState.update { AuthUiState.IsLoading }
         viewModelScope.launch {
             val data = repository.signinRequest()
             data?.let { json ->
@@ -84,7 +69,7 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
             val isSuccess = repository.signinResponse(credential)
             if (isSuccess) {
                 _uiState.update {
-
+                    repository.setSignedInState(true)
                     AuthUiState.MsgString(
                         "Successfully Sign in, Navigating to Home",
                         "signin",
@@ -92,6 +77,7 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
                     )
                 }
             } else {
+                repository.setSignedInState(false)
                 _uiState.update {
                     AuthUiState.MsgString(
                         "Some error occurred, please check logs!",
@@ -107,6 +93,8 @@ class AuthenticationViewModel @Inject constructor(private val repository: AuthRe
 sealed class AuthUiState {
 
     object Empty : AuthUiState()
+
+    object IsLoading : AuthUiState()
 
     class MsgString(
 

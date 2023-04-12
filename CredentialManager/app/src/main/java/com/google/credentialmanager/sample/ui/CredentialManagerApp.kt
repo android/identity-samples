@@ -17,6 +17,8 @@
 package com.google.credentialmanager.sample.ui
 
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
@@ -34,6 +36,8 @@ fun CredentialManagerApp() {
     CredentialManagerTheme {
         val systemUiController = rememberSystemUiController()
         val darkIcons = MaterialTheme.colors.isLight
+
+
         SideEffect {
             systemUiController.setSystemBarsColor(Color.Transparent, darkIcons = darkIcons)
         }
@@ -50,5 +54,7 @@ fun CredentialManagerApp() {
             navigateToHome = navigationActions.navigateToHome
         )
     }
+
+
 }
 
