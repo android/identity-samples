@@ -1,7 +1,4 @@
 buildscript {
-    ext {
-        compose_version = '1.3.1'
-    }
     repositories {
         // Make sure that you have the following two repositories
         google()  // Google's Maven repository
