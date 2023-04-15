@@ -22,6 +22,7 @@ import android.app.AlertDialog.Builder
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
@@ -61,6 +62,7 @@ class Auth(context: Context) {
                 listOf(
                     GetPublicKeyCredentialOption(
                         creationResult.toString(),
+                        null,
                         false
                     ),
                     GetPasswordOption()
@@ -111,12 +113,12 @@ class Auth(context: Context) {
         var ret: CreatePublicKeyCredentialResponse? = null
         try {
             ret = credMan.createCredential(
-                cr,
+                cr as CreateCredentialRequest,
                 activity
             ) as CreatePublicKeyCredentialResponse
         } catch (e: CreateCredentialException) {
 
-                showErrorAlert(activity, e)
+            showErrorAlert(activity, e)
 
             return null
         }
