@@ -1,0 +1,26 @@
+{
+    "challenge": "$4",
+    "rp": {
+        "id": "passkeys-codelab.glitch.me",
+        "name": "CredMan App Test"
+    },
+    "pubKeyCredParams": [
+        {
+            "type": "public-key",
+            "alg": -7
+        },
+        {
+            "type": "public-key",
+            "alg": -257
+        }
+    ],
+    "authenticatorSelection": {
+        "authenticatorAttachment": "platform",
+        "residentKey": "required"
+    },
+    "user": {
+           "id": "$3",
+           "name": "$1",
+           "displayName": "$2"
+       }
+}
