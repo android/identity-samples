@@ -67,23 +67,20 @@ class SignInFragment : Fragment() {
 
         binding.signIn.setOnClickListener(signInWithPassword())
 
-        binding.signInWithPasskeys.setOnClickListener(signInWithPasskeys())
+        binding.signInWithSavedCredentials.setOnClickListener(signInWithSavedCredentials())
     }
 
-    private fun signInWithPasskeys(): View.OnClickListener {
+    private fun signInWithSavedCredentials(): View.OnClickListener {
         return View.OnClickListener {
 
             lifecycleScope.launch {
                 configureViews(View.VISIBLE, false)
 
-                val data = getPasskey()
+                //TODO : Call getSavedCredentials() method to signin using passkey/password
 
                 configureViews(View.INVISIBLE, true)
 
-                data?.let {
-                    sendSignInResponseToServer()
-                    listener.showHome()
-                }
+              //TODO : complete the authentication process after validating the public key credential to your server and let the user in.
             }
         }
     }
@@ -91,7 +88,7 @@ class SignInFragment : Fragment() {
     private fun configureViews(visibility: Int, flag: Boolean) {
         configureProgress(visibility)
         binding.signIn.isEnabled = flag
-        binding.signInWithPasskeys.isEnabled = flag
+        binding.signInWithSavedCredentials.isEnabled = flag
     }
 
     private fun configureProgress(visibility: Int) {
@@ -125,46 +122,23 @@ class SignInFragment : Fragment() {
     }
 
     private fun fetchAuthJsonFromServer(): String {
-        return Utils.readFromAsset(context, "AuthFromServer")
+        //TODO fetch authentication mock json
+
+        return ""
     }
 
     private fun sendSignInResponseToServer(): Boolean {
         return true
     }
 
-    private suspend fun getPasskey(): String? {
-        val requestJson = fetchAuthJsonFromServer()
-        val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(requestJson, true)
-        val getPasswordOption = GetPasswordOption()
-        try {
-            val result = mCredMan.getCredential(
-                GetCredentialRequest(
-                    listOf(
-                        getPublicKeyCredentialOption,
-                        getPasswordOption
-                    )
-                ), requireActivity()
-            )
+    private suspend fun getSavedCredentials(): String? {
 
-            if (result.credential is PublicKeyCredential) {
-                val cred = result.credential as PublicKeyCredential
-                Utils.setSignedInThroughPasskeys(true)
-                return "Passkey: ${cred.authenticationResponseJson}"
-            }
-            if (result.credential is PasswordCredential) {
-                val cred = result.credential as PasswordCredential
-                Utils.setSignedInThroughPasskeys(false)
-                return "Got Password - User:${cred.id} Password: ${cred.password}"
-            }
-        } catch (e: Exception) {
-            configureViews(View.INVISIBLE, true)
-            Log.e("Auth", " Exception Message" + e.message.toString())
-            Utils.showErrorAlert(
-                activity,
-                "An error occurred while authenticating through saved credentials. Check logs for additional details"
-            )
-            return null
-        }
+        //TODO create a GetPublicKeyCredentialOption() with necessary authentication json from server
+
+        //TODO create a PasswordOption to retrieve all the associated user's password
+
+        //TODO call getCredential() with required credential options
+
         return null
     }
 

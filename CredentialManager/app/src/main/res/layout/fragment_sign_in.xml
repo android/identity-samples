@@ -98,11 +98,11 @@
         android:text="------------------------------      OR      ------------------------------"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/sign_in_with_passkeys"
+        app:layout_constraintStart_toStartOf="@+id/sign_in_with_savedCredentials"
         app:layout_constraintTop_toBottomOf="@+id/sign_in" />
 
     <Button
-        android:id="@+id/sign_in_with_passkeys"
+        android:id="@+id/sign_in_with_savedCredentials"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

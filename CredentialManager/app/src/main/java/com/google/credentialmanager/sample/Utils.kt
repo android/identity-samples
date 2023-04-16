@@ -35,11 +35,13 @@ object Utils {
         editor = sharedPreference.edit()
     }
 
+    //Set if the user is signed in or not
     fun configureSignedInPref(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN, flag)
         editor.commit()
     }
 
+    //Set if signed in through passkeys or not
     fun setSignedInThroughPasskeys(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN_THROUGH_PASSKEYS, flag)
         editor.commit()

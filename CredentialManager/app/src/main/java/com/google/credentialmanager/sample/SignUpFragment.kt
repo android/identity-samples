@@ -73,7 +73,8 @@ class SignUpFragment : Fragment() {
 
         mCredMan = CredentialManager.create(requireActivity())
 
-        binding.signUp.setOnClickListener(signUpWithPasskeys())
+        //TODO : Add signUp onClick()
+
         binding.signUpWithPassword.setOnClickListener(signUpWithPassword())
     }
 
@@ -92,8 +93,7 @@ class SignUpFragment : Fragment() {
 
                     configureViews(View.VISIBLE, false)
 
-                    //you can send this data to server for future use
-                    createPassword()
+                    //TODO : Save the user credential password with their password provider
 
                     simulateServerDelayAndLogIn()
 
@@ -113,17 +113,6 @@ class SignUpFragment : Fragment() {
         }, 2000)
     }
 
-    private fun configureViews(visibility: Int, flag: Boolean) {
-        configureProgress(visibility)
-        binding.signUp.isEnabled = flag
-        binding.signUpWithPassword.isEnabled = flag
-    }
-
-    private fun configureProgress(visibility: Int) {
-        binding.textProgress.visibility = visibility
-        binding.circularProgressIndicator.visibility = visibility
-    }
-
     private fun signUpWithPasskeys(): View.OnClickListener {
         return View.OnClickListener {
 
@@ -136,16 +125,12 @@ class SignUpFragment : Fragment() {
                 lifecycleScope.launch {
                     configureViews(View.VISIBLE, false)
 
-                    val data = createPasskey()
+                    //TODO : Call createPasskey() to sign up with passkey
 
                     configureViews(View.INVISIBLE, true)
 
-                    //send Data to server
-                    data?.let {
-                        registerResponse()
-                        Utils.setSignedInThroughPasskeys(true)
-                        listener.showHome()
-                    }
+                    //TODO : complete the registration process after sending public key credential to your server and let the user in
+
                 }
             }
         }
@@ -153,12 +138,9 @@ class SignUpFragment : Fragment() {
 
     private fun fetchRegistrationJsonFromServer(): String {
 
-        val response = Utils.readFromAsset(activity, "RegFromServer")
+        //TODO fetch registration mock response
 
-        //Update userId, name and Display name in the mock
-        return response.replace("$1", binding.username.text.toString())
-            .replace("$3", getEncodedUserId())
-            .replace("$2", binding.username.text.toString())
+        return ""
     }
 
     private fun getEncodedUserId(): String {
@@ -173,31 +155,32 @@ class SignUpFragment : Fragment() {
 
     private suspend fun createPassword(): String {
 
-        val cr = CreatePasswordRequest(
-            binding.username.text.toString(),
-            binding.password.text.toString()
-        )
-        return try {
-            mCredMan.createCredential(cr, requireActivity()) as CreatePasswordResponse
-            "Password created and saved"
-        } catch (e: Exception) {
-            "Exception $e"
-        }
+        //TODO : CreatePasswordRequest with entered username and password
+
+        //TODO : Create credential with created password request
+
+        return ""
     }
 
     private suspend fun createPasskey(): CreatePublicKeyCredentialResponse? {
-        val cr = CreatePublicKeyCredentialRequest(fetchRegistrationJsonFromServer())
         var ret: CreatePublicKeyCredentialResponse? = null
-        try {
-            ret = mCredMan.createCredential(
-                cr,
-                requireActivity()
-            ) as CreatePublicKeyCredentialResponse
-        } catch (e: CreateCredentialException) {
-            configureProgress(View.INVISIBLE)
-            handleFailure(e)
-        }
+
+        //TODO create a CreatePublicKeyCredentialRequest() with necessary registration json from server
+
+        //TODO call createCredential() with createPublicKeyCredentialRequest
+
         return ret
+    }
+
+    private fun configureViews(visibility: Int, flag: Boolean) {
+        configureProgress(visibility)
+        binding.signUp.isEnabled = flag
+        binding.signUpWithPassword.isEnabled = flag
+    }
+
+    private fun configureProgress(visibility: Int) {
+        binding.textProgress.visibility = visibility
+        binding.circularProgressIndicator.visibility = visibility
     }
 
     //Demonstration purpose : These are type of errors during passkey creation, handle this in your code wisely.
