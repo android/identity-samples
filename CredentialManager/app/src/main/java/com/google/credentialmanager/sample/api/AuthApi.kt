@@ -397,7 +397,6 @@ class AuthApi @Inject constructor(
 
         fun readCredentials(reader: JsonReader): List<Credential> {
             val credentials = mutableListOf<Credential>()
-            Thread {
                 reader.beginArray()
                 while (reader.hasNext()) {
                     reader.beginObject()
@@ -416,7 +415,6 @@ class AuthApi @Inject constructor(
                     }
                 }
                 reader.endArray()
-            }.start()
             return credentials
         }
 
