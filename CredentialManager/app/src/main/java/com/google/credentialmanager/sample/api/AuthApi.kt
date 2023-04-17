@@ -394,28 +394,32 @@ class AuthApi @Inject constructor(
     }
 
     private fun parseUserCredentials(body: ResponseBody): List<Credential> {
+
         fun readCredentials(reader: JsonReader): List<Credential> {
             val credentials = mutableListOf<Credential>()
-            reader.beginArray()
-            while (reader.hasNext()) {
-                reader.beginObject()
-                var id: String? = null
-                var publicKey: String? = null
+            Thread {
+                reader.beginArray()
                 while (reader.hasNext()) {
-                    when (reader.nextName()) {
-                        "credId" -> id = reader.nextString()
-                        "publicKey" -> publicKey = reader.nextString()
-                        else -> reader.skipValue()
+                    reader.beginObject()
+                    var id: String? = null
+                    var publicKey: String? = null
+                    while (reader.hasNext()) {
+                        when (reader.nextName()) {
+                            "credId" -> id = reader.nextString()
+                            "publicKey" -> publicKey = reader.nextString()
+                            else -> reader.skipValue()
+                        }
+                    }
+                    reader.endObject()
+                    if (id != null && publicKey != null) {
+                        credentials.add(Credential(id, publicKey))
                     }
                 }
-                reader.endObject()
-                if (id != null && publicKey != null) {
-                    credentials.add(Credential(id, publicKey))
-                }
-            }
-            reader.endArray()
+                reader.endArray()
+            }.start()
             return credentials
         }
+
         JsonReader(body.byteStream().bufferedReader()).use { reader ->
             reader.beginObject()
             while (reader.hasNext()) {
@@ -428,6 +432,7 @@ class AuthApi @Inject constructor(
             }
             reader.endObject()
         }
+
         throw ApiException("Cannot parse credentials")
     }
 
