@@ -29,8 +29,8 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-        buildConfigField 'String', 'API_BASE_URL', "\"https://credman-android-sample.glitch.me/auth\""
-        resValue 'string', 'host', 'https://credman-android-sample.glitch.me'
+        buildConfigField 'String', 'API_BASE_URL', "\"https://https://credman-glitch-sample.glitch.me/auth\""
+        resValue 'string', 'host', 'https://https://credman-glitch-sample.glitch.me'
     }
 
     buildTypes {
