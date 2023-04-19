@@ -55,21 +55,6 @@ class AuthApi @Inject constructor(
     }
 
     /**
-     * @param sessionId The session ID.
-     * @return A list of all the credentials registered on the server.
-     */
-    suspend fun getKeys(sessionId: String): ApiResult<List<Credential>> {
-        val call = client.newCall(
-            Builder().url("$BASE_URL/getKeys").addHeader("Cookie", formatCookie(sessionId))
-                .method("POST", jsonRequestBody {}).build()
-        )
-        val response = call.await()
-        return response.result("Error calling /getKeys") {
-            parseUserCredentials(body ?: throw ApiException("Empty response from /getKeys"))
-        }
-    }
-
-    /**
      * @param username The username to be used for sign-in.
      * @return The Session ID.
      */
@@ -135,7 +120,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun registerResponse(
         sessionId: String, response: JSONObject, credentialId: String
-    ): ApiResult<List<Credential>> {
+    ): ApiResult<Unit> {
         val call = client.newCall(
             Builder().url("$BASE_URL/registerResponse").addHeader("Cookie", formatCookie(sessionId))
                 .method("POST", jsonRequestBody {
@@ -153,11 +138,10 @@ class AuthApi @Inject constructor(
                 }).build()
         )
         val apiResponse = call.await()
-        return apiResponse.result("Error calling /registerResponse") {
-            parseUserCredentials(
-                body ?: throw ApiException("Empty response from /registerResponse")
-            )
+        if (apiResponse.body == null) {
+            throw ApiException("Empty response from /registerResponse")
         }
+        return apiResponse.result("Error calling /registerResponse") {}
     }
 
     /**
@@ -202,7 +186,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun signinResponse(
         sessionId: String, response: JSONObject, credentialId: String
-    ): ApiResult<List<Credential>> {
+    ): ApiResult<Unit> {
 
         val call = client.newCall(
             Builder().url("$BASE_URL/signinResponse").addHeader("Cookie", formatCookie(sessionId))
@@ -228,7 +212,6 @@ class AuthApi @Inject constructor(
         )
         val apiResponse = call.await()
         return apiResponse.result("Error calling /signingResponse") {
-            parseUserCredentials(body ?: throw ApiException("Empty response from /signinResponse"))
         }
     }
 
@@ -391,47 +374,6 @@ class AuthApi @Inject constructor(
             writer.endObject()
         }
         return output.toString().toRequestBody(JSON)
-    }
-
-    private fun parseUserCredentials(body: ResponseBody): List<Credential> {
-
-        fun readCredentials(reader: JsonReader): List<Credential> {
-            val credentials = mutableListOf<Credential>()
-                reader.beginArray()
-                while (reader.hasNext()) {
-                    reader.beginObject()
-                    var id: String? = null
-                    var publicKey: String? = null
-                    while (reader.hasNext()) {
-                        when (reader.nextName()) {
-                            "credId" -> id = reader.nextString()
-                            "publicKey" -> publicKey = reader.nextString()
-                            else -> reader.skipValue()
-                        }
-                    }
-                    reader.endObject()
-                    if (id != null && publicKey != null) {
-                        credentials.add(Credential(id, publicKey))
-                    }
-                }
-                reader.endArray()
-            return credentials
-        }
-
-        JsonReader(body.byteStream().bufferedReader()).use { reader ->
-            reader.beginObject()
-            while (reader.hasNext()) {
-                val name = reader.nextName()
-                if (name == "credentials") {
-                    return readCredentials(reader)
-                } else {
-                    reader.skipValue()
-                }
-            }
-            reader.endObject()
-        }
-
-        throw ApiException("Cannot parse credentials")
     }
 
     private fun throwResponseError(response: Response, message: String): Nothing {

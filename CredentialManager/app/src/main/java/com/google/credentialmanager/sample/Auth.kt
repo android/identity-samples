@@ -62,7 +62,6 @@ class Auth(context: Context) {
                 listOf(
                     GetPublicKeyCredentialOption(
                         creationResult.toString(),
-                        null,
                         false
                     ),
                     GetPasswordOption()

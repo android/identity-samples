@@ -24,7 +24,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.google.credentialmanager.sample.api.ApiException
 import com.google.credentialmanager.sample.api.ApiResult
 import com.google.credentialmanager.sample.api.AuthApi
@@ -53,8 +52,6 @@ class AuthRepository @Inject constructor(
         val USERNAME = stringPreferencesKey("username")
         val IS_SIGNED_IN_THROUGH_PASSKEYS = booleanPreferencesKey("is_signed_passkeys")
         val SESSION_ID = stringPreferencesKey("session_id")
-        val CREDENTIALS = stringSetPreferencesKey("credentials")
-        val LOCAL_CREDENTIAL_ID = stringPreferencesKey("local_credential_id")
 
         suspend fun <T> DataStore<Preferences>.read(key: Preferences.Key<T>): T? {
             return data.map { it[key] }.first()
@@ -68,7 +65,7 @@ class AuthRepository @Inject constructor(
     suspend fun login(username: String, password: String): Boolean {
         return when (val result = api.username(username)) {
             ApiResult.SignedOutFromServer -> {
-                forceSignOut()
+                signOut()
                 false
             }
             is ApiResult.Success<*> -> {
@@ -87,14 +84,14 @@ class AuthRepository @Inject constructor(
      * [SignInState.SigningIn]. If it succeeds, the sign-in state will proceed to
      * [SignInState.SignedIn].
      */
-    suspend fun setSessionWithPassword(password: String): Boolean {
+    private suspend fun setSessionWithPassword(password: String): Boolean {
         val username = dataStore.read(USERNAME)
         val sessionId = dataStore.read(SESSION_ID)
         if (!username.isNullOrEmpty() && !sessionId.isNullOrEmpty()) {
             try {
                 when (val result = api.password(sessionId, password)) {
                     ApiResult.SignedOutFromServer -> {
-                        forceSignOut()
+                        signOut()
                         return false
                     }
                     is ApiResult.Success<*> -> {
@@ -103,7 +100,6 @@ class AuthRepository @Inject constructor(
                                 prefs[SESSION_ID] = result.sessionId
                             }
                         }
-                        refreshCredentials()
                         return true
                     }
                 }
@@ -114,7 +110,6 @@ class AuthRepository @Inject constructor(
                 dataStore.edit { prefs ->
                     prefs.remove(USERNAME)
                     prefs.remove(SESSION_ID)
-                    prefs.remove(CREDENTIALS)
                 }
             }
         } else {
@@ -123,41 +118,10 @@ class AuthRepository @Inject constructor(
         return false
     }
 
-    private suspend fun refreshCredentials() {
-        val sessionId = dataStore.read(SESSION_ID)!!
-        when (val result = api.getKeys(sessionId)) {
-            ApiResult.SignedOutFromServer -> forceSignOut()
-            is ApiResult.Success -> {
-                dataStore.edit { prefs ->
-                    result.sessionId?.let { prefs[SESSION_ID] = it }
-                    prefs[CREDENTIALS] = result.data.toStringSet()
-                }
-            }
-        }
-    }
-
     private fun List<Credential>.toStringSet(): Set<String> {
         return mapIndexed { index, credential ->
             "$index;${credential.id};${credential.publicKey}"
         }.toSet()
-    }
-
-    private fun parseCredentials(set: Set<String>): List<Credential> {
-        return set.map { s ->
-            val (index, id, publicKey) = s.split(";")
-            index to Credential(id, publicKey)
-        }.sortedBy { (index, _) -> index }
-            .map { (_, credential) -> credential }
-    }
-
-    /**
-     * Clears the credentials. The sign-in state will proceed to [SignInState.SigningIn].
-     */
-    suspend fun clearCredentials() {
-        val username = dataStore.read(USERNAME)!!
-        dataStore.edit { prefs ->
-            prefs.remove(CREDENTIALS)
-        }
     }
 
     /**
@@ -168,16 +132,6 @@ class AuthRepository @Inject constructor(
         dataStore.edit { prefs ->
             prefs.remove(USERNAME)
             prefs.remove(SESSION_ID)
-            prefs.remove(CREDENTIALS)
-            prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
-        }
-    }
-
-    private suspend fun forceSignOut() {
-        dataStore.edit { prefs ->
-            prefs.remove(USERNAME)
-            prefs.remove(SESSION_ID)
-            prefs.remove(CREDENTIALS)
             prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
         }
     }
@@ -191,7 +145,7 @@ class AuthRepository @Inject constructor(
             val sessionId = dataStore.read(SESSION_ID)
             if (!sessionId.isNullOrEmpty()) {
                 when (val apiResult = api.registerRequest(sessionId)) {
-                    ApiResult.SignedOutFromServer -> forceSignOut()
+                    ApiResult.SignedOutFromServer -> signOut()
                     is ApiResult.Success -> {
                         if (apiResult.sessionId != null) {
                             dataStore.edit { prefs ->
@@ -222,12 +176,13 @@ class AuthRepository @Inject constructor(
             val sessionId = dataStore.read(SESSION_ID)!!
             val credentialId = obj.getString("rawId")
             when (val result = api.registerResponse(sessionId, response, credentialId)) {
-                ApiResult.SignedOutFromServer -> forceSignOut()
+                ApiResult.SignedOutFromServer -> {
+                    signOut()
+                    return false
+                }
                 is ApiResult.Success -> {
                     dataStore.edit { prefs ->
                         result.sessionId?.let { prefs[SESSION_ID] = it }
-                        prefs[CREDENTIALS] = result.data.toStringSet()
-                        prefs[LOCAL_CREDENTIAL_ID] = credentialId
                     }
                 }
             }
@@ -244,7 +199,7 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signinRequest(): JSONObject? {
         when (val apiResult = api.signinRequest()) {
-            ApiResult.SignedOutFromServer -> forceSignOut()
+            ApiResult.SignedOutFromServer -> signOut()
             is ApiResult.Success -> {
                 dataStore.edit { prefs ->
                     apiResult.sessionId?.let { prefs[SESSION_ID] = it }
@@ -269,14 +224,14 @@ class AuthRepository @Inject constructor(
                 val sessionId = dataStore.read(SESSION_ID)!!
                 val credentialId = obj.getString("rawId")
                 when (val result = api.signinResponse(sessionId, response, credentialId)) {
-                    ApiResult.SignedOutFromServer -> forceSignOut()
+                    ApiResult.SignedOutFromServer -> {
+                        signOut()
+                        return false
+                    }
                     is ApiResult.Success -> {
                         dataStore.edit { prefs ->
                             result.sessionId?.let { prefs[SESSION_ID] = it }
-                            prefs[CREDENTIALS] = result.data.toStringSet()
-                            prefs[LOCAL_CREDENTIAL_ID] = credentialId
                         }
-                        refreshCredentials()
                     }
                 }
             }
@@ -306,21 +261,6 @@ class AuthRepository @Inject constructor(
     suspend fun setSignedInState(flag: Boolean) {
         dataStore.edit { prefs ->
             prefs[IS_SIGNED_IN_THROUGH_PASSKEYS] = flag
-        }
-    }
-
-    /**
-     * Removes a credential registered on the server.
-     */
-    suspend fun removeKey(credentialId: String) {
-        try {
-            val sessionId = dataStore.read(SESSION_ID)!!
-            when (api.removeKey(sessionId, credentialId)) {
-                ApiResult.SignedOutFromServer -> forceSignOut()
-                is ApiResult.Success -> refreshCredentials()
-            }
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call removeKey", e)
         }
     }
 }
