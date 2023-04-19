@@ -42,11 +42,15 @@ This sample app implements the following use cases :
   and SHA for your application.
 * Use your own debug.keystore if needed for signed builds sample project -app testing
 
-# How to setup your own Glitchme server
+# How to setup your own Glitchme server 
 
 The app sends requests to a server https://credential-manager-app-test.glitch.me/
 
-You are going to work on your own version of the Glitch backend. The backend code uses your Android
+Note : 
+
+For the sample app, the server is already setup. You dont need to setup another one. But if you want to understand how glitchme server works and setup one for you. Here are the instructions:
+
+To create your own version of the Glitch backend. The backend code uses your Android
 package and SHA which needs to be updated on the server.
 
 * Go to the edit page of the website at https://glitch.com/edit/#!/credential-manager-app-test
