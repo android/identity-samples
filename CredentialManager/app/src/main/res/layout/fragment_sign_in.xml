@@ -16,40 +16,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/username"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/username"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="21dp"
-        android:hint="Enter Username"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/password"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
-
-    <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/password"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:hint="Enter Password"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/password_hint"
-        app:layout_constraintTop_toBottomOf="@+id/username" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/password_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:hint="Note : Sign in with username and password is for demonstration purpose."
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password" />
-
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/circularProgressIndicator"
@@ -62,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password_hint"
+        app:layout_constraintTop_toBottomOf="@+id/title"
         app:indicatorColor="@color/pink_500"
         app:trackColor="@color/pink_200"
         tools:visibility="visible" />
@@ -78,29 +46,6 @@
         app:layout_constraintStart_toEndOf="@+id/circularProgressIndicator"
         tools:visibility="visible" />
 
-
-    <Button
-        android:id="@+id/sign_in"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="21dp"
-        android:text="Sign in with username &amp; password"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/appCompatTextView"
-        app:layout_constraintTop_toBottomOf="@+id/circularProgressIndicator" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/appCompatTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="------------------------------      OR      ------------------------------"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/sign_in_with_savedCredentials"
-        app:layout_constraintTop_toBottomOf="@+id/sign_in" />
-
     <Button
         android:id="@+id/sign_in_with_savedCredentials"
         android:layout_width="0dp"
@@ -109,7 +54,7 @@
         android:text="Sign in with passkey/saved password"
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/password_hint"
-        app:layout_constraintTop_toBottomOf="@+id/appCompatTextView" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/circularProgressIndicator" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

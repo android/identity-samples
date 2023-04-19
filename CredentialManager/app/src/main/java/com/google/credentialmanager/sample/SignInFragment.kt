@@ -65,8 +65,6 @@ class SignInFragment : Fragment() {
 
         mCredMan = CredentialManager.create(requireActivity())
 
-        binding.signIn.setOnClickListener(signInWithPassword())
-
         binding.signInWithSavedCredentials.setOnClickListener(signInWithSavedCredentials())
     }
 
@@ -87,38 +85,12 @@ class SignInFragment : Fragment() {
 
     private fun configureViews(visibility: Int, flag: Boolean) {
         configureProgress(visibility)
-        binding.signIn.isEnabled = flag
         binding.signInWithSavedCredentials.isEnabled = flag
     }
 
     private fun configureProgress(visibility: Int) {
         binding.textProgress.visibility = visibility
         binding.circularProgressIndicator.visibility = visibility
-    }
-
-    private fun signInWithPassword(): View.OnClickListener {
-        return View.OnClickListener {
-            if (binding.username.text.isNullOrEmpty()) {
-                binding.username.error = "User name required"
-                binding.username.requestFocus()
-            } else if (binding.password.text.isNullOrEmpty()) {
-                binding.password.error = "Password required"
-                binding.password.requestFocus()
-            } else {
-                configureViews(View.VISIBLE, false)
-
-                simulateServerDelay()
-            }
-        }
-    }
-
-    private fun simulateServerDelay() {
-        Handler(Looper.getMainLooper()).postDelayed({
-            Utils.setSignedInThroughPasskeys(false)
-            configureViews(View.INVISIBLE, true)
-
-            listener.showHome()
-        }, 2000)
     }
 
     private fun fetchAuthJsonFromServer(): String {
