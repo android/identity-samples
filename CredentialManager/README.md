@@ -66,6 +66,9 @@ package and SHA which needs to be updated on the server.
 * In order to get the SHA256 hash of your developer signing certificate, use the command below. The
   default password of the debug keystore is "android".
 * $ keytool -exportcert -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore
+* In sample app’s build gradle, under android {}, find buildConfigField for API_BASE_URL
+  and resValue for  host and change this as per your new hostname you got after remixing the glitchMe server..
+
 
 # Development Environment
 
@@ -175,6 +178,10 @@ sign in.
 * androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException: The
   incoming request cannot be validated - This means your application package id is not registered
   with your server. Validate this with your server code(instructions below).
+
+## How to build a debug signed version
+To build a debug signed version of this sample app, you need to update the API_BASE_URL  to "https://credential-manager-app-test.glitch.me/auth" and host field to "https://credman-glitch-sample.glitch.me" under buildConfigField in your app-> build.gradle
+
 
 # License
 
