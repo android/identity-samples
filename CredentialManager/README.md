@@ -46,9 +46,8 @@ This sample app implements the following use cases :
 
 The app sends requests to a server https://credential-manager-app-test.glitch.me/
 
-Note : 
-
-For the sample app, the server is already setup. You dont need to setup another one. But if you want to understand how glitchme server works and setup one for you. Here are the instructions:
+You are going to work on your own version of the Glitch backend. The backend code uses your Android
+package and SHA which needs to be updated on the server.
 
 To create your own version of the Glitch backend. The backend code uses your Android
 package and SHA which needs to be updated on the server.
