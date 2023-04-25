@@ -152,13 +152,11 @@ class SignUpFragment : Fragment() {
         )
     }
 
-    private suspend fun createPassword(): String {
+    private suspend fun createPassword() {
 
         //TODO : CreatePasswordRequest with entered username and password
 
         //TODO : Create credential with created password request
-
-        return ""
     }
 
     private suspend fun createPasskey(): CreatePublicKeyCredentialResponse? {
