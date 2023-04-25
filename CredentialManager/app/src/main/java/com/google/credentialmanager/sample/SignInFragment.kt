@@ -18,8 +18,6 @@ package com.google.credentialmanager.sample
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -37,7 +35,7 @@ import kotlinx.coroutines.launch
 
 class SignInFragment : Fragment() {
 
-    private lateinit var mCredMan: CredentialManager
+    private lateinit var credentialManager: CredentialManager
     private var _binding: FragmentSignInBinding? = null
     private val binding get() = _binding!!
     private lateinit var listener: SignInFragmentCallback
@@ -63,7 +61,7 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mCredMan = CredentialManager.create(requireActivity())
+        credentialManager = CredentialManager.create(requireActivity())
 
         binding.signInWithSavedCredentials.setOnClickListener(signInWithSavedCredentials())
     }

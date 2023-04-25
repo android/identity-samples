@@ -50,14 +50,14 @@ This sample app implements the following use cases :
 * Kotlin plugin version : 1.8.10.
 * Latest Credential Manager API version.
 * Android device running Android 5 or higher. 
-* This project contains mock responses for debug and debug-signed version. RegFromServer and AuthFromServer are for debug version and regForServerSigned and AuthFromServerSigned are for debug signed apk.
-* This sample app requires digital asset linking to a website for credential manager api to validate the linking and proceed further, so the rp id used in the mock responses is from a mocked 3P server(Glitch.me). if you want to try your own mock response, try adding your app domain. 
+* This sample app requires digital asset linking to a website for credential manager api to validate the linking and proceed further, so the rp id used in the mock responses is from a mocked 3P server(Glitch.me). if you want to try your own mock response, try adding your app domain and dont forget to complete the digital asset linking as mentioned [here](https://developer.android.com/training/sign-in/passkeys#add-support-dal). 
+* Use the same debug.keystore mentioned in the sample project to build debug and release variants in order to verify the digital asset linking of sample app package name and sha on your mock server. This is already being done for you in build.gradle. 
+
 
 # Development Environment
 
 This app uses the Gradle build system and can be imported directly into the latest stable version of
-Android Studio (available [here](https://developer.android.com/studio)). The `debug`
-build can be built and run using the default configuration.
+Android Studio (available [here](https://developer.android.com/studio)). 
 
 # Understand Integration flow
 

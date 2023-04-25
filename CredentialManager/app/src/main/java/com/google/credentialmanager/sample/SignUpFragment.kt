@@ -45,7 +45,7 @@ import java.security.SecureRandom
 
 class SignUpFragment : Fragment() {
 
-    private lateinit var mCredMan: CredentialManager
+    private lateinit var credentialManager: CredentialManager
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private lateinit var listener: SignUpFragmentCallback
@@ -71,10 +71,9 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mCredMan = CredentialManager.create(requireActivity())
+        credentialManager = CredentialManager.create(requireActivity())
 
-        //TODO : Add signUp onClick()
-
+        binding.signUp.setOnClickListener(signUpWithPasskeys())
         binding.signUpWithPassword.setOnClickListener(signUpWithPassword())
     }
 
@@ -163,13 +162,13 @@ class SignUpFragment : Fragment() {
     }
 
     private suspend fun createPasskey(): CreatePublicKeyCredentialResponse? {
-        var ret: CreatePublicKeyCredentialResponse? = null
+        var response: CreatePublicKeyCredentialResponse? = null
 
         //TODO create a CreatePublicKeyCredentialRequest() with necessary registration json from server
 
         //TODO call createCredential() with createPublicKeyCredentialRequest
 
-        return ret
+        return response
     }
 
     private fun configureViews(visibility: Int, flag: Boolean) {
@@ -228,7 +227,7 @@ class SignUpFragment : Fragment() {
             }
             else -> Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
         }
-        Log.e("Auth", " Exception Message" + e.message.toString())
+        Log.e("Auth", " Exception Message : " + e.message.toString())
         Utils.showErrorAlert(activity, msg)
     }
 

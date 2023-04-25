@@ -1,7 +1,7 @@
 {
-    "challenge": "AkGcTZzM-UDmTFhCGvoWzn3gCA0C-ufoEKnVzozjdvY",
+    "challenge": "$4",
     "rp": {
-        "id": "credman-android-sample.glitch.me",
+        "id": "passkeys-codelab.glitch.me",
         "name": "CredMan App Test"
     },
     "pubKeyCredParams": [

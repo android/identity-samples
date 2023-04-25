@@ -16,7 +16,6 @@
 
 package com.google.credentialmanager.sample
 
-import android.R.drawable
 import android.app.AlertDialog.Builder
 import android.content.Context
 import android.content.SharedPreferences
@@ -64,7 +63,7 @@ object Utils {
                 it.readText()
             }
         }
-        return data;
+        return data
     }
 
     fun showErrorAlert(context: Context?, msg: String) {
@@ -72,7 +71,7 @@ object Utils {
             .setTitle("An error occurred")
             .setMessage(msg)
             .setNegativeButton("Ok", null)
-            .setIcon(drawable.ic_dialog_alert)
+            .setIcon(android.R.drawable.ic_dialog_alert)
             .show()
     }
 }
