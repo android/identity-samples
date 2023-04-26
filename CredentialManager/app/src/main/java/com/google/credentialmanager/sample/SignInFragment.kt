@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,34 +106,36 @@ class SignInFragment : Fragment() {
         val getPublicKeyCredentialOption =
             GetPublicKeyCredentialOption(fetchAuthJsonFromServer(), null, true)
         val getPasswordOption = GetPasswordOption()
-        try {
-            val result = credentialManager.getCredential(
+        val result = try {
+            credentialManager.getCredential(
                 GetCredentialRequest(
                     listOf(
                         getPublicKeyCredentialOption,
                         getPasswordOption
                     )
-                ), requireActivity()
+                ),
+                requireActivity()
             )
-
-            if (result.credential is PublicKeyCredential) {
-                val cred = result.credential as PublicKeyCredential
-                DataProvider.setSignedInThroughPasskeys(true)
-                return "Passkey: ${cred.authenticationResponseJson}"
-            }
-            if (result.credential is PasswordCredential) {
-                val cred = result.credential as PasswordCredential
-                DataProvider.setSignedInThroughPasskeys(false)
-                return "Got Password - User:${cred.id} Password: ${cred.password}"
-            }
         } catch (e: Exception) {
             configureViews(View.INVISIBLE, true)
-            Log.e("Auth", " Exception Message" + e.message.toString())
+            Log.e("Auth", "getCredential failed with exception: " + e.message.toString())
             activity?.showErrorAlert(
                 "An error occurred while authenticating through saved credentials. Check logs for additional details"
             )
             return null
         }
+
+        if (result.credential is PublicKeyCredential) {
+            val cred = result.credential as PublicKeyCredential
+            DataProvider.setSignedInThroughPasskeys(true)
+            return "Passkey: ${cred.authenticationResponseJson}"
+        }
+        if (result.credential is PasswordCredential) {
+            val cred = result.credential as PasswordCredential
+            DataProvider.setSignedInThroughPasskeys(false)
+            return "Got Password - User:${cred.id} Password: ${cred.password}"
+        }
+
         return null
     }
 

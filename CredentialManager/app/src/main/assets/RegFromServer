@@ -1,5 +1,5 @@
 {
-    "challenge": "$4",
+    "challenge": "<challenge>",
     "rp": {
         "id": "passkeys-codelab.glitch.me",
         "name": "CredMan App Test"
@@ -19,8 +19,8 @@
         "residentKey": "required"
     },
     "user": {
-           "id": "$3",
-           "name": "$1",
-           "displayName": "$2"
+           "id": "<userId>",
+           "name": "<userName>",
+           "displayName": "<userDisplayName>"
        }
 }
