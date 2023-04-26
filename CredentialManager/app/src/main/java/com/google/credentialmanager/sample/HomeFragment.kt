@@ -61,7 +61,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun configureSignedInText() {
-        if (Utils.isSignedInThroughPasskeys()) {
+        if (DataProvider.isSignedInThroughPasskeys()) {
             binding.signedInText.text = LOGGED_IN_THROUGH_PASSKEYS
         } else {
             binding.signedInText.text = LOGGED_IN_THROUGH_PASSWORD

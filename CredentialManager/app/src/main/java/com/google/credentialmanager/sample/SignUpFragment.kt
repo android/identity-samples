@@ -104,7 +104,7 @@ class SignUpFragment : Fragment() {
     private fun simulateServerDelayAndLogIn() {
         Handler(Looper.getMainLooper()).postDelayed({
 
-            Utils.setSignedInThroughPasskeys(false)
+            DataProvider.setSignedInThroughPasskeys(false)
 
             configureViews(View.INVISIBLE, true)
 
@@ -226,7 +226,7 @@ class SignUpFragment : Fragment() {
             else -> Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
         }
         Log.e("Auth", " Exception Message : " + e.message.toString())
-        Utils.showErrorAlert(activity, msg)
+        activity?.showErrorAlert(msg)
     }
 
     private fun registerResponse(): Boolean {

@@ -11,15 +11,12 @@ repositories {
 // keystore.properties file, in the rootProject folder.
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 
-// Initialize a new Properties() object called keystoreProperties.
 def keystoreProperties = new Properties()
 
-// Load your keystore.properties file into the keystoreProperties object.
+// Load keystore properties for our signing key (see developer.android.com/studio/publish/app-signing)
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-
-
     namespace 'com.google.credentialmanager.sample'
     compileSdkVersion 33
     defaultConfig {

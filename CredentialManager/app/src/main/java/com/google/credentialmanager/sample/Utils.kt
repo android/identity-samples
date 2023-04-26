@@ -16,11 +16,10 @@
 
 package com.google.credentialmanager.sample
 
-import android.app.AlertDialog.Builder
 import android.content.Context
 import android.content.SharedPreferences
 
-object Utils {
+object DataProvider {
 
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
@@ -52,26 +51,5 @@ object Utils {
 
     fun isSignedInThroughPasskeys(): Boolean {
         return sharedPreference.getBoolean(IS_SIGNED_IN_THROUGH_PASSKEYS, false)
-    }
-
-    fun readFromAsset(context: Context?, fileName: String): String {
-
-        var data = ""
-        context?.let {
-            val bufferReader = context.assets.open(fileName).bufferedReader()
-            data = bufferReader.use {
-                it.readText()
-            }
-        }
-        return data
-    }
-
-    fun showErrorAlert(context: Context?, msg: String) {
-        Builder(context)
-            .setTitle("An error occurred")
-            .setMessage(msg)
-            .setNegativeButton("Ok", null)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .show()
     }
 }

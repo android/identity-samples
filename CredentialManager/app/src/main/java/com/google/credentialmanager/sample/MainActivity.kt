@@ -38,9 +38,9 @@ class MainActivity : AppCompatActivity(), MainFragmentCallback, HomeFragmentCall
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Utils.initSharedPref(this)
+        DataProvider.initSharedPref(applicationContext)
 
-        if (Utils.isSignedIn()) {
+        if (DataProvider.isSignedIn()) {
             showHome()
         } else {
             loadMainFragment()
@@ -71,13 +71,13 @@ class MainActivity : AppCompatActivity(), MainFragmentCallback, HomeFragmentCall
     }
 
     private fun loadFragment(fragment: Fragment, flag: Boolean, backstackString: String? = null) {
-        Utils.configureSignedInPref(flag)
+        DataProvider.configureSignedInPref(flag)
         supportFragmentManager.beginTransaction().replace(id.fragment_container, fragment)
             .addToBackStack(backstackString).commit()
     }
 
     override fun onBackPressed() {
-        if (Utils.isSignedIn() || supportFragmentManager.backStackEntryCount == 1) {
+        if (DataProvider.isSignedIn() || supportFragmentManager.backStackEntryCount == 1) {
             finish()
         } else {
             super.onBackPressed();
