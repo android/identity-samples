@@ -152,6 +152,16 @@ class SignUpFragment : Fragment() {
         )
     }
 
+    private fun getEncodedChallenge(): String {
+        val random = SecureRandom()
+        val bytes = ByteArray(32)
+        random.nextBytes(bytes)
+        return Base64.encodeToString(
+            bytes,
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
+        )
+    }
+
     private suspend fun createPassword() {
 
         //TODO : CreatePasswordRequest with entered username and password
