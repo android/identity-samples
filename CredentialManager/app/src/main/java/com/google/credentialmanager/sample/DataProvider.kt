@@ -29,7 +29,7 @@ object DataProvider {
     private const val PREF_NAME = "CREDMAN_PREF"
 
     fun initSharedPref(context: Context) {
-        sharedPreference = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        sharedPreference = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         editor = sharedPreference.edit()
     }
 
