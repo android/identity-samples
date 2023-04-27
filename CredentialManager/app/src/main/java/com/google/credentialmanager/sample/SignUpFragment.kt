@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,38 +190,30 @@ class SignUpFragment : Fragment() {
         binding.circularProgressIndicator.visibility = visibility
     }
 
-    //Demonstration purpose : These are type of errors during passkey creation, handle this in your code wisely.
-    private fun handleFailure(e: CreateCredentialException) {
-        var msg = ""
-        when (e) {
+    // These are types of errors that can occur during passkey creation.
+    private fun handlePasskeyFailure(e: CreateCredentialException) {
+        val msg = when (e) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec using e.domError
-                msg =
-                    "An error occurred while creating a passkey, please check logs for additional details"
+                "An error occurred while creating a passkey, please check logs for additional details."
             }
             is CreateCredentialCancellationException -> {
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
-                msg =
-                    "The user intentionally canceled the operation and chose not to register the credential. , please check logs for additional details"
+                "The user intentionally canceled the operation and chose not to register the credential. Check logs for additional details."
             }
             is CreateCredentialInterruptedException -> {
-                msg =
-                    "The operation was interrupted, please retry the call. Check logs for additional details"
                 // Retry-able error. Consider retrying the call.
+                "The operation was interrupted, please retry the call. Check logs for additional details."
             }
             is CreateCredentialProviderConfigurationException -> {
                 // Your app is missing the provider configuration dependency.
-                // Most likely, you're missing the
-                // "credentials-play-services-auth" module.
-                msg =
-                    "Your app is missing the provider configuration dependency. Check logs for additional details"
+                // Most likely, you're missing "credentials-play-services-auth".
+                "Your app is missing the provider configuration dependency. Check logs for additional details."
             }
             is CreateCredentialUnknownException -> {
-                msg =
-                    "An unknown error occurred while creating passkey. Check logs for additional details"
-                Log.w("Auth", e.message.toString())
+                "An unknown error occurred while creating passkey. Check logs for additional details."
             }
             is CreateCustomCredentialException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
@@ -230,12 +222,14 @@ class SignUpFragment : Fragment() {
                 // should check for any custom exception type constants within
                 // that SDK to match with e.type. Otherwise, drop or log the
                 // exception.
-                msg =
-                    "An unknown error occurred from a 3rd party SDK. Check logs for additional details"
+                "An unknown error occurred from a 3rd party SDK. Check logs for additional details."
             }
-            else -> Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
+            else -> {
+                Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
+                "An unknown error occurred."
+            }
         }
-        Log.e("Auth", " Exception Message : " + e.message.toString())
+        Log.e("Auth", "createPasskey failed with exception: " + e.message.toString())
         activity?.showErrorAlert(msg)
     }
 
