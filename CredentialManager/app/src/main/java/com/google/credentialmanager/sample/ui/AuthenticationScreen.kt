@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -173,7 +172,8 @@ fun AuthenticationScreen(
                 Button(
                     onClick = {
 
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
+                        if ( email.isNotEmpty() && password.isNotEmpty()
+                        ) {
                             Toast.makeText(
                                 activity, "Wait, signing you in.", Toast.LENGTH_SHORT
                             ).show()
@@ -181,7 +181,7 @@ fun AuthenticationScreen(
                             onLogin(email, password)
                         } else {
                             Toast.makeText(
-                                activity, "Enter both username and password", Toast.LENGTH_LONG
+                                activity, "Enter valid username and password", Toast.LENGTH_LONG
                             ).show()
                         }
                     },
