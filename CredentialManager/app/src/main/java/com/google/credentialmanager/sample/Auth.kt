@@ -28,6 +28,7 @@ import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.CreateCredentialCustomException
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
@@ -38,7 +39,6 @@ import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialInterruptedException
 import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
 import androidx.credentials.exceptions.CreateCredentialUnknownException
-import androidx.credentials.exceptions.CreateCustomCredentialException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
 import org.json.JSONObject
 
@@ -65,9 +65,9 @@ class Auth(context: Context) {
                         null
                     ),
                     GetPasswordOption()
-                )
+                ), preferImmediatelyAvailableCredentials = true
             )
-            result = credMan.getCredential(cr, activity)
+            result = credMan.getCredential(activity, cr)
             if (result.credential is PublicKeyCredential) {
                 val cred = result.credential as PublicKeyCredential
                 Log.i("TAG", "Passkey ${cred.authenticationResponseJson}")
@@ -112,8 +112,8 @@ class Auth(context: Context) {
         var ret: CreatePublicKeyCredentialResponse? = null
         try {
             ret = credMan.createCredential(
-                cr as CreateCredentialRequest,
-                activity
+                activity,
+                cr as CreateCredentialRequest
             ) as CreatePublicKeyCredentialResponse
         } catch (e: CreateCredentialException) {
 
@@ -146,7 +146,7 @@ class Auth(context: Context) {
             is CreateCredentialUnknownException -> {
                 Log.w("Auth", e.message.toString())
             }
-            is CreateCustomCredentialException -> {
+            is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
                 // make the API call with a request object that's a subclass of
                 // CreateCustomCredentialRequest using a 3rd-party SDK, then you
