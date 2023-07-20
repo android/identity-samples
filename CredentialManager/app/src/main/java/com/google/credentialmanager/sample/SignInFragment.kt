@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
@@ -104,17 +105,17 @@ class SignInFragment : Fragment() {
 
     private suspend fun getSavedCredentials(): String? {
         val getPublicKeyCredentialOption =
-            GetPublicKeyCredentialOption(fetchAuthJsonFromServer(), null, true)
+            GetPublicKeyCredentialOption(fetchAuthJsonFromServer(), null)
         val getPasswordOption = GetPasswordOption()
         val result = try {
             credentialManager.getCredential(
+                requireActivity(),
                 GetCredentialRequest(
                     listOf(
                         getPublicKeyCredentialOption,
                         getPasswordOption
-                    )
-                ),
-                requireActivity()
+                    ), preferImmediatelyAvailableCredentials = true
+                )
             )
         } catch (e: Exception) {
             configureViews(View.INVISIBLE, true)
@@ -135,7 +136,10 @@ class SignInFragment : Fragment() {
             DataProvider.setSignedInThroughPasskeys(false)
             return "Got Password - User:${cred.id} Password: ${cred.password}"
         }
-
+        if (result.credential is CustomCredential) {
+            //If you are also using any external sign-in libraries, parse them here with the
+            // utility functions provided.
+        }
         return null
     }
 

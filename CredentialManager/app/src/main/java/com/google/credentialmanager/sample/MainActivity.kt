@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), MainFragmentCallback, HomeFragmentCall
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         DataProvider.initSharedPref(applicationContext)
 
         if (DataProvider.isSignedIn()) {
