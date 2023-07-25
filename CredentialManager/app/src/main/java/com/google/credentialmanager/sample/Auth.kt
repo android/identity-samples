@@ -65,7 +65,7 @@ class Auth(context: Context) {
                         null
                     ),
                     GetPasswordOption()
-                ), preferImmediatelyAvailableCredentials = true
+                )
             )
             result = credMan.getCredential(activity, cr)
             if (result.credential is PublicKeyCredential) {
