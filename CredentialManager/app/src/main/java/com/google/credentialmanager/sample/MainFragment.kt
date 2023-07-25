@@ -53,6 +53,7 @@ class MainFragment : Fragment() {
         binding.signUp.setOnClickListener {
             listener.signup()
         }
+
         binding.signIn.setOnClickListener {
             listener.signIn()
         }

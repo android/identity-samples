@@ -114,7 +114,7 @@ class SignInFragment : Fragment() {
                     listOf(
                         getPublicKeyCredentialOption,
                         getPasswordOption
-                    ), preferImmediatelyAvailableCredentials = true
+                    )
                 )
             )
         } catch (e: Exception) {
