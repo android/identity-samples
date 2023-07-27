@@ -31,11 +31,11 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace 'com.google.credentialmanager.sample'
-    compileSdkVersion 33
+    compileSdkVersion 34
     defaultConfig {
         applicationId "com.google.credentialmanager.sample"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -100,8 +100,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    implementation 'androidx.credentials:credentials:1.0.0-alpha06'
-    implementation 'androidx.credentials:credentials-play-services-auth:1.0.0-alpha06'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.2.0-beta01'
+    implementation 'androidx.credentials:credentials:1.2.0-beta01'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"

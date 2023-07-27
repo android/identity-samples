@@ -31,11 +31,11 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialCancellationException
+import androidx.credentials.exceptions.CreateCredentialCustomException
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialInterruptedException
 import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
 import androidx.credentials.exceptions.CreateCredentialUnknownException
-import androidx.credentials.exceptions.CreateCustomCredentialException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -175,7 +175,7 @@ class SignUpFragment : Fragment() {
             binding.password.text.toString()
         )
         try {
-            credentialManager.createCredential(request, requireActivity()) as CreatePasswordResponse
+            credentialManager.createCredential(requireActivity(), request) as CreatePasswordResponse
         } catch (e: Exception) {
             Log.e("Auth", "createPassword failed with exception: " + e.message)
         }
@@ -186,8 +186,8 @@ class SignUpFragment : Fragment() {
         var response: CreatePublicKeyCredentialResponse? = null
         try {
             response = credentialManager.createCredential(
-                request,
-                requireActivity()
+                requireActivity(),
+                request
             ) as CreatePublicKeyCredentialResponse
         } catch (e: CreateCredentialException) {
             configureProgress(View.INVISIBLE)
@@ -232,7 +232,7 @@ class SignUpFragment : Fragment() {
             is CreateCredentialUnknownException -> {
                 "An unknown error occurred while creating passkey. Check logs for additional details."
             }
-            is CreateCustomCredentialException -> {
+            is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
                 // make the API call with a request object that's a subclass of
                 // CreateCustomCredentialRequest using a 3rd-party SDK, then you
