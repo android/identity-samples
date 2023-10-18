@@ -4,6 +4,10 @@
         "id": "passkeys-codelab.glitch.me",
         "name": "CredMan App Test"
     },
+     "extensions":
+           {
+               "prf": { }
+           },
     "pubKeyCredParams": [
         {
             "type": "public-key",

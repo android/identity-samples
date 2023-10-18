@@ -40,7 +40,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="21dp"
         android:hint="Enter Username"
-        android:isCredential="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
@@ -53,7 +52,6 @@
         android:hint="Enter Password"
         android:inputType="textPassword"
         android:visibility="gone"
-        android:isCredential="true"
         android:imeOptions="actionDone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
