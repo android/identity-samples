@@ -1,7 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.CredentialManagerSample" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
-
-    </style>
+    <style name="Theme.Prototype" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
