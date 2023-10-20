@@ -97,7 +97,7 @@ class Auth(context: Context) {
             username, password
         )
         return try {
-            credMan.createCredential(cr, activity) as CreatePasswordResponse
+            credMan.createCredential(activity, cr) as CreatePasswordResponse
             "Password created and saved"
         } catch (e: Exception) {
             "Exception $e"
