@@ -95,6 +95,12 @@ repositories {
         // FIDO
         implementation 'com.google.android.gms:play-services-fido:20.1.0'
 
+        //Firebase Specific
+        implementation platform('com.google.firebase:firebase-bom:30.3.2')
+        implementation 'com.google.firebase:firebase-auth-ktx'
+        implementation 'com.google.firebase:firebase-database-ktx'
+        implementation 'com.google.firebase:firebase-functions-ktx'
+
         // ViewModel
         implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
         implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
