@@ -19,22 +19,12 @@ package com.google.credentialmanager.sample.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,33 +34,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
 import com.google.credentialmanager.sample.Graph
+import com.google.credentialmanager.sample.R
+import com.google.credentialmanager.sample.ui.common.LogoHeading
+import com.google.credentialmanager.sample.ui.common.ShrineButton
+import com.google.credentialmanager.sample.ui.theme.light_button
 import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 
 @Composable
 fun AuthenticationRoute(
     navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit,
-    viewModel: AuthenticationViewModel
+    viewModel: AuthenticationViewModel,
+    navigateToRegister: () -> Unit,
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
 
     AuthenticationScreen(
         navigateToHome,
-        viewModel::login,
         viewModel::signInRequest,
         viewModel::signInResponse,
+        navigateToRegister,
         uiState
     )
 }
@@ -79,9 +69,9 @@ fun AuthenticationRoute(
 @Composable
 fun AuthenticationScreen(
     navigateToHome: (flag: Boolean) -> Unit,
-    onLogin: (String, String) -> Unit,
     onSignInRequest: () -> Unit,
     onSignInResponse: (GetCredentialResponse) -> Unit,
+    navigateToRegister: () -> Unit,
     uiState: AuthUiState
 ) {
 
@@ -96,181 +86,88 @@ fun AuthenticationScreen(
     val activity = LocalContext.current as Activity
 
     Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Text(
-            text = "Try Passkeys Demo",
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        OutlinedTextField(colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.White,
-            cursorColor = Color.Black,
-            disabledLabelColor = Color.Blue,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Blue,
-            placeholderColor = Color.Gray
-        ),
-            modifier = Modifier.padding(top = 16.dp),
-            value = email,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Email, contentDescription = "emailIcon"
-                )
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            onValueChange = { email = it },
-            label = { Text("E-mail address") },
-            placeholder = {
-                Text("E-mail Address")
-            })
-
-        OutlinedTextField(colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.White,
-            cursorColor = Color.Black,
-            disabledLabelColor = Color.Blue,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Blue,
-            placeholderColor = Color.Gray
-        ),
-            modifier = Modifier.padding(top = 16.dp),
-            value = password,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Password, contentDescription = "passwordIcon"
-                )
-            },
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            placeholder = {
-                Text("Password")
-            },
-            trailingIcon = {
-                val image = if (passwordVisible) {
-                    Icons.Filled.Visibility
-                } else {
-                    Icons.Filled.VisibilityOff
-                }
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, "Toggle password visibility")
-                }
-            })
-
-        Column(
-            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        LogoHeading()
+        Spacer(modifier = Modifier.padding(20.dp))
+        ShrineButton(
+            onClick = {
+                //Fetch credentials for your account
+                      onSignInRequest()
+                      },
+            enabled = enabled2
         ) {
-            Row(
-                modifier = Modifier.padding(top = 10.dp)
-            ) {
-                Button(
-                    onClick = {
-
-                        if ( email.isNotEmpty() && password.isNotEmpty()
-                        ) {
-                            Toast.makeText(
-                                activity, "Wait, signing you in.", Toast.LENGTH_SHORT
-                            ).show()
-
-                            onLogin(email, password)
-                        } else {
-                            Toast.makeText(
-                                activity, "Enter valid username and password", Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    },
-                    enabled = enabled1
-                ) {
-                    Text("Create an account with password")
-                }
-            }
-
-            Text(
-                modifier = Modifier.padding(20.dp),
-                text = "----------------     or     ----------------",
-                fontSize = 20.sp,
-                color = Color.Gray
-            )
-
-
-            Row(
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                Button(
-                    onClick = {
-                        //Fetch credentials for your account
-                        onSignInRequest()
-                    },
-                    enabled = enabled2
-                ) {
-                    Text("Sign in with saved passkey/password")
-                }
-            }
-
+            Text(text = stringResource(id = R.string.sign_in))
+        }
+        ShrineButton(
+            color = light_button,
+            onClick = navigateToRegister
+        ) {
+            Text(text = stringResource(id = R.string.sign_up))
         }
 
-        //Handle UiState values
-        when (uiState) {
-            is AuthUiState.Empty -> {
-                enabled1 = true
-                enabled2 = true
-            }
+    }
 
-            is AuthUiState.IsLoading -> {
-                enabled1 = false
-                enabled2 = false
-            }
 
-            is AuthUiState.RequestResult -> LaunchedEffect(uiState) {
-                enabled1 = true
-                enabled2 = true
-                val data = auth.getPasskey(activity, uiState.data)
-                data?.let {
-                    Toast.makeText(
-                        activity, "Wait for server validation. Letting you in", Toast.LENGTH_LONG
-                    ).show()
-                    onSignInResponse(data)
-                }
-            }
+    //Handle UiState values
+    when (uiState) {
+        is AuthUiState.Empty -> {
+            enabled1 = true
+            enabled2 = true
+        }
 
-            is AuthUiState.MsgString -> {
-                if (uiState.success && uiState.request == "signin") {
-                    if (uiState.credential != null && uiState.credential is PasswordCredential) {
-                        navigateToHome(true)
-                    } else {
-                        navigateToHome(false)
-                    }
-                } else {
-                    LaunchedEffect(uiState) {
-                        Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
-                    }
-                }
-                enabled1 = true
-                enabled2 = true
-            }
+        is AuthUiState.IsLoading -> {
+            enabled1 = false
+            enabled2 = false
+        }
 
-            is AuthUiState.LoginResult -> {
-                if (uiState.flag) {
-                    LaunchedEffect(uiState) {
-                        auth.createPassword(email, password, activity)
-                    }
+        is AuthUiState.RequestResult -> LaunchedEffect(uiState) {
+            enabled1 = true
+            enabled2 = true
+            val data = auth.getPasskey(activity, uiState.data)
+            data?.let {
+                Toast.makeText(
+                    activity, "Wait for server validation. Letting you in", Toast.LENGTH_LONG
+                ).show()
+                onSignInResponse(data)
+            }
+        }
+
+        is AuthUiState.MsgString -> {
+            if (uiState.success && uiState.request == "signin") {
+                if (uiState.credential != null && uiState.credential is PasswordCredential) {
                     navigateToHome(true)
                 } else {
-                    LaunchedEffect(uiState) {
-                        Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
-                    }
+                    navigateToHome(false)
                 }
-                enabled1 = true
-                enabled2 = true
+            } else {
+                LaunchedEffect(uiState) {
+                    Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
+                }
             }
-            else -> {}
+            enabled1 = true
+            enabled2 = true
         }
+
+        is AuthUiState.LoginResult -> {
+            if (uiState.flag) {
+                LaunchedEffect(uiState) {
+                    auth.createPassword(email, password, activity)
+                }
+                navigateToHome(true)
+            } else {
+                LaunchedEffect(uiState) {
+                    Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
+                }
+            }
+            enabled1 = true
+            enabled2 = true
+        }
+        else -> {}
     }
 }
 

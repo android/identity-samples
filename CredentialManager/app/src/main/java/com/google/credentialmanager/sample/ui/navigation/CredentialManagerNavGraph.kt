@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.credentialmanager.sample.ui.AuthenticationRoute
 import com.google.credentialmanager.sample.ui.HomeRoute
+import com.google.credentialmanager.sample.ui.RegisterRoute
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
@@ -38,7 +39,8 @@ fun CredentialManagerNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = CredManAppDestinations.AUTH_ROUTE,
     navigateToLogin: () -> Unit,
-    navigateToHome: (Boolean) -> Unit
+    navigateToHome: (Boolean) -> Unit,
+    navigateToRegister: () -> Unit
 ) {
 
     NavHost(
@@ -50,6 +52,7 @@ fun CredentialManagerNavGraph(
             val authViewModel = hiltViewModel<AuthenticationViewModel>()
             AuthenticationRoute(
                 navigateToHome = navigateToHome,
+                navigateToRegister = navigateToRegister,
                 viewModel = authViewModel
             )
         }
@@ -65,6 +68,13 @@ fun CredentialManagerNavGraph(
             HomeRoute(
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
+            )
+        }
+        composable(CredManAppDestinations.REGISTER_ROUTE) {
+            val authViewModel = hiltViewModel<AuthenticationViewModel>()
+            RegisterRoute(
+                navigateToHome = navigateToHome,
+                viewModel = authViewModel
             )
         }
         composable(CredManAppDestinations.SPLASH_ROUTE) {

@@ -23,6 +23,7 @@ object CredManAppDestinations {
     const val PASSKEYS_ROUTE = "passkeys"
     const val AUTH_ROUTE = "Auth"
     const val SPLASH_ROUTE = "splash"
+    const val REGISTER_ROUTE = "register"
 }
 
 //This controller will help decide where to navigate
@@ -43,6 +44,16 @@ class CredentialManagerNavActions(navController: NavHostController) {
     //Takes user to login flow.
     val navigateToLogin: () -> Unit = {
         navController.navigate(CredManAppDestinations.AUTH_ROUTE) {
+            popUpTo(0) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+
+    //Takes user to login flow.
+    val navigateToRegister: () -> Unit = {
+        navController.navigate(CredManAppDestinations.REGISTER_ROUTE) {
             popUpTo(0) {
                 inclusive = true
             }

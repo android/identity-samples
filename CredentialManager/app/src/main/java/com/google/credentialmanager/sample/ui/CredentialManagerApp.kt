@@ -51,7 +51,8 @@ fun CredentialManagerApp() {
             navController = navController,
             startDestination = CredManAppDestinations.SPLASH_ROUTE,
             navigateToLogin = navigationActions.navigateToLogin,
-            navigateToHome = navigationActions.navigateToHome
+            navigateToHome = navigationActions.navigateToHome,
+            navigateToRegister = navigationActions.navigateToRegister
         )
     }
 
