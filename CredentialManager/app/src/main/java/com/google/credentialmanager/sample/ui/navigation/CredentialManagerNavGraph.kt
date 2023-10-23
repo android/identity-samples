@@ -16,6 +16,7 @@
 
 package com.google.credentialmanager.sample.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,14 +24,33 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.AuthenticationRoute
 import com.google.credentialmanager.sample.ui.HomeRoute
+import com.google.credentialmanager.sample.ui.LearnMoreScreen
 import com.google.credentialmanager.sample.ui.RegisterRoute
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.PasskeysSignedSRoute
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
+
+enum class ApplicationScreen(@StringRes val title: Int){
+    AccountRecovery(title = R.string.account_recovery),
+    Help(title = R.string.help),
+    Home(title = R.string.home),
+    LearnMore(title = R.string.learn_more),
+    MainMenu(title = R.string.main_menu),
+    OtherOptions(title = R.string.other_options),
+    Placeholder(title = R.string.todo),
+    Settings(title = R.string.settings),
+    ShrineApp(title = R.string.app_name),
+    SignInWithPasskey(title = R.string.sign_in),
+    SignInWithPassword(title = R.string.sign_in),
+    SignOut(title = R.string.sign_out),
+    SignUpWithPasskey(title = R.string.sign_up),
+    SignUpWithPassword(title = R.string.sign_up),
+}
 
 //This Navigation Graph is handling to and fro from Authentication to Contacts screens.
 @Composable
@@ -67,8 +87,12 @@ fun CredentialManagerNavGraph(
             val homeViewModel = hiltViewModel<HomeViewModel>()
             HomeRoute(
                 navigateToLogin = navigateToLogin,
-                viewModel = homeViewModel
+                viewModel = homeViewModel,
+                onLearnMoreClicked = { navController.navigate(ApplicationScreen.LearnMore.name) }
             )
+        }
+        composable(route = ApplicationScreen.LearnMore.name) {
+            LearnMoreScreen()
         }
         composable(CredManAppDestinations.REGISTER_ROUTE) {
             val authViewModel = hiltViewModel<AuthenticationViewModel>()

@@ -20,9 +20,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -38,12 +42,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import com.google.credentialmanager.sample.Graph
+import com.google.credentialmanager.sample.R
+import com.google.credentialmanager.sample.ui.common.PasskeyInfo
+import com.google.credentialmanager.sample.ui.common.ShrineButton
+import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
@@ -52,12 +61,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeRoute(
     navigateToLogin: () -> Unit,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    onLearnMoreClicked: () -> Unit,
+
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
     HomeScreen(
         navigateToLogin,
+        onLearnMoreClicked,
         viewModel::registerRequest,
         viewModel::registerResponse,
         viewModel::signOut,
@@ -69,12 +81,12 @@ fun HomeRoute(
 @Composable
 fun HomeScreen(
     navigateToLogin: () -> Unit,
+    onLearnMoreClicked: () -> Unit,
     onRegisterRequest: () -> Unit,
     onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
     onSignOut: () -> Unit,
     uiState: HomeUiState
 ) {
-
     val coroutineScope = rememberCoroutineScope()
     val auth = Graph.auth
     val activity = LocalContext.current as Activity
@@ -84,35 +96,29 @@ fun HomeScreen(
 
     Column(
         modifier = Modifier
-            .padding(20.dp)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(22.dp)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            modifier = Modifier.padding(20.dp),
-            text = "Save a passkey",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            modifier = Modifier.padding(20.dp),
-            textAlign = TextAlign.Center,
-            text = "Sign in to your account easily and securely with a passkey. " +
-                "Note: Your biometric data is only stored on your devices and will never be shared with anyone",
-            fontSize = 20.sp
-        )
-
-        Row(
-            modifier = Modifier.padding(top = 8.dp),
+        TextHeader(text = stringResource(R.string.create_passkey))
+        PasskeyInfo(onLearnMoreClicked)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
+            ShrineButton(
                 onClick = {
                     //Create a passkey for your account
                     onRegisterRequest()
                 },
                 enabled = enabled1
             ) {
-                Text("Save a passkey")
+                Text(text = stringResource(R.string.create_passkey))
             }
         }
 
@@ -126,14 +132,14 @@ fun HomeScreen(
         Row(
             modifier = Modifier.padding(top = 8.dp),
         ) {
-            Button(
+            ShrineButton(
                 onClick = {
                     onSignOut()
                     navigateToLogin()
                 },
                 enabled = enabled2
             ) {
-                Text("Sign out and try again")
+                Text(text = stringResource(R.string.sign_out))
             }
         }
 
