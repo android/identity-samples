@@ -119,9 +119,9 @@ repositories {
         implementation 'androidx.activity:activity-compose:1.8.0'
         implementation 'androidx.compose.foundation:foundation-layout-android:1.6.0-alpha08'
         implementation "androidx.compose.foundation:foundation:1.5.4"
-        implementation "androidx.compose.material:material:1.5.3"
+        implementation "androidx.compose.material:material:1.5.4"
         implementation 'androidx.compose.material3:material3:1.1.2'
-        implementation "androidx.compose.material:material-icons-extended:1.5.3"
+        implementation "androidx.compose.material:material-icons-extended:1.5.4"
 
         // Navigation
         implementation 'androidx.navigation:navigation-compose:2.7.4'
@@ -132,7 +132,7 @@ repositories {
         implementation 'androidx.compose.runtime:runtime-livedata'
 
         // Font
-        implementation("androidx.compose.ui:ui-text-google-fonts:1.5.3")
+        implementation("androidx.compose.ui:ui-text-google-fonts:1.5.4")
 
         // Firebase
         implementation platform('com.google.firebase:firebase-bom:30.3.2')
