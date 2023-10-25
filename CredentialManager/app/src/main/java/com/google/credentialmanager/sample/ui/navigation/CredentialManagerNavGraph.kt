@@ -32,7 +32,7 @@ import com.google.credentialmanager.sample.ui.RegisterRoute
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
-import com.google.credentialmanager.sample.ui.viewmodel.PasskeysSignedSRoute
+import com.google.credentialmanager.sample.ui.PasskeysSignedSRoute
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
 
 enum class ApplicationScreen(@StringRes val title: Int){

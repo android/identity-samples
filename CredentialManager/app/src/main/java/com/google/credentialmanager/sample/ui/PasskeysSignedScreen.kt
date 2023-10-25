@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.credentialmanager.sample.ui.viewmodel
+package com.google.credentialmanager.sample.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
+import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
 fun PasskeysSignedSRoute(
