@@ -112,7 +112,7 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .background(
-                    color = Color(0xFFF0EFF0),
+                    color = Color(0xFFF9F2F1),
                 )
                 .fillMaxWidth()
                 .padding(15.dp),
