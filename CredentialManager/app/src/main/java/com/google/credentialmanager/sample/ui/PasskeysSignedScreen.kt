@@ -43,6 +43,7 @@ import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
 fun PasskeysSignedRoute(
+    onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel
@@ -50,6 +51,7 @@ fun PasskeysSignedRoute(
 
     val uiState = viewModel.uiState.collectAsState().value
     PasskeysSignedInScreen(
+        onSettingsButtonClicked,
         onHelpButtonClicked,
         navigateToLogin,
         viewModel::signOut,
@@ -60,6 +62,7 @@ fun PasskeysSignedRoute(
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PasskeysSignedInScreen(
+    onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
     onSignOut: () -> Unit,
@@ -80,12 +83,15 @@ fun PasskeysSignedInScreen(
             LogoHeading()
         }
         Spacer(modifier = Modifier.padding(30.dp))
-        ShrineButton(onClick = { /*TODO*/ }) {
-            Text(text = ("Go to the App"))
+        ShrineButton(
+            onClick = onSettingsButtonClicked,
+        ) {Text(stringResource(R.string.shop))
         }
+
         ShrineButton(onClick = { /*TODO*/ }) {
             Text(stringResource(R.string.settings))
         }
+
         ShrineButton(
             onClick = onHelpButtonClicked,
         ) { Text(stringResource(R.string.help))

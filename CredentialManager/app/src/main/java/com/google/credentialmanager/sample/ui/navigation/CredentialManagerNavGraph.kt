@@ -31,6 +31,7 @@ import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.LearnMoreScreen
 import com.google.credentialmanager.sample.ui.PasskeysSignedRoute
 import com.google.credentialmanager.sample.ui.RegisterRoute
+import com.google.credentialmanager.sample.ui.ShrineAppScreen
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
@@ -90,6 +91,7 @@ fun CredentialManagerNavGraph(
         composable(CredManAppDestinations.PASSKEYS_ROUTE) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             PasskeysSignedRoute(
+                onSettingsButtonClicked = {navController.navigate(ApplicationScreen.ShrineApp.name)},
                 onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
@@ -118,6 +120,10 @@ fun CredentialManagerNavGraph(
 
         composable(route = ApplicationScreen.LearnMore.name) {
             LearnMoreScreen()
+        }
+
+        composable(route = ApplicationScreen.ShrineApp.name) {
+            ShrineAppScreen()
         }
     }
 }
