@@ -26,13 +26,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.AuthenticationRoute
+import com.google.credentialmanager.sample.ui.HelpScreen
 import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.LearnMoreScreen
+import com.google.credentialmanager.sample.ui.PasskeysSignedRoute
 import com.google.credentialmanager.sample.ui.RegisterRoute
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
-import com.google.credentialmanager.sample.ui.PasskeysSignedSRoute
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
 
 enum class ApplicationScreen(@StringRes val title: Int){
@@ -78,7 +79,8 @@ fun CredentialManagerNavGraph(
         }
         composable(CredManAppDestinations.PASSKEYS_ROUTE) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
-            PasskeysSignedSRoute(
+            PasskeysSignedRoute(
+                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
             )
@@ -91,6 +93,11 @@ fun CredentialManagerNavGraph(
                 onLearnMoreClicked = { navController.navigate(ApplicationScreen.LearnMore.name) }
             )
         }
+
+        composable(route = ApplicationScreen.Help.name) {
+            HelpScreen()
+        }
+
         composable(route = ApplicationScreen.LearnMore.name) {
             LearnMoreScreen()
         }

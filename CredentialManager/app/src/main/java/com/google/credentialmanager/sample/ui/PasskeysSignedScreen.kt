@@ -22,12 +22,10 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,25 +34,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.LogoHeading
 import com.google.credentialmanager.sample.ui.common.ShrineButton
-import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
-fun PasskeysSignedSRoute(
+fun PasskeysSignedRoute(
+    onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
     PasskeysSignedInScreen(
+        onHelpButtonClicked,
         navigateToLogin,
         viewModel::signOut,
         uiState
@@ -64,6 +60,7 @@ fun PasskeysSignedSRoute(
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PasskeysSignedInScreen(
+    onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
     onSignOut: () -> Unit,
     uiState: HomeUiState
@@ -89,9 +86,11 @@ fun PasskeysSignedInScreen(
         ShrineButton(onClick = { /*TODO*/ }) {
             Text(stringResource(R.string.settings))
         }
-        ShrineButton(onClick = { /*TODO*/ }) {
-            Text(stringResource(R.string.help))
+        ShrineButton(
+            onClick = onHelpButtonClicked,
+        ) { Text(stringResource(R.string.help))
         }
+
         ShrineButton(onClick = {
             onSignOut()
             navigateToLogin()

@@ -58,7 +58,6 @@ fun HomeRoute(
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel,
     onLearnMoreClicked: () -> Unit,
-
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
