@@ -88,7 +88,7 @@ fun AuthenticationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(40.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -103,6 +103,9 @@ fun AuthenticationScreen(
         ) {
             Text(text = stringResource(id = R.string.sign_in))
         }
+
+        Spacer(modifier = Modifier.padding(10.dp))
+
         ShrineButton(
             color = light_button,
             onClick = navigateToRegister

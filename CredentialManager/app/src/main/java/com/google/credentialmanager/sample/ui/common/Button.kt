@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.ripple.rememberRipple
@@ -48,7 +49,6 @@ fun ShrineButton(
         border = border,
         modifier = modifier
             .clip(shape)
-            .padding(bottom = 10.dp)
             .clickable(
                 onClick = onClick,
                 enabled = enabled,
@@ -59,12 +59,9 @@ fun ShrineButton(
     ) {
         Row(
             Modifier
-                .defaultMinSize(
-                    minWidth = 300.dp,
-                    minHeight = ButtonDefaults.MinHeight
-                )
+                .fillMaxWidth()
                 .indication(interactionSource, rememberRipple())
-                .padding(contentPadding),
+                .padding(10.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             content = content

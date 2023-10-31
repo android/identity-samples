@@ -30,7 +30,9 @@ import com.google.credentialmanager.sample.ui.HelpScreen
 import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.LearnMoreScreen
 import com.google.credentialmanager.sample.ui.PasskeysSignedRoute
+import com.google.credentialmanager.sample.ui.PlaceholderScreen
 import com.google.credentialmanager.sample.ui.RegisterRoute
+import com.google.credentialmanager.sample.ui.SettingsScreen
 import com.google.credentialmanager.sample.ui.ShrineAppScreen
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
@@ -91,7 +93,8 @@ fun CredentialManagerNavGraph(
         composable(CredManAppDestinations.PASSKEYS_ROUTE) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             PasskeysSignedRoute(
-                onSettingsButtonClicked = {navController.navigate(ApplicationScreen.ShrineApp.name)},
+                onShrineButtonClicked = {navController.navigate(ApplicationScreen.ShrineApp.name)},
+                onSettingsButtonClicked = {navController.navigate(ApplicationScreen.Settings.name)},
                 onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
@@ -120,6 +123,24 @@ fun CredentialManagerNavGraph(
 
         composable(route = ApplicationScreen.LearnMore.name) {
             LearnMoreScreen()
+        }
+
+        composable(route = ApplicationScreen.Placeholder.name) {
+            PlaceholderScreen()
+        }
+
+        composable(route = ApplicationScreen.Settings.name) {
+            SettingsScreen(
+                onCreatePasskeyClicked = {
+                    navController.navigate(ApplicationScreen.Placeholder.name)
+                },
+                onChangePasswordClicked = {
+                    navController.navigate(ApplicationScreen.Placeholder.name)
+                },
+                onHelpClicked = {
+                    navController.navigate(ApplicationScreen.Help.name)
+                }
+            )
         }
 
         composable(route = ApplicationScreen.ShrineApp.name) {

@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,15 +36,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.LogoHeading
 import com.google.credentialmanager.sample.ui.common.ShrineButton
+import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
 fun PasskeysSignedRoute(
+    onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
@@ -51,6 +56,7 @@ fun PasskeysSignedRoute(
 
     val uiState = viewModel.uiState.collectAsState().value
     PasskeysSignedInScreen(
+        onShrineButtonClicked,
         onSettingsButtonClicked,
         onHelpButtonClicked,
         navigateToLogin,
@@ -62,6 +68,7 @@ fun PasskeysSignedRoute(
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PasskeysSignedInScreen(
+    onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
@@ -73,35 +80,46 @@ fun PasskeysSignedInScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Column {
+        Column(
+        ) {
             LogoHeading()
         }
         Spacer(modifier = Modifier.padding(30.dp))
-        ShrineButton(
-            onClick = onSettingsButtonClicked,
-        ) {Text(stringResource(R.string.shop))
-        }
 
-        ShrineButton(onClick = { /*TODO*/ }) {
-            Text(stringResource(R.string.settings))
-        }
+        Column(
+            modifier = Modifier
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            ShrineButton(
+                onClick = onShrineButtonClicked,
+            ) { Text(stringResource(R.string.shop)) }
 
-        ShrineButton(
-            onClick = onHelpButtonClicked,
-        ) { Text(stringResource(R.string.help))
-        }
+            Spacer(modifier = Modifier.padding(10.dp))
 
-        ShrineButton(onClick = {
-            onSignOut()
-            navigateToLogin()
-        }) {
-            Text(text = stringResource(R.string.sign_out))
+            ShrineButton(
+                onClick = onSettingsButtonClicked
+            ) { Text(stringResource(R.string.settings)) }
+
+            Spacer(modifier = Modifier.padding(10.dp))
+
+            ShrineButton(
+                onClick = onHelpButtonClicked,
+            ) { Text(stringResource(R.string.help)) }
+
+            Spacer(modifier = Modifier.padding(10.dp))
+
+            ShrineButton(onClick = {
+                onSignOut()
+                navigateToLogin()
+            }) {
+                Text(text = stringResource(R.string.sign_out))
+            }
         }
 
         //Handle UiState values
@@ -118,5 +136,20 @@ fun PasskeysSignedInScreen(
 
     BackHandler(enabled = true) {
         activity.finish()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PasskeysSignedPreview(){
+    CredentialManagerTheme {
+        PasskeysSignedInScreen(
+            onShrineButtonClicked = {},
+            onSettingsButtonClicked = {},
+            onHelpButtonClicked = {},
+            navigateToLogin = {},
+            onSignOut = {},
+            HomeUiState.Empty
+        )
     }
 }
