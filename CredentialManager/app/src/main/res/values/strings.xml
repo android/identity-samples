@@ -26,6 +26,7 @@
     <string name="learn_more_line6">Yes, passkeys are more secure than passwords and provide a simpler login where you do not have to remember complex passwords</string>
     <string name="main_menu">Main Menu</string>
     <string name="name_label">Name</string>
+    <string name="not_now">Not now</string>
     <string name="or">Or</string>
     <string name="other_options">Other Options</string>
     <string name="password">Password</string>

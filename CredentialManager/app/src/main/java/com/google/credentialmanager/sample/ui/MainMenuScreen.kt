@@ -24,9 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -42,11 +39,12 @@ import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.LogoHeading
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
+import com.google.credentialmanager.sample.ui.theme.light_button
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
-fun PasskeysSignedRoute(
+fun PasskeysSignedInRoute(
     onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
@@ -55,7 +53,7 @@ fun PasskeysSignedRoute(
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
-    PasskeysSignedInScreen(
+    MainMenuScreen(
         onShrineButtonClicked,
         onSettingsButtonClicked,
         onHelpButtonClicked,
@@ -67,7 +65,7 @@ fun PasskeysSignedRoute(
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun PasskeysSignedInScreen(
+fun MainMenuScreen(
     onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
@@ -103,6 +101,7 @@ fun PasskeysSignedInScreen(
             Spacer(modifier = Modifier.padding(10.dp))
 
             ShrineButton(
+                color = light_button,
                 onClick = onSettingsButtonClicked
             ) { Text(stringResource(R.string.settings)) }
 
@@ -114,7 +113,9 @@ fun PasskeysSignedInScreen(
 
             Spacer(modifier = Modifier.padding(10.dp))
 
-            ShrineButton(onClick = {
+            ShrineButton(
+                color = light_button,
+                onClick = {
                 onSignOut()
                 navigateToLogin()
             }) {
@@ -143,7 +144,7 @@ fun PasskeysSignedInScreen(
 @Composable
 fun PasskeysSignedPreview(){
     CredentialManagerTheme {
-        PasskeysSignedInScreen(
+        MainMenuScreen(
             onShrineButtonClicked = {},
             onSettingsButtonClicked = {},
             onHelpButtonClicked = {},

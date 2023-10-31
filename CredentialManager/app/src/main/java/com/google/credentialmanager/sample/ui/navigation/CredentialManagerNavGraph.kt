@@ -29,7 +29,8 @@ import com.google.credentialmanager.sample.ui.AuthenticationRoute
 import com.google.credentialmanager.sample.ui.HelpScreen
 import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.LearnMoreScreen
-import com.google.credentialmanager.sample.ui.PasskeysSignedRoute
+import com.google.credentialmanager.sample.ui.MainMenuScreen
+import com.google.credentialmanager.sample.ui.PasskeysSignedInRoute
 import com.google.credentialmanager.sample.ui.PlaceholderScreen
 import com.google.credentialmanager.sample.ui.RegisterRoute
 import com.google.credentialmanager.sample.ui.SettingsScreen
@@ -86,15 +87,16 @@ fun CredentialManagerNavGraph(
             HomeRoute(
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel,
-                onLearnMoreClicked = { navController.navigate(ApplicationScreen.LearnMore.name) }
+                onLearnMoreClicked = { navController.navigate(ApplicationScreen.LearnMore.name) },
+                onNotNowClicked = { navController.navigate(ApplicationScreen.MainMenu.name) }
             )
         }
 
         composable(CredManAppDestinations.PASSKEYS_ROUTE) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
-            PasskeysSignedRoute(
-                onShrineButtonClicked = {navController.navigate(ApplicationScreen.ShrineApp.name)},
-                onSettingsButtonClicked = {navController.navigate(ApplicationScreen.Settings.name)},
+            PasskeysSignedInRoute(
+                onShrineButtonClicked = { navController.navigate(ApplicationScreen.ShrineApp.name) },
+                onSettingsButtonClicked = { navController.navigate(ApplicationScreen.Settings.name) },
                 onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
@@ -123,6 +125,17 @@ fun CredentialManagerNavGraph(
 
         composable(route = ApplicationScreen.LearnMore.name) {
             LearnMoreScreen()
+        }
+
+        composable(route = ApplicationScreen.MainMenu.name) {
+            val homeViewModel = hiltViewModel<HomeViewModel>()
+            PasskeysSignedInRoute(
+                onShrineButtonClicked = { navController.navigate(ApplicationScreen.ShrineApp.name) },
+                onSettingsButtonClicked = { navController.navigate(ApplicationScreen.Settings.name) },
+                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
+                navigateToLogin = navigateToLogin,
+                viewModel = homeViewModel
+            )
         }
 
         composable(route = ApplicationScreen.Placeholder.name) {

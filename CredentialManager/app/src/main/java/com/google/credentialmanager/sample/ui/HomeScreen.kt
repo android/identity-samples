@@ -23,6 +23,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +51,7 @@ import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.PasskeyInfo
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.common.TextHeader
+import com.google.credentialmanager.sample.ui.theme.light_button
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
@@ -58,6 +60,7 @@ fun HomeRoute(
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel,
     onLearnMoreClicked: () -> Unit,
+    onNotNowClicked: () -> Unit
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
@@ -67,6 +70,7 @@ fun HomeRoute(
         viewModel::registerRequest,
         viewModel::registerResponse,
         viewModel::signOut,
+        onNotNowClicked,
         uiState
     )
 }
@@ -79,6 +83,7 @@ fun HomeScreen(
     onRegisterRequest: () -> Unit,
     onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
     onSignOut: () -> Unit,
+    onNotNowClicked: () -> Unit,
     uiState: HomeUiState
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -114,26 +119,14 @@ fun HomeScreen(
             ) {
                 Text(text = stringResource(R.string.create_passkey))
             }
-        }
 
-        Text(
-            modifier = Modifier.padding(20.dp),
-            text = "----------------     or     ----------------",
-            fontSize = 20.sp,
-            color = Color.Gray
-        )
+            Spacer(modifier = Modifier.padding(10.dp))
 
-        Row(
-            modifier = Modifier.padding(top = 8.dp),
-        ) {
             ShrineButton(
-                onClick = {
-                    onSignOut()
-                    navigateToLogin()
-                },
-                enabled = enabled2
-            ) {
-                Text(text = stringResource(R.string.sign_out))
+                onClick = { onNotNowClicked ()},
+                color = light_button,
+                ) {
+                Text(text = stringResource(R.string.not_now))
             }
         }
 
