@@ -77,14 +77,7 @@ fun CredentialManagerNavGraph(
                 viewModel = authViewModel
             )
         }
-        composable(CredManAppDestinations.PASSKEYS_ROUTE) {
-            val homeViewModel = hiltViewModel<HomeViewModel>()
-            PasskeysSignedRoute(
-                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
-                navigateToLogin = navigateToLogin,
-                viewModel = homeViewModel
-            )
-        }
+
         composable(CredManAppDestinations.HOME_ROUTE) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             HomeRoute(
@@ -94,13 +87,15 @@ fun CredentialManagerNavGraph(
             )
         }
 
-        composable(route = ApplicationScreen.Help.name) {
-            HelpScreen()
+        composable(CredManAppDestinations.PASSKEYS_ROUTE) {
+            val homeViewModel = hiltViewModel<HomeViewModel>()
+            PasskeysSignedRoute(
+                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
+                navigateToLogin = navigateToLogin,
+                viewModel = homeViewModel
+            )
         }
 
-        composable(route = ApplicationScreen.LearnMore.name) {
-            LearnMoreScreen()
-        }
         composable(CredManAppDestinations.REGISTER_ROUTE) {
             val authViewModel = hiltViewModel<AuthenticationViewModel>()
             RegisterRoute(
@@ -108,12 +103,21 @@ fun CredentialManagerNavGraph(
                 viewModel = authViewModel
             )
         }
+
         composable(CredManAppDestinations.SPLASH_ROUTE) {
             val splashViewModel = hiltViewModel<SplashViewModel>()
             SplashScreen(
                 splashViewModel = splashViewModel,
                 navController
             )
+        }
+
+        composable(route = ApplicationScreen.Help.name) {
+            HelpScreen()
+        }
+
+        composable(route = ApplicationScreen.LearnMore.name) {
+            LearnMoreScreen()
         }
     }
 }
