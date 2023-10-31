@@ -32,7 +32,6 @@ fun TextHeader(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun TextHeaderPreview(){

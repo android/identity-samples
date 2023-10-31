@@ -30,7 +30,6 @@ fun LogoHeading(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun WelcomeLogoPreview(){

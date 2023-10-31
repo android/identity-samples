@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 
-
 @Composable
 fun ShrineTextField(
     value: TextFieldValue,

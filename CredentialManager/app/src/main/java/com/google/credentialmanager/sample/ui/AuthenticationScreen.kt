@@ -74,7 +74,6 @@ fun AuthenticationScreen(
     navigateToRegister: () -> Unit,
     uiState: AuthUiState
 ) {
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -114,7 +113,6 @@ fun AuthenticationScreen(
         }
 
     }
-
 
     //Handle UiState values
     when (uiState) {

@@ -42,7 +42,6 @@ import com.google.credentialmanager.sample.ui.common.ClickableLearnMore
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 
-
 private const val TAG = "LearnMoreScreen"
 
 @Composable

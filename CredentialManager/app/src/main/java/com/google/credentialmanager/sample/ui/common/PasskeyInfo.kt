@@ -74,7 +74,6 @@ fun PasskeyInfo(
     }
 }
 
-
 @Preview (showBackground = true)
 @Composable
 fun PasskeyInfoPreview(){

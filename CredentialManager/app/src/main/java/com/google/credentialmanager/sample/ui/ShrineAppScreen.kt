@@ -24,7 +24,6 @@ import com.google.credentialmanager.sample.data.Datasource
 import com.google.credentialmanager.sample.model.Product
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 
-
 private const val TAG = "ShrineAppScreen"
 
 @Composable

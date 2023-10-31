@@ -35,7 +35,6 @@ fun CredentialManagerApp() {
         val systemUiController = rememberSystemUiController()
         val darkIcons = MaterialTheme.colors.isLight
 
-
         SideEffect {
             systemUiController.setSystemBarsColor(Color.Transparent, darkIcons = darkIcons)
         }
@@ -53,7 +52,5 @@ fun CredentialManagerApp() {
             navigateToRegister = navigationActions.navigateToRegister
         )
     }
-
-
 }
 
