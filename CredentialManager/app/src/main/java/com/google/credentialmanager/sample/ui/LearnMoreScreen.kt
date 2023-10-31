@@ -20,6 +20,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -99,9 +100,12 @@ fun LearnMoreScreen(){
                 modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
             )
             ClickableLearnMore()
-        }
-        ShrineButton(onClick = { /*TODO*/ }) {
-            Text(stringResource(R.string.back_button))
+
+            Spacer(Modifier.padding(15.dp))
+
+            ShrineButton(onClick = { /*TODO*/ }) {
+                Text(stringResource(R.string.back_button))
+            }
         }
     }
 }
