@@ -23,9 +23,8 @@ This web listener looks for the 'postMessage()' call on the javascript web code,
 receives it, it will handle it in the manner dictated in this local codebase. This allows for
 javascript on the web to interact with the local setup on device that contains more complex logic.
 
-The embedded javascript can be found in src ('credmanweb') / javascript / encode.js.
-The setup for this script was made easier hanks to prior similar logic from agl@google.com. It can
-be modified depending on the use case. If you wish to minify, please use the following command
+The embedded javascript can be found in CredentialManagerWebView/javascript/encode.js.
+It can be modified depending on the use case. If you wish to minify, please use the following command
 to call the toptal minifier API.
 ```
 cat encode.js | grep -v '^let __webauthn_interface__;$' | \
