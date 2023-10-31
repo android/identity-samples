@@ -20,8 +20,11 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
@@ -32,10 +35,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.credentialmanager.sample.R
+import com.google.credentialmanager.sample.ui.common.LogoHeading
+import com.google.credentialmanager.sample.ui.common.ShrineButton
+import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
@@ -65,32 +73,35 @@ fun PasskeysSignedInScreen(
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .padding(20.dp)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            modifier = Modifier.padding(20.dp),
-            text = "Signed successfully with passkeys",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Row(
-            modifier = Modifier.padding(top = 8.dp),
-        ) {
-            Button(onClick = {
-                onSignOut()
-                navigateToLogin()
-            }) {
-                Text("Sign out and try again")
-            }
+        Column {
+            LogoHeading()
+        }
+        Spacer(modifier = Modifier.padding(30.dp))
+        ShrineButton(onClick = { /*TODO*/ }) {
+            Text(text = ("Go to the App"))
+        }
+        ShrineButton(onClick = { /*TODO*/ }) {
+            Text(stringResource(R.string.settings))
+        }
+        ShrineButton(onClick = { /*TODO*/ }) {
+            Text(stringResource(R.string.help))
+        }
+        ShrineButton(onClick = {
+            onSignOut()
+            navigateToLogin()
+        }) {
+            Text(text = stringResource(R.string.sign_out))
         }
 
         //Handle UiState values
         when (uiState) {
             is HomeUiState.Empty -> {}
-
             is HomeUiState.MsgString -> {
                 LaunchedEffect(uiState) {
                     Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()

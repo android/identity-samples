@@ -170,5 +170,3 @@ fun AuthenticationScreen(
         else -> {}
     }
 }
-
-
