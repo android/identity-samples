@@ -16,7 +16,6 @@
 
 package com.google.credentialmanager.sample.ui.navigation
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,12 +23,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.AuthenticationRoute
 import com.google.credentialmanager.sample.ui.HelpScreen
 import com.google.credentialmanager.sample.ui.HomeRoute
 import com.google.credentialmanager.sample.ui.LearnMoreScreen
-import com.google.credentialmanager.sample.ui.MainMenuScreen
 import com.google.credentialmanager.sample.ui.PasskeysSignedInRoute
 import com.google.credentialmanager.sample.ui.PlaceholderScreen
 import com.google.credentialmanager.sample.ui.RegisterRoute
@@ -40,29 +37,13 @@ import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
 
-enum class ApplicationScreen(@StringRes val title: Int){
-    AccountRecovery(title = R.string.account_recovery),
-    Help(title = R.string.help),
-    Home(title = R.string.home),
-    LearnMore(title = R.string.learn_more),
-    MainMenu(title = R.string.main_menu),
-    OtherOptions(title = R.string.other_options),
-    Placeholder(title = R.string.todo),
-    Settings(title = R.string.settings),
-    ShrineApp(title = R.string.app_name),
-    SignInWithPasskey(title = R.string.sign_in),
-    SignInWithPassword(title = R.string.sign_in),
-    SignOut(title = R.string.sign_out),
-    SignUpWithPasskey(title = R.string.sign_up),
-    SignUpWithPassword(title = R.string.sign_up),
-}
 
 //This Navigation Graph is handling to and fro from Authentication to Contacts screens.
 @Composable
 fun CredentialManagerNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = CredManAppDestinations.AUTH_ROUTE,
+    startDestination: String = CredManAppDestinations.AUTH_ROUTE.name,
     navigateToLogin: () -> Unit,
     navigateToHome: (Boolean) -> Unit,
     navigateToRegister: () -> Unit
@@ -73,7 +54,7 @@ fun CredentialManagerNavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(CredManAppDestinations.AUTH_ROUTE) {
+        composable(route = CredManAppDestinations.AUTH_ROUTE.name) {
             val authViewModel = hiltViewModel<AuthenticationViewModel>()
             AuthenticationRoute(
                 navigateToHome = navigateToHome,
@@ -82,28 +63,28 @@ fun CredentialManagerNavGraph(
             )
         }
 
-        composable(CredManAppDestinations.HOME_ROUTE) {
+        composable(route = CredManAppDestinations.HOME_ROUTE.name) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             HomeRoute(
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel,
-                onLearnMoreClicked = { navController.navigate(ApplicationScreen.LearnMore.name) },
-                onNotNowClicked = { navController.navigate(ApplicationScreen.MainMenu.name) }
+                onLearnMoreClicked = { navController.navigate(CredManAppDestinations.LearnMore.name) },
+                onNotNowClicked = { navController.navigate(CredManAppDestinations.MainMenu.name) }
             )
         }
 
-        composable(CredManAppDestinations.PASSKEYS_ROUTE) {
+        composable(route = CredManAppDestinations.PASSKEYS_ROUTE.name) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             PasskeysSignedInRoute(
-                onShrineButtonClicked = { navController.navigate(ApplicationScreen.ShrineApp.name) },
-                onSettingsButtonClicked = { navController.navigate(ApplicationScreen.Settings.name) },
-                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
+                onShrineButtonClicked = { navController.navigate(CredManAppDestinations.ShrineApp.name) },
+                onSettingsButtonClicked = { navController.navigate(CredManAppDestinations.Settings.name) },
+                onHelpButtonClicked = { navController.navigate(CredManAppDestinations.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
             )
         }
 
-        composable(CredManAppDestinations.REGISTER_ROUTE) {
+        composable(route = CredManAppDestinations.REGISTER_ROUTE.name) {
             val authViewModel = hiltViewModel<AuthenticationViewModel>()
             RegisterRoute(
                 navigateToHome = navigateToHome,
@@ -111,7 +92,7 @@ fun CredentialManagerNavGraph(
             )
         }
 
-        composable(CredManAppDestinations.SPLASH_ROUTE) {
+        composable(route = CredManAppDestinations.SPLASH_ROUTE.name) {
             val splashViewModel = hiltViewModel<SplashViewModel>()
             SplashScreen(
                 splashViewModel = splashViewModel,
@@ -119,44 +100,44 @@ fun CredentialManagerNavGraph(
             )
         }
 
-        composable(route = ApplicationScreen.Help.name) {
+        composable(route = CredManAppDestinations.Help.name) {
             HelpScreen()
         }
 
-        composable(route = ApplicationScreen.LearnMore.name) {
+        composable(route = CredManAppDestinations.LearnMore.name) {
             LearnMoreScreen()
         }
 
-        composable(route = ApplicationScreen.MainMenu.name) {
+        composable(route = CredManAppDestinations.MainMenu.name) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             PasskeysSignedInRoute(
-                onShrineButtonClicked = { navController.navigate(ApplicationScreen.ShrineApp.name) },
-                onSettingsButtonClicked = { navController.navigate(ApplicationScreen.Settings.name) },
-                onHelpButtonClicked = { navController.navigate(ApplicationScreen.Help.name) },
+                onShrineButtonClicked = { navController.navigate(CredManAppDestinations.ShrineApp.name) },
+                onSettingsButtonClicked = { navController.navigate(CredManAppDestinations.Settings.name) },
+                onHelpButtonClicked = { navController.navigate(CredManAppDestinations.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = homeViewModel
             )
         }
 
-        composable(route = ApplicationScreen.Placeholder.name) {
+        composable(route = CredManAppDestinations.Placeholder.name) {
             PlaceholderScreen()
         }
 
-        composable(route = ApplicationScreen.Settings.name) {
+        composable(route = CredManAppDestinations.Settings.name) {
             SettingsScreen(
                 onCreatePasskeyClicked = {
-                    navController.navigate(ApplicationScreen.Placeholder.name)
+                    navController.navigate(CredManAppDestinations.Placeholder.name)
                 },
                 onChangePasswordClicked = {
-                    navController.navigate(ApplicationScreen.Placeholder.name)
+                    navController.navigate(CredManAppDestinations.Placeholder.name)
                 },
                 onHelpClicked = {
-                    navController.navigate(ApplicationScreen.Help.name)
+                    navController.navigate(CredManAppDestinations.Help.name)
                 }
             )
         }
 
-        composable(route = ApplicationScreen.ShrineApp.name) {
+        composable(route = CredManAppDestinations.ShrineApp.name) {
             ShrineAppScreen()
         }
     }

@@ -16,14 +16,22 @@
 
 package com.google.credentialmanager.sample.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.navigation.NavHostController
+import com.google.credentialmanager.sample.R
 
-object CredManAppDestinations {
-    const val HOME_ROUTE = "home"
-    const val PASSKEYS_ROUTE = "passkeys"
-    const val AUTH_ROUTE = "Auth"
-    const val SPLASH_ROUTE = "splash"
-    const val REGISTER_ROUTE = "register"
+enum class CredManAppDestinations(@StringRes val title: Int) {
+    HOME_ROUTE(title = R.string.home),
+    PASSKEYS_ROUTE(title = R.string.passkeys),
+    AUTH_ROUTE(R.string.auth),
+    SPLASH_ROUTE(R.string.splash),
+    REGISTER_ROUTE(R.string.register),
+    Help(title = R.string.help),
+    LearnMore(title = R.string.learn_more),
+    MainMenu(title = R.string.main_menu),
+    Placeholder(title = R.string.todo),
+    Settings(title = R.string.settings),
+    ShrineApp(title = R.string.app_name),
 }
 
 //This controller will help decide where to navigate
@@ -31,11 +39,11 @@ class CredentialManagerNavActions(navController: NavHostController) {
     //Takes user to Home flow.
     val navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit = {
         if (it) {
-            navController.navigate(CredManAppDestinations.HOME_ROUTE) {
+            navController.navigate(CredManAppDestinations.HOME_ROUTE.name) {
                 launchSingleTop = true
             }
         } else {
-            navController.navigate(CredManAppDestinations.PASSKEYS_ROUTE) {
+            navController.navigate(CredManAppDestinations.PASSKEYS_ROUTE.name) {
                 launchSingleTop = true
             }
         }
@@ -43,7 +51,7 @@ class CredentialManagerNavActions(navController: NavHostController) {
 
     //Takes user to login flow.
     val navigateToLogin: () -> Unit = {
-        navController.navigate(CredManAppDestinations.AUTH_ROUTE) {
+        navController.navigate(CredManAppDestinations.AUTH_ROUTE.name) {
             popUpTo(0) {
                 inclusive = true
             }
@@ -51,9 +59,9 @@ class CredentialManagerNavActions(navController: NavHostController) {
         }
     }
 
-    //Takes user to login flow.
+    //Takes user to register flow.
     val navigateToRegister: () -> Unit = {
-        navController.navigate(CredManAppDestinations.REGISTER_ROUTE) {
+        navController.navigate(CredManAppDestinations.REGISTER_ROUTE.name) {
             popUpTo(0) {
                 inclusive = true
             }

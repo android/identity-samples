@@ -2,6 +2,7 @@
     <string name="account">Account</string>
     <string name="account_recovery">Account Recovery</string>
     <string name="app_name">Credential Manager App</string>
+    <string name="auth">Auth</string>
     <string name="back_button">Back</string>
     <string name="bag">Dusty Pink Satchel</string>
     <string name="change">Change</string>
@@ -15,7 +16,7 @@
     <string name="help">Get Help</string>
     <string name="home">Home</string>
     <string name="jacket">Hopscotch Jacket</string>
-    <string name="lamp">Ok Glow Lamp</string>
+    <string name="lamp">OK Glow Lamp</string>
     <string name="learn_more">Learn More</string>
     <string name="learn_more_heading">Passwordless login with passkeys</string>
     <string name="learn_more_line1">What are passkeys?</string>
@@ -29,11 +30,13 @@
     <string name="not_now">Not now</string>
     <string name="or">Or</string>
     <string name="other_options">Other Options</string>
+    <string name="passkeys">Passkeys</string>
     <string name="password">Password</string>
     <string name="passkey_info">With passkeys, you don’t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen lock to sign in.</string>
     <string name="passkey_info_heading">Create a passkey for faster, easier sign-in</string>
     <string name="proceed">Proceed without Signing In</string>
     <string name="prototype">Prototype</string>
+    <string name="register">Register</string>
     <string name="send_reset">Send reset link via email</string>
     <string name="security">Security</string>
     <string name="settings">Settings</string>
@@ -51,6 +54,7 @@
     <string name="signed_in_title">You’re signed in!</string>
     <string name="signed_out_title">You’re signed out.</string>
     <string name="skip">Skip</string>
+    <string name="splash">Splash</string>
     <string name="submit">Submit</string>
     <string name="todo">TODO</string>
     <string name="trouble">Trouble signing in?</string>

@@ -56,11 +56,11 @@ fun SplashScreen(
         navController.navigate(
             if (splashViewModel.isSignedIn()) {
                 if (splashViewModel.isSignedInThroughPasskeys()) {
-                    CredManAppDestinations.PASSKEYS_ROUTE
+                    CredManAppDestinations.PASSKEYS_ROUTE.name
                 } else {
-                    CredManAppDestinations.HOME_ROUTE
+                    CredManAppDestinations.HOME_ROUTE.name
                 }
-            } else CredManAppDestinations.AUTH_ROUTE
+            } else CredManAppDestinations.AUTH_ROUTE.name
         )
     }
 
