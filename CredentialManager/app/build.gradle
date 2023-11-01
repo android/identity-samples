@@ -84,13 +84,13 @@ repositories {
 
     dependencies {
         // Credential Manager
-        implementation("androidx.credentials:credentials:1.2.0-rc01")
+        implementation("androidx.credentials:credentials:1.2.0")
         implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.0'
         implementation 'com.google.android.gms:play-services-auth:20.7.0'
 
         // optional - needed for credentials support from play services, for devices running
         // Android 13 and below.
-        implementation("androidx.credentials:credentials-play-services-auth:1.2.0-rc01")
+        implementation("androidx.credentials:credentials-play-services-auth:1.2.0")
 
         // FIDO
         implementation 'com.google.android.gms:play-services-fido:20.1.0'
