@@ -21,8 +21,8 @@ import androidx.navigation.NavHostController
 import com.google.credentialmanager.sample.R
 
 enum class CredManAppDestinations(@StringRes val title: Int) {
-    HOME_ROUTE(title = R.string.home),
-    PASSKEYS_ROUTE(title = R.string.passkeys),
+    CREATE_PASSKEY_ROUTE(title = R.string.home),
+    MAIN_MENU_ROUTE(title = R.string.main_menu),
     AUTH_ROUTE(R.string.auth),
     SPLASH_ROUTE(R.string.splash),
     REGISTER_ROUTE(R.string.register),
@@ -39,11 +39,11 @@ class CredentialManagerNavActions(navController: NavHostController) {
     //Takes user to Home flow.
     val navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit = {
         if (it) {
-            navController.navigate(CredManAppDestinations.HOME_ROUTE.name) {
+            navController.navigate(CredManAppDestinations.CREATE_PASSKEY_ROUTE.name) {
                 launchSingleTop = true
             }
         } else {
-            navController.navigate(CredManAppDestinations.PASSKEYS_ROUTE.name) {
+            navController.navigate(CredManAppDestinations.MAIN_MENU_ROUTE.name) {
                 launchSingleTop = true
             }
         }

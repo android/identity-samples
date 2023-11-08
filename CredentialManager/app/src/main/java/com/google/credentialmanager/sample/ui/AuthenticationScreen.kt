@@ -65,6 +65,7 @@ fun AuthenticationRoute(
     )
 }
 
+// This is the main landing page with Sign-In and Sign Up Buttons
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun AuthenticationScreen(

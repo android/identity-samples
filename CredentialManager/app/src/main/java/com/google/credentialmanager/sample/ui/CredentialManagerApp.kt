@@ -27,10 +27,11 @@ import com.google.credentialmanager.sample.ui.navigation.CredManAppDestinations
 import com.google.credentialmanager.sample.ui.navigation.CredentialManagerNavActions
 import com.google.credentialmanager.sample.ui.navigation.CredentialManagerNavGraph
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
+import kotlinx.coroutines.CoroutineScope
 
 //This composable is responsible for setting App theme and navigation
 @Composable
-fun CredentialManagerApp() {
+fun CredentialManagerApp(scope: CoroutineScope) {
     CredentialManagerTheme {
         val systemUiController = rememberSystemUiController()
         val darkIcons = MaterialTheme.colors.isLight
@@ -49,7 +50,8 @@ fun CredentialManagerApp() {
             startDestination = CredManAppDestinations.SPLASH_ROUTE.name,
             navigateToLogin = navigationActions.navigateToLogin,
             navigateToHome = navigationActions.navigateToHome,
-            navigateToRegister = navigationActions.navigateToRegister
+            navigateToRegister = navigationActions.navigateToRegister,
+            scope = scope
         )
     }
 }

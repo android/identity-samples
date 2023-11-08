@@ -19,6 +19,7 @@ package com.google.credentialmanager.sample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.rememberCoroutineScope
 import com.google.credentialmanager.sample.ui.CredentialManagerApp
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,7 +29,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CredentialManagerApp()
+            val scope = rememberCoroutineScope()
+            CredentialManagerApp(scope)
         }
     }
 }

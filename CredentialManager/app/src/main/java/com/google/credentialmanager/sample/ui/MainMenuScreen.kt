@@ -44,7 +44,7 @@ import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
-fun PasskeysSignedInRoute(
+fun MainMenuRoute(
     onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,

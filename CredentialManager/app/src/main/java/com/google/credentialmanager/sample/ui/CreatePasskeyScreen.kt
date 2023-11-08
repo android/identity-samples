@@ -22,7 +22,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,11 +39,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import com.google.credentialmanager.sample.Graph
 import com.google.credentialmanager.sample.R
@@ -54,37 +51,41 @@ import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.theme.light_button
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun HomeRoute(
+fun CreatePasskeyRoute(
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel,
     onLearnMoreClicked: () -> Unit,
-    onNotNowClicked: () -> Unit
+    onNotNowClicked: () -> Unit,
+    scope: CoroutineScope
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
-    HomeScreen(
+    CreatePasskeyScreen(
         navigateToLogin,
         onLearnMoreClicked,
         viewModel::registerRequest,
         viewModel::registerResponse,
         viewModel::signOut,
         onNotNowClicked,
-        uiState
+        uiState,
+        scope
     )
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun HomeScreen(
+fun CreatePasskeyScreen(
     navigateToLogin: () -> Unit,
     onLearnMoreClicked: () -> Unit,
     onRegisterRequest: () -> Unit,
     onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
     onSignOut: () -> Unit,
     onNotNowClicked: () -> Unit,
-    uiState: HomeUiState
+    uiState: HomeUiState,
+    scope: CoroutineScope
 ) {
     val coroutineScope = rememberCoroutineScope()
     val auth = Graph.auth
