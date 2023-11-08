@@ -55,7 +55,6 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun CreatePasskeyRoute(
-    navigateToLogin: () -> Unit,
     viewModel: HomeViewModel,
     onLearnMoreClicked: () -> Unit,
     onNotNowClicked: () -> Unit,
@@ -64,11 +63,9 @@ fun CreatePasskeyRoute(
 
     val uiState = viewModel.uiState.collectAsState().value
     CreatePasskeyScreen(
-        navigateToLogin,
         onLearnMoreClicked,
         viewModel::registerRequest,
         viewModel::registerResponse,
-        viewModel::signOut,
         onNotNowClicked,
         uiState,
         scope
@@ -78,11 +75,9 @@ fun CreatePasskeyRoute(
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun CreatePasskeyScreen(
-    navigateToLogin: () -> Unit,
     onLearnMoreClicked: () -> Unit,
     onRegisterRequest: () -> Unit,
     onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
-    onSignOut: () -> Unit,
     onNotNowClicked: () -> Unit,
     uiState: HomeUiState,
     scope: CoroutineScope
