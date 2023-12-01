@@ -18,7 +18,7 @@ import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 @Composable
 fun ClickableLearnMore() {
     val context = LocalContext.current
-    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://developers.google.com/identity/passkeys/")) }
+    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=2xdV-xut7EQ")) }
         Text(
             text = stringResource(R.string.learn_more),
                     modifier = Modifier
