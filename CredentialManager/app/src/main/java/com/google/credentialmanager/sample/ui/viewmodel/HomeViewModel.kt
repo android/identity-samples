@@ -65,13 +65,13 @@ class HomeViewModel @Inject constructor(private val repository: AuthRepository) 
             if (isRegisterResponseSuccess) {
                 _uiState.update {
                     HomeUiState.MsgString(
-                        "Passkey created. Try signin with passkeys"
+                        "Passkey created. Try signing in with a passkey"
                     )
                 }
             } else {
                 _uiState.update {
                     HomeUiState.MsgString(
-                        "Some error occurred, please check logs!"
+                        "An error occurred, please check the logs!"
                     )
                 }
             }
