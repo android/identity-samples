@@ -35,6 +35,7 @@ import com.google.credentialmanager.sample.ui.ShrineAppScreen
 import com.google.credentialmanager.sample.ui.SplashScreen
 import com.google.credentialmanager.sample.ui.viewmodel.AuthenticationViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
+import com.google.credentialmanager.sample.ui.viewmodel.MainMenuViewModel
 import com.google.credentialmanager.sample.ui.viewmodel.SplashViewModel
 import kotlinx.coroutines.CoroutineScope
 
@@ -76,13 +77,13 @@ fun CredentialManagerNavGraph(
         }
 
         composable(route = CredManAppDestinations.MAIN_MENU_ROUTE.name) {
-            val homeViewModel = hiltViewModel<HomeViewModel>()
+            val mainMenuViewModel = hiltViewModel<MainMenuViewModel>()
             MainMenuRoute(
                 onShrineButtonClicked = { navController.navigate(CredManAppDestinations.ShrineApp.name) },
                 onSettingsButtonClicked = { navController.navigate(CredManAppDestinations.Settings.name) },
                 onHelpButtonClicked = { navController.navigate(CredManAppDestinations.Help.name) },
                 navigateToLogin = navigateToLogin,
-                viewModel = homeViewModel
+                viewModel = mainMenuViewModel
             )
         }
 
@@ -111,13 +112,13 @@ fun CredentialManagerNavGraph(
         }
 
         composable(route = CredManAppDestinations.MainMenu.name) {
-            val homeViewModel = hiltViewModel<HomeViewModel>()
+            val mainMenuViewModel = hiltViewModel<MainMenuViewModel>()
             MainMenuRoute(
                 onShrineButtonClicked = { navController.navigate(CredManAppDestinations.ShrineApp.name) },
                 onSettingsButtonClicked = { navController.navigate(CredManAppDestinations.Settings.name) },
                 onHelpButtonClicked = { navController.navigate(CredManAppDestinations.Help.name) },
                 navigateToLogin = navigateToLogin,
-                viewModel = homeViewModel
+                viewModel = mainMenuViewModel
             )
         }
 
