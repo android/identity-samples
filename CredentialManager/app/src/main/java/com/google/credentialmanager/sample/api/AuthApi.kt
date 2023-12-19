@@ -252,6 +252,7 @@ class AuthApi @Inject constructor(
                     "pubKeyCredParams" -> jObject.put("pubKeyCredParams", parseParameters(reader))
                     "timeout" -> jObject.put("timeout", reader.nextDouble())
                     "attestation" -> reader.skipValue()
+                    "extensions" -> reader.skipValue()
                     "excludeCredentials" -> jObject.put(
                         "excludeCredentials",
                         parseCredentialDescriptors(reader)
