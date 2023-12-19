@@ -19,6 +19,7 @@ package com.google.credentialmanager.sample.repository
 import android.util.Log
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -68,6 +69,7 @@ class AuthRepository @Inject constructor(
                 signOut()
                 false
             }
+
             is ApiResult.Success<*> -> {
                 dataStore.edit { prefs ->
                     prefs[USERNAME] = username
@@ -94,6 +96,7 @@ class AuthRepository @Inject constructor(
                         signOut()
                         return false
                     }
+
                     is ApiResult.Success<*> -> {
                         if (result.sessionId != null) {
                             dataStore.edit { prefs ->
@@ -180,6 +183,7 @@ class AuthRepository @Inject constructor(
                     signOut()
                     return false
                 }
+
                 is ApiResult.Success -> {
                     dataStore.edit { prefs ->
                         result.sessionId?.let { prefs[SESSION_ID] = it }
@@ -218,24 +222,39 @@ class AuthRepository @Inject constructor(
         try {
             val signinResponse =
                 credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON")
-            signinResponse?.let {
-                val obj = JSONObject(it)
+            if (signinResponse != null) {
+                val obj = JSONObject(signinResponse)
                 val response = obj.getJSONObject("response")
                 val sessionId = dataStore.read(SESSION_ID)!!
                 val credentialId = obj.getString("rawId")
-                when (val result = api.signinResponse(sessionId, response, credentialId)) {
+                return when (val result = api.signinResponse(sessionId, response, credentialId)) {
                     ApiResult.SignedOutFromServer -> {
                         signOut()
-                        return false
+                        false
                     }
+
                     is ApiResult.Success -> {
                         dataStore.edit { prefs ->
                             result.sessionId?.let { prefs[SESSION_ID] = it }
                         }
+                        true
                     }
                 }
+            } else if (credentialResponse.credential.type == PasswordCredential.TYPE_PASSWORD_CREDENTIAL) {
+                val email =
+                    credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_ID")
+                val password =
+                    credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_PASSWORD")
+                if (email != null && password != null) {
+                  return  login(email, password)
+                } else {
+                    Log.e(TAG, "Cannot call registerResponse")
+                }
+                return false
+            } else {
+                Log.e(TAG, "Cannot call registerResponse")
             }
-            return true
+            return false
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse", e)
         }
