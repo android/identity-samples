@@ -50,6 +50,7 @@ fun CredentialManagerApp(scope: CoroutineScope) {
             startDestination = CredManAppDestinations.SPLASH_ROUTE.name,
             navigateToLogin = navigationActions.navigateToLogin,
             navigateToHome = navigationActions.navigateToHome,
+            navigateToMainMenu = navigationActions.navigateToMainMenu,
             navigateToRegister = navigationActions.navigateToRegister,
             scope = scope
         )

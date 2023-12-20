@@ -47,6 +47,7 @@ fun CredentialManagerNavGraph(
     startDestination: String = CredManAppDestinations.AUTH_ROUTE.name,
     navigateToLogin: () -> Unit,
     navigateToHome: (Boolean) -> Unit,
+    navigateToMainMenu: (Boolean) -> Unit,
     navigateToRegister: () -> Unit,
     scope: CoroutineScope
 ) {
@@ -68,6 +69,7 @@ fun CredentialManagerNavGraph(
         composable(route = CredManAppDestinations.CREATE_PASSKEY_ROUTE.name) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             CreatePasskeyRoute(
+                navigateToMainMenu = navigateToMainMenu,
                 viewModel = homeViewModel,
                 onLearnMoreClicked = { navController.navigate(CredManAppDestinations.LearnMore.name) },
                 onNotNowClicked = { navController.navigate(CredManAppDestinations.MainMenu.name) },

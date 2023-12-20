@@ -68,4 +68,17 @@ class CredentialManagerNavActions(navController: NavHostController) {
             launchSingleTop = true
         }
     }
+
+    //Takes user to Home flow.
+    val navigateToMainMenu: (isSignInThroughPasskeys: Boolean) -> Unit = {
+        if (it) {
+            navController.navigate(CredManAppDestinations.MAIN_MENU_ROUTE.name) {
+                launchSingleTop = true
+            }
+        } else {
+            navController.navigate(CredManAppDestinations.CREATE_PASSKEY_ROUTE.name) {
+                launchSingleTop = true
+            }
+        }
+    }
 }

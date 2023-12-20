@@ -43,18 +43,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.PasswordCredential
 import com.google.credentialmanager.sample.Graph
 import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.PasskeyInfo
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.theme.light_button
+import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun CreatePasskeyRoute(
+    navigateToMainMenu: (isSignInThroughPasskeys: Boolean) -> Unit,
     viewModel: HomeViewModel,
     onLearnMoreClicked: () -> Unit,
     onNotNowClicked: () -> Unit,
@@ -63,6 +66,7 @@ fun CreatePasskeyRoute(
 
     val uiState = viewModel.uiState.collectAsState().value
     CreatePasskeyScreen(
+        navigateToMainMenu,
         onLearnMoreClicked,
         viewModel::registerRequest,
         viewModel::registerResponse,
@@ -75,6 +79,7 @@ fun CreatePasskeyRoute(
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun CreatePasskeyScreen(
+    navigateToMainMenu: (flag: Boolean) -> Unit,
     onLearnMoreClicked: () -> Unit,
     onRegisterRequest: () -> Unit,
     onRegisterResponse: (CreatePublicKeyCredentialResponse) -> Unit,
@@ -143,6 +148,9 @@ fun CreatePasskeyScreen(
                     val data = auth.createPasskey(activity, uiState.data)
                     if (data != null) {
                         onRegisterResponse(data)
+                        navigateToMainMenu(true)
+                    } else {
+                        navigateToMainMenu(false)
                     }
                     enabled1 = true
                     enabled2 = true
