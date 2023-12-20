@@ -40,8 +40,8 @@ import com.google.credentialmanager.sample.ui.common.LogoHeading
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 import com.google.credentialmanager.sample.ui.theme.light_button
-import com.google.credentialmanager.sample.ui.viewmodel.MainMenuUiState
-import com.google.credentialmanager.sample.ui.viewmodel.MainMenuViewModel
+import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
+import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 
 @Composable
 fun MainMenuRoute(
@@ -49,7 +49,7 @@ fun MainMenuRoute(
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
-    viewModel: MainMenuViewModel
+    viewModel: HomeViewModel
 ) {
 
     val uiState = viewModel.uiState.collectAsState().value
@@ -71,7 +71,7 @@ fun MainMenuScreen(
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
     onSignOut: () -> Unit,
-    uiState: MainMenuUiState
+    uiState: HomeUiState
 ) {
 
     val activity = LocalContext.current as Activity
@@ -125,8 +125,8 @@ fun MainMenuScreen(
 
         //Handle UiState values
         when (uiState) {
-            is MainMenuUiState.Empty -> {}
-            is MainMenuUiState.MsgString -> {
+            is HomeUiState.Empty -> {}
+            is HomeUiState.MsgString -> {
                 LaunchedEffect(uiState) {
                     Toast.makeText(activity, uiState.msg, Toast.LENGTH_LONG).show()
                 }
@@ -137,5 +137,20 @@ fun MainMenuScreen(
 
     BackHandler(enabled = true) {
         activity.finish()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PasskeysSignedPreview(){
+    CredentialManagerTheme {
+        MainMenuScreen(
+            onShrineButtonClicked = {},
+            onSettingsButtonClicked = {},
+            onHelpButtonClicked = {},
+            navigateToLogin = {},
+            onSignOut = {},
+            HomeUiState.Empty
+        )
     }
 }
