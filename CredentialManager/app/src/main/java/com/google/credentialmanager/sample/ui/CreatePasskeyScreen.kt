@@ -43,14 +43,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CreatePublicKeyCredentialResponse
-import androidx.credentials.PasswordCredential
 import com.google.credentialmanager.sample.Graph
 import com.google.credentialmanager.sample.R
 import com.google.credentialmanager.sample.ui.common.PasskeyInfo
 import com.google.credentialmanager.sample.ui.common.ShrineButton
 import com.google.credentialmanager.sample.ui.common.TextHeader
 import com.google.credentialmanager.sample.ui.theme.light_button
-import com.google.credentialmanager.sample.ui.viewmodel.AuthUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeUiState
 import com.google.credentialmanager.sample.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
