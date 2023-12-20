@@ -16,6 +16,7 @@
 
 package com.google.credentialmanager.sample.ui.viewmodel
 
+import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.credentialmanager.sample.repository.AuthRepository
@@ -23,7 +24,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,15 +39,59 @@ class MainMenuViewModel @Inject constructor(private val repository: AuthReposito
       repository.signOut()
     }
   }
+
+  fun registerRequest() {
+    _uiState.update {
+      MainMenuUiState.IsLoading
+    }
+    viewModelScope.launch {
+      repository.registerRequest()?.let { data ->
+        _uiState.update {
+          MainMenuUiState.CreationResult(data)
+        }
+      } ?: run {
+        _uiState.update {
+          MainMenuUiState.MsgString(
+            "Oops, An internal server error occurred."
+          )
+        }
+      }
+    }
+  }
+
+  fun registerResponse(credential: CreatePublicKeyCredentialResponse) {
+    viewModelScope.launch {
+      val isRegisterResponseSuccess = repository.registerResponse(credential)
+      if (isRegisterResponseSuccess) {
+        _uiState.update {
+          MainMenuUiState.MsgString(
+            "Passkey created. Try signin with passkeys"
+          )
+        }
+      } else {
+        _uiState.update {
+          MainMenuUiState.MsgString(
+            "Some error occurred, please check logs!"
+          )
+        }
+      }
+    }
+  }
 }
 
 sealed class MainMenuUiState {
   object Empty : MainMenuUiState()
+
+  object IsLoading : MainMenuUiState()
 
   class MsgString(
 
     val msg: String
   ) : MainMenuUiState()
 
+  class CreationResult(
+
+    val data: JSONObject
+  ) : MainMenuUiState()
 }
 
