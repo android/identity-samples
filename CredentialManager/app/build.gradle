@@ -32,7 +32,7 @@ repositories {
                 useSupportLibrary true
             }
             buildConfigField 'String', 'API_BASE_URL', "\"https://passkeys-codelab.glitch.me/auth\""
-            resValue 'string', 'host', 'https:/passkeys-codelab.glitch.me'
+            resValue 'string', 'host', 'https://passkeys-codelab.glitch.me'
         }
 
         signingConfigs {
