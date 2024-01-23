@@ -6,7 +6,11 @@
     },
      "extensions":
            {
-               "prf": { }
+               "prf": {
+                      "eval": {
+                       "first": "FACEBOOKCODE"
+                      }
+           }
            },
     "pubKeyCredParams": [
         {
