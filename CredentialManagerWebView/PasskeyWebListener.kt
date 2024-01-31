@@ -1,4 +1,4 @@
-package com.leecam.credmanwebtest.webhandler
+package com.credmanwebtest.webhandler
 
 import android.app.Activity
 import android.net.Uri
