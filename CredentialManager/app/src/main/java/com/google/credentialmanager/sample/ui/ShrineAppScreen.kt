@@ -1,11 +1,12 @@
 package com.google.credentialmanager.sample.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -30,32 +32,48 @@ private const val TAG = "ShrineAppScreen"
 fun ShrineAppScreen() {
     Column(
         modifier = Modifier
-            .padding(20.dp)
+            .background(color = Color(0xFFEFDFDF))
+            .padding( start = 30.dp, top = 60.dp, end = 30.dp, bottom = 30.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        ProductList(
-            productList = Datasource.loadProducts()
-        )
+    ) {
+
+        Column(
+            modifier = Modifier
+                .background(color = Color(0xFFFFFFFF))
+                .padding(10.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ProductList(
+                productList = Datasource.loadProducts()
+            )
+        }
     }
 }
 
 @Composable
 fun ProductCard(product: Product, modifier: Modifier = Modifier) {
-    Card(modifier = Modifier) {
-        Column {
+    Card {
+        Column (
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
             Image(
                 painter = painterResource(product.imageResourceId),
                 contentDescription = stringResource(product.stringResourceId),
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .width(100.dp),
                 contentScale = ContentScale.Crop
                 )
             Text(
                 text = LocalContext.current.getString(product.stringResourceId),
                 modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
