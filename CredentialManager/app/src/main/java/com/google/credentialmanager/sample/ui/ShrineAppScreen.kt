@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.credentialmanager.sample.data.Datasource
 import com.google.credentialmanager.sample.model.Product
+import com.google.credentialmanager.sample.ui.common.TopMenu
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerTheme
 
 private const val TAG = "ShrineAppScreen"
@@ -33,12 +34,12 @@ fun ShrineAppScreen() {
     Column(
         modifier = Modifier
             .background(color = Color(0xFFEFDFDF))
-            .padding( start = 30.dp, top = 60.dp, end = 30.dp, bottom = 30.dp)
+            .padding(15.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        TopMenu()
         Column(
             modifier = Modifier
                 .background(color = Color(0xFFFFFFFF))
@@ -55,7 +56,7 @@ fun ShrineAppScreen() {
 }
 
 @Composable
-fun ProductCard(product: Product, modifier: Modifier = Modifier) {
+fun ProductCard(product: Product, modifier: Modifier) {
     Card {
         Column (
             modifier = Modifier
