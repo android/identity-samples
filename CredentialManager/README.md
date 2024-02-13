@@ -34,7 +34,7 @@ This sample app implements the following use cases :
 * Logout of the application.
 * On Main screen, Go to sign in.
 * You can either sign in through passkeys or username & password. Please note this sample app uses a
-  mock server so username & password are not being validated. Yu can do that at your backend before
+  mock server so username & password are not being validated. You can do that at your backend before
   letting the user in.
 * Logout of the application.
 * On Main screen, Go to sign up.
@@ -48,7 +48,7 @@ This sample app implements the following use cases :
 * Android Studio
 * Java 11
 * Kotlin plugin version : 1.8.10.
-* The sample app uses Credential Manager API version 1.0.0-alpha06
+* The sample app uses Credential Manager API version 1.0.3-alpha01
 * Android device running Android 5 or higher. 
 * This sample app requires digital asset linking to a website for credential manager api to validate the linking and proceed further, so the rp id used in the mock responses is from a mocked 3P server(Glitch.me). if you want to try your own mock response, try adding your app domain and dont forget to complete the digital asset linking as mentioned [here](https://developer.android.com/training/sign-in/passkeys#add-support-dal). 
 * Use the same debug.keystore mentioned in the sample project to build debug and release variants in order to verify the digital asset linking of sample app package name and sha on your mock server. This is already being done for you in build.gradle. 
