@@ -59,21 +59,19 @@ fun ShrineAppScreen() {
 fun ProductCard(product: Product, modifier: Modifier) {
     Card {
         Column (
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             Image(
                 painter = painterResource(product.imageResourceId),
                 contentDescription = stringResource(product.stringResourceId),
-                modifier = Modifier
-                    .width(100.dp),
+                modifier.width(100.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
                 text = LocalContext.current.getString(product.stringResourceId),
-                modifier = Modifier.padding(16.dp),
+                modifier.padding(16.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
