@@ -106,7 +106,6 @@ fun SettingsScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(10.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
@@ -114,14 +113,13 @@ fun SettingsScreen(
                     Image(
                         painter = painterResource(R.drawable.clip_path_group),
                         contentDescription = "password",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.width(10.dp)
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.width(20.dp)
                     )
                 }
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(10.dp),
+                        .fillMaxHeight(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -144,8 +142,7 @@ fun SettingsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .fillMaxWidth()
-                        .padding(10.dp),
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End
                 ) {
