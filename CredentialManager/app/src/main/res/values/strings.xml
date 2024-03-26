@@ -62,4 +62,5 @@
     <string name="welcome">Welcome</string>
     <string name="welcome_to">Welcome to</string>
     <string name="your_web_client_id">example</string>
+    <string name="passkeys_are_not_supported">Passkeys are not supported on this device.</string>
 </resources>

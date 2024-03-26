@@ -19,12 +19,8 @@ package com.google.credentialmanager.sample
 import android.R.drawable
 import android.app.Activity
 import android.app.AlertDialog.Builder
-import android.app.KeyguardManager
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
@@ -43,11 +39,10 @@ import androidx.credentials.exceptions.CreateCredentialInterruptedException
 import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
 import androidx.credentials.exceptions.CreateCredentialUnknownException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import org.json.JSONObject
 
-private const val MIN_PLAY_VERSION = 230815045
+private const val TAG = "Auth"
+
 class Auth(context: Context) {
 
     private val credMan: CredentialManager
@@ -62,9 +57,8 @@ class Auth(context: Context) {
         creationResult: JSONObject
     ): GetCredentialResponse? {
 
-        if(!isPasskeySupported(activity)) {
-            Toast.makeText(activity, "Passkeys are not supported on this devices", Toast.LENGTH_SHORT)
-                .show()
+        if(!PasskeysEligibility.isPasskeySupported(activity)) {
+            Log.i(TAG, R.string.passkeys_are_not_supported.toString())
             return null
         }
 
@@ -82,7 +76,7 @@ class Auth(context: Context) {
             result = credMan.getCredential(activity, cr)
             if (result.credential is PublicKeyCredential) {
                 val cred = result.credential as PublicKeyCredential
-                Log.i("TAG", "Passkey ${cred.authenticationResponseJson}")
+                Log.i(TAG, "Passkey ${cred.authenticationResponseJson}")
                 return result
             }
         } catch (e: Exception) {
@@ -121,9 +115,8 @@ class Auth(context: Context) {
         requestResult: JSONObject
     ): CreatePublicKeyCredentialResponse? {
 
-        if(!isPasskeySupported(activity)) {
-            Toast.makeText(activity, "Passkeys are not supported on this devices", Toast.LENGTH_SHORT)
-                .show()
+        if(!PasskeysEligibility.isPasskeySupported(activity)) {
+            Log.i(TAG, R.string.passkeys_are_not_supported.toString())
             return null
         }
 
@@ -148,7 +141,7 @@ class Auth(context: Context) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec using e.domError
-                Log.e("Auth", e.domError.toString())
+                Log.e(TAG, e.domError.toString())
             }
 
             is CreateCredentialCancellationException -> {
@@ -167,7 +160,7 @@ class Auth(context: Context) {
             }
 
             is CreateCredentialUnknownException -> {
-                Log.w("Auth", e.message.toString())
+                Log.w(TAG, e.message.toString())
             }
 
             is CreateCredentialCustomException -> {
@@ -179,62 +172,7 @@ class Auth(context: Context) {
                 // exception.
             }
 
-            else -> Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
+            else -> Log.w(TAG, "Unexpected exception type ${e::class.java.name}")
         }
-    }
-
-    /**
-     * Check if passkeys are supported on the device. In order, we verify that:
-     * 1. The API Version >= P
-     * 2. Google Play Services >= 230815045, which is a version matching one of the first stable passkey releases.
-     * This check is added to the library here: https://developer.android.com/jetpack/androidx/releases/credentials#1.3.0-alpha01
-     * 3. The device is secured with some lock.
-     * 4. Ensure GMS is enabled, to avoid any disabled related errors.
-     */
-    private fun isPasskeySupported(context: Context): Boolean {
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            return false
-        }
-
-        val yourPlayVersion = determineDeviceGMSVersionCode(context)
-        if (yourPlayVersion < MIN_PLAY_VERSION) {
-            return false
-        }
-
-        val isDeviceSecured =
-            (context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isDeviceSecure
-        if (!isDeviceSecured) {
-            return false
-        }
-
-        if (isGooglePlayServicesDisabled(context)) {
-            return false
-        }
-        Log.i(
-            "PasskeySample",
-            "Your device appears to meet various checks and should be able to run passkeys with minimal errors."
-        )
-        return true
-    }
-
-    /**
-     * Recovers the current GMS version code running on the device. This is needed because
-     * even if a dependency knows the methods and functions of a newer code, the device may
-     * only contain the older module, which can cause exceptions due to the discrepancy.
-     */
-    private fun determineDeviceGMSVersionCode(context: Context): Long {
-        val packageManager: PackageManager = context.packageManager
-        val packageName = GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE
-        return packageManager.getPackageInfo(packageName, 0).longVersionCode
-    }
-
-    /**
-     * Determines if Google Play Services is disabled on the device.
-     */
-    private fun isGooglePlayServicesDisabled(context: Context): Boolean {
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val connectionResult = googleApiAvailability.isGooglePlayServicesAvailable(context)
-        return connectionResult != ConnectionResult.SUCCESS
     }
 }
