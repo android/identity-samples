@@ -21,7 +21,6 @@ import android.app.Activity
 import android.app.AlertDialog.Builder
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
@@ -42,7 +41,10 @@ import androidx.credentials.exceptions.CreateCredentialUnknownException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
 import org.json.JSONObject
 
+private const val TAG = "Auth"
+
 class Auth(context: Context) {
+
     private val credMan: CredentialManager
 
     //Configure and initialize CredentialManager
@@ -54,8 +56,12 @@ class Auth(context: Context) {
         activity: Activity,
         creationResult: JSONObject
     ): GetCredentialResponse? {
-        Toast.makeText(activity, "Fetching previously stored credentials", Toast.LENGTH_SHORT)
-            .show()
+
+        if(!PasskeysEligibility.isPasskeySupported(activity)) {
+            Log.i(TAG, R.string.passkeys_are_not_supported.toString())
+            return null
+        }
+
         var result: GetCredentialResponse? = null
         try {
             val cr = GetCredentialRequest(
@@ -70,7 +76,7 @@ class Auth(context: Context) {
             result = credMan.getCredential(activity, cr)
             if (result.credential is PublicKeyCredential) {
                 val cred = result.credential as PublicKeyCredential
-                Log.i("TAG", "Passkey ${cred.authenticationResponseJson}")
+                Log.i(TAG, "Passkey ${cred.authenticationResponseJson}")
                 return result
             }
         } catch (e: Exception) {
@@ -108,6 +114,12 @@ class Auth(context: Context) {
         activity: Activity,
         requestResult: JSONObject
     ): CreatePublicKeyCredentialResponse? {
+
+        if(!PasskeysEligibility.isPasskeySupported(activity)) {
+            Log.i(TAG, R.string.passkeys_are_not_supported.toString())
+            return null
+        }
+
         val cr = CreatePublicKeyCredentialRequest(requestResult.toString())
         var ret: CreatePublicKeyCredentialResponse? = null
         try {
@@ -129,23 +141,28 @@ class Auth(context: Context) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec using e.domError
-                Log.e("Auth", e.domError.toString())
+                Log.e(TAG, e.domError.toString())
             }
+
             is CreateCredentialCancellationException -> {
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
             }
+
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
             }
+
             is CreateCredentialProviderConfigurationException -> {
                 // Your app is missing the provider configuration dependency.
                 // Most likely, you're missing the
                 // "credentials-play-services-auth" module.
             }
+
             is CreateCredentialUnknownException -> {
-                Log.w("Auth", e.message.toString())
+                Log.w(TAG, e.message.toString())
             }
+
             is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
                 // make the API call with a request object that's a subclass of
@@ -154,7 +171,8 @@ class Auth(context: Context) {
                 // that SDK to match with e.type. Otherwise, drop or log the
                 // exception.
             }
-            else -> Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
+
+            else -> Log.w(TAG, "Unexpected exception type ${e::class.java.name}")
         }
     }
 }
