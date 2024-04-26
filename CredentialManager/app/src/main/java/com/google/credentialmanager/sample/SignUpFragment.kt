@@ -71,7 +71,7 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        credentialManager = CredentialManager.create(requireActivity())
+        credentialManager = CredentialManager.create(requireContext().applicationContext)
 
         binding.signUp.setOnClickListener(signUpWithPasskeys())
         binding.signUpWithPassword.setOnClickListener(signUpWithPassword())

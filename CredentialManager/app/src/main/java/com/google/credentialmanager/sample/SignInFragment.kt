@@ -62,7 +62,7 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        credentialManager = CredentialManager.create(requireActivity())
+        credentialManager = CredentialManager.create(requireContext().applicationContext)
 
         binding.signInWithSavedCredentials.setOnClickListener(signInWithSavedCredentials())
     }
