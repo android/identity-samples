@@ -50,9 +50,7 @@ Note: You can use any app which supports passkey creation, just ensure that you 
 - Run the MyVault app to see the passkeys and passwords which have been saved to the MyVault app
 - To delete all credentials, open the app drawer -> Settings -> Delete all data
 
-<img src="docs/images/credentials-list.png" alt="List of all saved app credentials displayed in MyVault" style="width:200px;"/>
-<img src="docs/images/passkey-credentials.png" alt="Passkeys meta data displayed in MyVault for a particular domain" style="width:200px;"/>
-<img src="docs/images/password-credentials.png" alt="Password metadata displayed in MyVault for a particular domain" style="width:200px;"/>
+<img src="docs/images/credentials-list.png" alt="List of all saved app credentials displayed in MyVault" style="width:200px;"/>                 <img src="docs/images/passkey-credentials.png" alt="Passkeys meta data displayed in MyVault for a particular domain" style="width:200px;"/>              <img src="docs/images/password-credentials.png" alt="Password metadata displayed in MyVault for a particular domain" style="width:200px;"/>
 <br/>
 
 ## Retrieve a credential in another app
