@@ -215,23 +215,28 @@ class SignUpFragment : Fragment() {
                 // WebAuthn spec using e.domError
                 "An error occurred while creating a passkey, please check logs for additional details."
             }
+
             is CreateCredentialCancellationException -> {
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
                 "The user intentionally canceled the operation and chose not to register the credential. Check logs for additional details."
             }
+
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
                 "The operation was interrupted, please retry the call. Check logs for additional details."
             }
+
             is CreateCredentialProviderConfigurationException -> {
                 // Your app is missing the provider configuration dependency.
                 // Most likely, you're missing "credentials-play-services-auth".
                 "Your app is missing the provider configuration dependency. Check logs for additional details."
             }
+
             is CreateCredentialUnknownException -> {
                 "An unknown error occurred while creating passkey. Check logs for additional details."
             }
+
             is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
                 // make the API call with a request object that's a subclass of
@@ -241,6 +246,7 @@ class SignUpFragment : Fragment() {
                 // exception.
                 "An unknown error occurred from a 3rd party SDK. Check logs for additional details."
             }
+
             else -> {
                 Log.w("Auth", "Unexpected exception type ${e::class.java.name}")
                 "An unknown error occurred."

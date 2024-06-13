@@ -28,7 +28,9 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PasswordCredential
+import androidx.credentials.PendingGetCredentialRequest
 import androidx.credentials.PublicKeyCredential
+import androidx.credentials.pendingGetCredentialRequest
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.credentialmanager.sample.databinding.FragmentSignInBinding
@@ -64,25 +66,65 @@ class SignInFragment : Fragment() {
 
         credentialManager = CredentialManager.create(requireActivity())
 
-        binding.signInWithSavedCredentials.setOnClickListener(signInWithSavedCredentials())
+        val getCredentialRequest = configureGetCredentialRequest()
+
+        configureAutofill(getCredentialRequest)
+
+        binding.signInWithSavedCredentials.setOnClickListener(
+            signInWithSavedCredentials(
+                getCredentialRequest
+            )
+        )
     }
 
-    private fun signInWithSavedCredentials(): View.OnClickListener {
+    private fun configureAutofill(getCredentialRequest: GetCredentialRequest) {
+        binding.textUsername
+            .pendingGetCredentialRequest = PendingGetCredentialRequest(
+            getCredentialRequest
+        ) { response ->
+            if (response.credential is PublicKeyCredential) {
+                DataProvider.setSignedInThroughPasskeys(true)
+            }
+            if (response.credential is PasswordCredential) {
+                DataProvider.setSignedInThroughPasskeys(false)
+            }
+            showHome()
+        }
+    }
+
+    private fun configureGetCredentialRequest(): GetCredentialRequest {
+        val getPublicKeyCredentialOption =
+            GetPublicKeyCredentialOption(fetchAuthJsonFromServer(), null)
+        val getPasswordOption = GetPasswordOption()
+        val getCredentialRequest = GetCredentialRequest(
+            listOf(
+                getPublicKeyCredentialOption,
+                getPasswordOption
+            )
+        )
+        return getCredentialRequest
+    }
+
+    private fun signInWithSavedCredentials(getCredentialRequest: GetCredentialRequest): View.OnClickListener {
         return View.OnClickListener {
 
             lifecycleScope.launch {
                 configureViews(View.VISIBLE, false)
 
-                val data = getSavedCredentials()
+                val data = getSavedCredentials(getCredentialRequest)
 
                 configureViews(View.INVISIBLE, true)
 
                 data?.let {
-                    sendSignInResponseToServer()
-                    listener.showHome()
+                    showHome()
                 }
             }
         }
+    }
+
+    private fun showHome() {
+        sendSignInResponseToServer()
+        listener.showHome()
     }
 
     private fun configureViews(visibility: Int, flag: Boolean) {
@@ -103,19 +145,12 @@ class SignInFragment : Fragment() {
         return true
     }
 
-    private suspend fun getSavedCredentials(): String? {
-        val getPublicKeyCredentialOption =
-            GetPublicKeyCredentialOption(fetchAuthJsonFromServer(), null)
-        val getPasswordOption = GetPasswordOption()
+    private suspend fun getSavedCredentials(getCredentialRequest: GetCredentialRequest): String? {
+
         val result = try {
             credentialManager.getCredential(
                 requireActivity(),
-                GetCredentialRequest(
-                    listOf(
-                        getPublicKeyCredentialOption,
-                        getPasswordOption
-                    )
-                )
+                getCredentialRequest,
             )
         } catch (e: Exception) {
             configureViews(View.INVISIBLE, true)
