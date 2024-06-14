@@ -28,7 +28,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Sign in"
+        android:text="@string/sign_in"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +39,7 @@
         android:id="@+id/circularProgressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:indeterminate="true"
         android:visibility="invisible"
         app:layout_constraintCircleRadius="0dp"
@@ -55,8 +55,8 @@
         android:id="@+id/textProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="operation in progress... "
+        android:layout_marginBottom="16dp"
+        android:text="@string/operation_in_progress"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/circularProgressIndicator"
         app:layout_constraintStart_toEndOf="@+id/circularProgressIndicator"
@@ -66,11 +66,21 @@
         android:id="@+id/sign_in_with_savedCredentials"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Sign in with passkey/saved password"
+        android:layout_marginTop="40dp"
+        android:text="@string/sign_in_with_passkey_saved_password"
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/circularProgressIndicator" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/text_username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:hint="@string/autofill_saved_credentials"
+        app:layout_constraintBottom_toTopOf="@+id/sign_in_with_savedCredentials"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

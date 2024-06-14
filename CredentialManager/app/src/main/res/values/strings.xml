@@ -25,4 +25,8 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="sign_in">Sign in</string>
+    <string name="operation_in_progress">operation in progress...</string>
+    <string name="sign_in_with_passkey_saved_password">Sign in with passkey/saved password</string>
+    <string name="autofill_saved_credentials">Autofill saved credentials</string>
 </resources>
