@@ -14,12 +14,10 @@
  * limitations under the License.
 -->
 <credential-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="com.android.testprovider.SettingsActivity"
-    android:settingsSubtitle="@string/provider_sample">
+        android:settingsActivity="com.example.android.authentication.myvault.ui.MainActivity"
+        android:settingsSubtitle="@string/myvault_provider">
     <capabilities>
         <capability name="android.credentials.TYPE_PASSWORD_CREDENTIAL" />
-
         <capability name="androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL" />
-        <capability name="androidx.credentials.TYPE_CUSTOM" />
     </capabilities>
 </credential-provider>
