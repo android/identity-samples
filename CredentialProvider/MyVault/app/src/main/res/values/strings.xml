@@ -49,7 +49,7 @@
     <string name="search">Search</string>
     <string name="passwords_passkeys">Passwords: %1$s Passkeys: %2$s</string>
     <string name="web">web</string>
-    <string name="provider_sample">Provider Sample\n</string>
+    <string name="myvault_provider">MyVault Provider</string>
     <string name="unable_to_retrieve_data_from_intent">Unable to retrieve data from intent</string>
     <string name="manage_credentials">Manage Credentials</string>
     <string name="open">Open %1$s</string>
