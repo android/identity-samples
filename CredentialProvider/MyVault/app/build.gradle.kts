@@ -22,12 +22,12 @@ plugins {
 android {
     namespace = "com.example.android.authentication.myvault"
 
-    compileSdk = 34
+    compileSdkPreview = "VanillaIceCream"
 
     defaultConfig {
         applicationId = "com.example.android.authentication.myvault"
         minSdk = 34
-        targetSdk = 34
+        targetSdkPreview = "VanillaIceCream"
         versionCode = 1
         versionName = "1.0"
 
