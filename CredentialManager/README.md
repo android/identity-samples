@@ -1,6 +1,5 @@
 ![Credential Manager ]
 
-
 Credentials Manager Sample App
 ==================
 
