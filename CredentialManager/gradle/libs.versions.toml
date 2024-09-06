@@ -1,0 +1,44 @@
+[versions]
+android_gradle_plugin      = '8.6.0'
+google_services_plugin     = '4.4.2'
+hilt_android               = "2.52"
+kotlin_android             = '2.0.0'
+kotlin_kapt                = '2.0.20'
+kotlin_coroutines          = '1.7.3'
+junit                      = '4.13.2'
+material_design            = '1.12.0'
+androidx_core              = '1.13.1'
+androidx_appcompat         = '1.7.0'
+androidx_constraintlayout  = '2.1.4'
+androidx_credentials       = '1.5.0-alpha05'
+androidx_lifecycle         = '2.8.5'
+androidx_test_ext_junit    = '1.2.1'
+androidx_test_monitor      = '1.7.2'
+androidx_test_espresso     = '3.6.1'
+
+[plugins]
+android_application        = { id = "com.android.application", version.ref = "android_gradle_plugin" }
+android_library            = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+google_services            = { id = "com.google.gms.google-services", version.ref = "google_services_plugin" }
+kotlin_android             = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin_android" }
+kotlin_kapt                = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin_android" }
+hilt_android               = { id = "com.google.dagger.hilt.android", version.ref = "hilt_android" }
+
+[libraries]
+hilt_android                       = { module = "com.google.dagger:hilt-android", version.ref = "hilt_android" }
+hilt_android_compiler              = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt_android" }
+junit                              = { module = "junit:junit", version.ref = "junit" }
+kotlin_coroutines_android          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin_coroutines" }
+kotlin_coroutines_core             = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin_coroutines" }
+material_design                    = { module = "com.google.android.material:material", version.ref = "material_design" }
+androidx_core                      = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
+androidx_appcompat                 = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
+androidx_constraintlayout          = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx_constraintlayout" }
+androidx_credentials_play_auth     = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx_credentials" }
+androidx_credentials               = { module = "androidx.credentials:credentials", version.ref = "androidx_credentials" }
+androidx_lifecycle_runtime_ktx     = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx_lifecycle" }
+androidx_lifecycle_runtime_compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx_lifecycle" }
+androidx_lifecycle_viewmodel_ktx   = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx_lifecycle" }
+androidx_test_monitor              = { module = "androidx.test:monitor", version.ref = "androidx_test_monitor" }
+androidx_test_ext_junit            = { module = "androidx.test.ext:junit", version.ref = "androidx_test_ext_junit" }
+androidx_espresso_core             = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }
