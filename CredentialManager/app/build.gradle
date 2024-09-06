@@ -17,8 +17,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // alias(libs.plugins.kotlin.kapt)
-    // alias(libs.plugins.hilt.android)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 // Load keystore properties for our signing key
@@ -86,7 +86,7 @@ android {
 
 dependencies {
 
-    implementation libs.androidx.core
+    implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material.design
     implementation libs.androidx.constraintlayout
@@ -101,8 +101,11 @@ dependencies {
     implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.lifecycle.runtime.compose
 
-    // implementation libs.hilt.android
-    // kapt libs.hilt.android.compiler
+    // Hilt
+    implementation libs.hilt.android
+    kapt libs.hilt.android.compiler
+    implementation libs.hilt.work
+    kapt libs.hilt.compiler
 
     testImplementation libs.junit
     debugImplementation libs.androidx.test.monitor

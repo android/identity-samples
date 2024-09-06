@@ -2,8 +2,8 @@
 android_gradle_plugin      = '8.6.0'
 google_services_plugin     = '4.4.2'
 hilt_android               = "2.52"
-kotlin_android             = '2.0.0'
-kotlin_kapt                = '2.0.20'
+hilt                       = "1.2.0"
+kotlin                     = '2.0.0'
 kotlin_coroutines          = '1.7.3'
 junit                      = '4.13.2'
 material_design            = '1.12.0'
@@ -20,18 +20,20 @@ androidx_test_espresso     = '3.6.1'
 android_application        = { id = "com.android.application", version.ref = "android_gradle_plugin" }
 android_library            = { id = "com.android.library", version.ref = "android_gradle_plugin" }
 google_services            = { id = "com.google.gms.google-services", version.ref = "google_services_plugin" }
-kotlin_android             = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin_android" }
-kotlin_kapt                = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin_android" }
+kotlin_android             = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin_kapt                = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 hilt_android               = { id = "com.google.dagger.hilt.android", version.ref = "hilt_android" }
 
 [libraries]
+hilt_compiler                      = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
+hilt_work                          = { module = "androidx.hilt:hilt-work", version.ref = "hilt" }
 hilt_android                       = { module = "com.google.dagger:hilt-android", version.ref = "hilt_android" }
 hilt_android_compiler              = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt_android" }
 junit                              = { module = "junit:junit", version.ref = "junit" }
 kotlin_coroutines_android          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin_coroutines" }
 kotlin_coroutines_core             = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin_coroutines" }
 material_design                    = { module = "com.google.android.material:material", version.ref = "material_design" }
-androidx_core                      = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
+androidx_core_ktx                  = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
 androidx_appcompat                 = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
 androidx_constraintlayout          = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx_constraintlayout" }
 androidx_credentials_play_auth     = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx_credentials" }

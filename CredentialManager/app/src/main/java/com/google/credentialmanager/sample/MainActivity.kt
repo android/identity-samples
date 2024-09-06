@@ -27,7 +27,9 @@ import com.google.credentialmanager.sample.R.id
 import com.google.credentialmanager.sample.SignInFragment.SignInFragmentCallback
 import com.google.credentialmanager.sample.SignUpFragment.SignUpFragmentCallback
 import com.google.credentialmanager.sample.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), MainFragmentCallback, HomeFragmentCallback,
     SignInFragmentCallback, SignUpFragmentCallback {
 
