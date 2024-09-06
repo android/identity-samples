@@ -112,7 +112,10 @@ class GetPasskeyActivity : FragmentActivity() {
 
         // Extract the requestJson and clientDataHash from this option.
         var clientDataHash: ByteArray? = null
-        if (request.callingAppInfo.origin != null) {
+        var privilegedAllowlist: String = ""
+
+        // TODO: Cannot access 'val origin: String?': it is internal in 'androidx/credentials/provider/CallingAppInfo'.
+        if (request.callingAppInfo.getOrigin(privilegedAllowlist) != null) {
             clientDataHash = publicKeyRequest.clientDataHash
         }
 
