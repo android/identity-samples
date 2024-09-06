@@ -153,7 +153,7 @@ class AuthApi @Inject constructor(
         sessionId: String,
         credential: PublicKeyCredential
     ): ApiResult<List<Credential>> {
-        val rawId = credential.rawId.toBase64()
+        val rawId = credential.rawId!!.toBase64()
         val response = credential.response as AuthenticatorAttestationResponse
 
         val call = client.newCall(
@@ -242,7 +242,7 @@ class AuthApi @Inject constructor(
         sessionId: String,
         credential: PublicKeyCredential
     ): ApiResult<List<Credential>> {
-        val rawId = credential.rawId.toBase64()
+        val rawId = credential.rawId!!.toBase64()
         val response = credential.response as AuthenticatorAssertionResponse
 
         val call = client.newCall(
@@ -304,6 +304,7 @@ class AuthApi @Inject constructor(
         JsonReader(body.byteStream().bufferedReader()).use { reader ->
             reader.beginObject()
             while (reader.hasNext()) {
+                // TODO: unhandled IllegalStateException: Expected a name but was BEGIN_OBJECT.
                 when (reader.nextName()) {
                     "user" -> builder.setUser(parseUser(reader))
                     "challenge" -> builder.setChallenge(reader.nextString().decodeBase64())

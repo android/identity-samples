@@ -249,7 +249,7 @@ class AuthRepository @Inject constructor(
     suspend fun registerResponse(credential: PublicKeyCredential) {
         try {
             val sessionId = dataStore.read(SESSION_ID)!!
-            val credentialId = credential.rawId.toBase64()
+            val credentialId = credential.rawId!!.toBase64()
             when (val result = api.registerResponse(sessionId, credential)) {
                 ApiResult.SignedOutFromServer -> forceSignOut()
                 is ApiResult.Success -> {
@@ -309,7 +309,7 @@ class AuthRepository @Inject constructor(
         try {
             val username = dataStore.read(USERNAME)!!
             val sessionId = dataStore.read(SESSION_ID)!!
-            val credentialId = credential.rawId.toBase64()
+            val credentialId = credential.rawId!!.toBase64()
             when (val result = api.signinResponse(sessionId, credential)) {
                 ApiResult.SignedOutFromServer -> forceSignOut()
                 is ApiResult.Success -> {
