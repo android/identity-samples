@@ -3,12 +3,12 @@ android_gradle_plugin          = '8.6.0'
 hilt_android                   = '2.52'
 androidx_hilt                  = '1.2.0'
 kotlin                         = '2.0.20'
-kotlinCoroutinesOkhttp = "1.0"
+kotlin_coroutines_okhttp       = '1.0'
 kotlinx_coroutines             = '1.7.3'
 junit                          = '4.13.2'
 google_truth                   = '1.4.0'
 material_design                = '1.12.0'
-okhttp = "4.12.0"
+okhttp                         = '4.12.0'
 play_services_fido             = '21.1.0'
 androidx_core                  = '1.13.1'
 androidx_core_testing          = '2.2.0'
@@ -40,7 +40,7 @@ androidx_datastore_preferences     = { module = "androidx.datastore:datastore-pr
 androidx_fragment_ktx              = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx_fragment_ktx" }
 junit                              = { module = "junit:junit", version.ref = "junit" }
 kotlin_stdlib                      = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-kotlin_coroutines_okhttp           = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "kotlinCoroutinesOkhttp" }
+kotlin_coroutines_okhttp           = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "kotlin_coroutines_okhttp" }
 kotlinx_coroutines_android         = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_core            = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_play_services   = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx_coroutines" }
