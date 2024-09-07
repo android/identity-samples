@@ -46,15 +46,10 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.localbroadcastmanager
-    implementation libs.google.play.services.base
-    implementation libs.google.play.services.identity
-    implementation libs.google.play.services.auth
-    implementation libs.google.play.services.auth.api.phone
+    implementation libs.bundles.google.play.services
     implementation libs.volley
 
     testImplementation libs.junit
-    androidTestImplementation libs.androidx.test.ext.junit
-    androidTestImplementation libs.androidx.test.core
-    androidTestImplementation libs.androidx.test.monitor
-    androidTestImplementation libs.androidx.test.espresso.core
+    debugImplementation libs.androidx.test.monitor
+    androidTestImplementation libs.bundles.androidx.test
 }
