@@ -112,15 +112,11 @@ class GetPasskeyActivity : FragmentActivity() {
 
         // Extract the requestJson and clientDataHash from this option.
         var clientDataHash: ByteArray? = null
-
-        // TODO: Cannot access 'val origin: String?': it is internal in 'androidx/credentials/provider/CallingAppInfo'.
-        //       The problem is that `cert_fingerprint_sha256`, cannot be defined statically in the JSON, not portable.
-        val privilegedAllowlist: String = assets
-            .open("privileged_allowlist.json")
-            .bufferedReader().use { it.readText() }
-
-        if (request.callingAppInfo.getOrigin(privilegedAllowlist) != null) {
-            clientDataHash = publicKeyRequest.clientDataHash
+        val privilegedAllowlist: String? = getGPMPrivilegedAppAllowlist()
+        if (privilegedAllowlist != null) {
+            if (request.callingAppInfo.getOrigin(privilegedAllowlist) != null) {
+                clientDataHash = publicKeyRequest.clientDataHash
+            }
         }
 
         if (callingAppOriginInfo != null) {
@@ -137,7 +133,7 @@ class GetPasskeyActivity : FragmentActivity() {
     }
 
     /**
-     * This method helps check the asset linking to verify client app idenity
+     * This method helps check the asset linking to verify client app identity
      * @param rpId : Relying party identifier
      * @param callingAppInfo : Information pertaining to the calling application.
      */
