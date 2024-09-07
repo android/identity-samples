@@ -1,0 +1,41 @@
+[versions]
+android_gradle_plugin               = '8.6.0'
+google_services_plugin              = '4.4.2'
+junit                               = '4.13.2'
+volley                              = '1.2.1'
+androidx_appcompat                  = '1.7.0'
+androidx_constraintlayout           = '2.1.4'
+androidx_localbroadcastmanager      = '1.1.0'
+androidx_test_ext_junit             = '1.2.1'
+androidx_test_monitor               = '1.7.2'
+androidx_test_core                  = '1.6.1'
+androidx_test_espresso              = '3.6.1'
+google_play_services_base           = '18.5.0'
+google_play_services_identity       = '18.1.0'
+google_play_services_identity_credentials = '16.0.0-alpha03'
+# provides com.google.android.gms.auth.api.credentials
+google_play_services_auth           = '20.5.0'
+google_play_services_auth_api_phone = '18.1.0'
+
+
+[plugins]
+android_application  = { id = "com.android.application", version.ref = "android_gradle_plugin" }
+android_library      = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+google_services      = { id = "com.google.gms.google-services", version.ref = "google_services_plugin" }
+
+
+[libraries]
+junit                                       = { module = "junit:junit", version.ref = "junit" }
+volley                                      = { module = "com.android.volley:volley", version.ref = "volley" }
+androidx_appcompat                          = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
+androidx_constraintlayout                   = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx_constraintlayout" }
+androidx_localbroadcastmanager              = { module = "androidx.localbroadcastmanager:localbroadcastmanager", version.ref = "androidx_localbroadcastmanager" }
+androidx_test_espresso_core                 = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }
+androidx_test_monitor                       = { module = "androidx.test:monitor", version.ref = "androidx_test_monitor" }
+androidx_test_core                          = { module = "androidx.test:core", version.ref = "androidx_test_core" }
+androidx_test_ext_junit                     = { module = "androidx.test.ext:junit", version.ref = "androidx_test_ext_junit" }
+google_play_services_base                   = { module = "com.google.android.gms:play-services-base", version.ref = "google_play_services_base" }
+google_play_services_identity               = { module = "com.google.android.gms:play-services-identity", version.ref = "google_play_services_identity" }
+# google_play_services_identity_credentials = { module = "com.google.android.gms:play-services-identity-credentials", version.ref = "google_play_services_identity_credentials" }
+google_play_services_auth                   = { module = "com.google.android.gms:play-services-auth", version.ref = "google_play_services_auth" }
+google_play_services_auth_api_phone         = { module = "com.google.android.gms:play-services-auth-api-phone", version.ref = "google_play_services_auth_api_phone" }

@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -39,13 +41,13 @@ public class ApiHelper extends ContextWrapper {
     }
 
     public void request(String phoneNo, final RequestResponse successReceiver,
-                        final ApiError failureReceiver) {
+                        @NonNull final ApiError failureReceiver) {
         HashMap<String, String> params = new HashMap<>();
         params.put("phone", phoneNo);
         sendRequest(R.string.url_request, params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Boolean success = false;
+                boolean success = false;
                 try {
                     success = response.getBoolean(RESPONSE_SUCCESS);
                 } catch (JSONException e) {
@@ -53,12 +55,7 @@ public class ApiHelper extends ContextWrapper {
                 }
                 successReceiver.onResponse(success);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                failureReceiver.onError(error);
-            }
-        });
+        }, failureReceiver::onError);
     }
 
     public void verify(String phoneNo, String smsMessage, final VerifyResponse successReceiver,
@@ -70,7 +67,7 @@ public class ApiHelper extends ContextWrapper {
         sendRequest(R.string.url_verify, params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Boolean success = false;
+                boolean success = false;
                 String phoneNo = null;
                 try {
                     success = response.getBoolean(RESPONSE_SUCCESS);
@@ -95,7 +92,7 @@ public class ApiHelper extends ContextWrapper {
         sendRequest(R.string.url_reset, params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Boolean success = false;
+                boolean success = false;
                 try {
                     success = response.getBoolean(RESPONSE_SUCCESS);
                 } catch (JSONException e) {
@@ -111,12 +108,12 @@ public class ApiHelper extends ContextWrapper {
         });
     }
 
-    protected void sendRequest(int urlId, HashMap<String, String> params, Response.Listener success,
+    protected void sendRequest(int urlId, HashMap<String, String> params, Response.Listener<JSONObject> success,
                             Response.ErrorListener failure) {
         sendRequest(getString(urlId), params, success, failure);
     }
 
-    protected void sendRequest(String url, HashMap<String, String> params, Response.Listener success,
+    protected void sendRequest(String url, HashMap<String, String> params, Response.Listener<JSONObject> success,
                              Response.ErrorListener failure) {
         String secret = prefsHelper.getSecretOverride(null);
         if (TextUtils.isEmpty(secret)) {
@@ -141,7 +138,7 @@ public class ApiHelper extends ContextWrapper {
         }
     }
 
-    private static int getGmsVersion(Context context) {
+    private static int getGmsVersion(@NonNull Context context) {
         try {
             return context.getPackageManager()
                     .getPackageInfo("com.google.android.gms", 0 ).versionCode;
