@@ -89,21 +89,14 @@ android {
 }
 
 dependencies {
-
+    implementation libs.material.design
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation libs.material.design
     implementation libs.androidx.constraintlayout
 
-    implementation libs.androidx.credentials.play.auth
-    implementation libs.androidx.credentials
-
-    implementation libs.kotlin.coroutines.core
-    implementation libs.kotlin.coroutines.android
-
-    implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.lifecycle.viewmodel.ktx
-    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.bundles.androidx.credentials
+    implementation libs.bundles.kotlin.coroutines
+    implementation libs.bundles.androidx.lifecycle
 
     // Hilt
     implementation libs.hilt.android
@@ -113,6 +106,5 @@ dependencies {
 
     testImplementation libs.junit
     debugImplementation libs.androidx.test.monitor
-    androidTestImplementation libs.androidx.test.ext.junit
-    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.bundles.androidx.test
 }

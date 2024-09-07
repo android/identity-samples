@@ -71,6 +71,7 @@ android {
 
 dependencies {
     implementation libs.kotlin.stdlib
+    implementation libs.material.design
     implementation libs.play.services.fido
 
     implementation libs.androidx.appcompat
@@ -79,31 +80,17 @@ dependencies {
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.datastore.preferences
 
-    implementation libs.kotlinx.coroutines.core
-    implementation libs.kotlinx.coroutines.android
-    implementation libs.kotlinx.coroutines.play.services
+    implementation libs.bundles.androidx.lifecycle
+    implementation libs.bundles.kotlin.coroutines
+    implementation libs.bundles.okhttp
 
+    // Hilt
     implementation libs.dagger.hilt.android
-    kapt libs.dagger.hilt.compiler
     kapt libs.androidx.hilt.compiler
-
-    implementation libs.androidx.lifecycle.livedata.ktx
-    implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.lifecycle.viewmodel.ktx
-    testImplementation libs.androidx.core.testing
-
-    implementation libs.material.design
-
-    implementation libs.okhttp
-    implementation libs.okhttp.logging.interceptor
-    implementation libs.kotlin.coroutines.okhttp
+    kapt libs.dagger.hilt.compiler
 
     testImplementation libs.junit
+    testImplementation libs.androidx.core.testing
     debugImplementation libs.androidx.test.monitor
-    androidTestImplementation libs.androidx.test.runner
-    androidTestImplementation libs.androidx.test.rules
-    androidTestImplementation libs.androidx.test.ext.junit
-    androidTestImplementation libs.androidx.test.ext.truth
-    androidTestImplementation libs.google.truth
-    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.bundles.androidx.test
 }

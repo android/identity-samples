@@ -54,18 +54,17 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation libs.kotlin.stdlib
     implementation libs.play.services.auth.blockstore
     implementation libs.material.design
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
-    implementation libs.androidx.espresso.idling.resource
+    implementation libs.androidx.test.espresso.idling.resource
+
     testImplementation libs.junit
     debugImplementation libs.androidx.test.monitor
-    androidTestImplementation libs.androidx.espresso.core
-    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.bundles.androidx.test
 
     // Hilt
     implementation libs.hilt.android
@@ -74,9 +73,7 @@ dependencies {
     kapt libs.hilt.compiler
 
     // Lifecycle
-    implementation libs.androidx.lifecycle.viewmodel.ktx
-    implementation libs.androidx.lifecycle.livedata.ktx
-    implementation libs.androidx.lifecycle.common.java8
+    implementation libs.bundles.androidx.lifecycle
 
     // Activity
     implementation libs.androidx.activity.ktx

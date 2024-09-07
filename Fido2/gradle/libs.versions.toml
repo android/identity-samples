@@ -41,8 +41,8 @@ androidx_fragment_ktx            = { module = "androidx.fragment:fragment-ktx", 
 junit                            = { module = "junit:junit", version.ref = "junit" }
 kotlin_stdlib                    = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin_coroutines_okhttp         = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "kotlin_coroutines_okhttp" }
-kotlinx_coroutines_android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_core          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
+kotlinx_coroutines_android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_play_services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx_coroutines" }
 material_design                  = { module = "com.google.android.material:material", version.ref = "material_design" }
 androidx_core_ktx                = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
@@ -60,5 +60,11 @@ androidx_test_ext_junit          = { module = "androidx.test.ext:junit", version
 androidx_test_ext_truth          = { module = "androidx.test.ext:truth", version.ref = "androidx_test_ext_truth" }
 androidx_test_rules              = { module = "androidx.test:rules", version.ref = "androidx_test_rules" }
 androidx_test_runner             = { module = "androidx.test:runner", version.ref = "androidx_test_runner" }
-androidx_espresso_core           = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }
+androidx_test_espresso_core      = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }
 google_truth                     = { module = "com.google.truth:truth", version.ref = "google_truth" }
+
+[bundles]
+kotlin_coroutines                = ["kotlin_coroutines_okhttp", "kotlinx_coroutines_core", "kotlinx_coroutines_android", "kotlinx_coroutines_play_services"]
+androidx_lifecycle               = ["androidx_lifecycle_runtime_ktx", "androidx_lifecycle_livedata_ktx", "androidx_lifecycle_viewmodel_ktx"]
+androidx_test                    = ["androidx_test_ext_junit", "androidx_test_ext_truth", "google_truth", "androidx_test_rules", "androidx_test_runner", "androidx_test_espresso_core"]
+okhttp                           = ["okhttp", "okhttp_logging_interceptor"]
