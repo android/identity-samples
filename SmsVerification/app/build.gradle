@@ -43,9 +43,7 @@ dependencies {
         }
     }
 
-    implementation libs.androidx.appcompat
-    implementation libs.androidx.constraintlayout
-    implementation libs.androidx.localbroadcastmanager
+    implementation libs.bundles.androidx
     implementation libs.bundles.google.play.services
     implementation libs.volley
 

@@ -2,8 +2,9 @@ package com.google.samples.smartlock.sms_verify;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 /**
  * Created by pmatthews on 9/14/16.
