@@ -15,26 +15,28 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.SignUpActivity" />
+        <activity
+            android:name=".ui.SignUpActivity"
+            android:exported="false" />
 
         <service
             android:name=".PhoneNumberVerifier"
             android:exported="false" />
 
-        <activity android:name=".ui.ResetActivity" />
+        <activity
+            android:name=".ui.ResetActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".ui.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.google.samples.smartlock.sms_verify.ui.MainActivity" />
-        </activity>
+            android:parentActivityName=".ui.MainActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
