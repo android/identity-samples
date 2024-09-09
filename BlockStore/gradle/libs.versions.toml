@@ -11,6 +11,7 @@ androidx_activity                      = '1.9.2'
 androidx_appcompat                     = '1.7.0'
 androidx_constraintlayout              = '2.1.4'
 androidx_lifecycle                     = '2.8.5'
+androidx_work                          = '2.9.1'
 androidx_test_ext_junit                = '1.2.1'
 androidx_test_monitor                  = '1.7.2'
 androidx_test_espresso                 = '3.6.1'
@@ -40,6 +41,8 @@ play_services_auth_blockstore          = { module = "com.google.android.gms:play
 androidx_lifecycle_common_java8        = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "androidx_lifecycle" }
 androidx_lifecycle_livedata_ktx        = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx_lifecycle" }
 androidx_lifecycle_viewmodel_ktx       = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx_lifecycle" }
+androidx_work_runtime                  = { module = "androidx.work:work-runtime", version.ref = "androidx_work" }
+androidx_work_runtime_ktx              = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx_work" }
 androidx_test_monitor                  = { module = "androidx.test:monitor", version.ref = "androidx_test_monitor" }
 androidx_test_ext_junit                = { module = "androidx.test.ext:junit", version.ref = "androidx_test_ext_junit" }
 androidx_test_espresso_core            = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }

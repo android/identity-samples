@@ -59,6 +59,7 @@ dependencies {
     implementation libs.material.design
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
+    implementation libs.androidx.work.runtime
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.test.espresso.idling.resource
 
