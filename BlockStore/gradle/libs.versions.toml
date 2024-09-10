@@ -1,7 +1,7 @@
 [versions]
 android_gradle_plugin                  = '8.6.0'
-hilt_android                           = "2.52"
-hilt                                   = "1.2.0"
+hilt_android                           = '2.52'
+hilt                                   = '1.2.0'
 kotlin                                 = '2.0.20'
 kotlinx_coroutines                     = '1.7.3'
 junit                                  = '4.13.2'
@@ -15,7 +15,7 @@ androidx_work                          = '2.9.1'
 androidx_test_ext_junit                = '1.2.1'
 androidx_test_monitor                  = '1.7.2'
 androidx_test_espresso                 = '3.6.1'
-play_services_auth_blockstore          = "16.4.0"
+play_services_auth_blockstore          = '16.4.0'
 
 [plugins]
 android_application                    = { id = "com.android.application", version.ref = "android_gradle_plugin" }
