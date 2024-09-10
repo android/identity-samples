@@ -78,8 +78,8 @@ class GetPasskeyActivity : FragmentActivity() {
         intent.getBooleanExtra(getString(R.string.is_auto_selected), false)
 
         /*
-         * retrieveProviderGetCredentialRequest extracts the [ProviderGetCredentialRequest] from the provider's
-         * [PendingIntent] invoked by the Android system, when the user selects a
+         * retrieveProviderGetCredentialRequest extracts the [ProviderGetCredentialRequest] from
+         * the provider's [PendingIntent] invoked by the Android system, when the user selects a
          * [CredentialEntry].
          */
         val request = PendingIntentHandler.retrieveProviderGetCredentialRequest(intent)
@@ -112,8 +112,11 @@ class GetPasskeyActivity : FragmentActivity() {
 
         // Extract the requestJson and clientDataHash from this option.
         var clientDataHash: ByteArray? = null
-        if (request.callingAppInfo.origin != null) {
-            clientDataHash = publicKeyRequest.clientDataHash
+        val privilegedAllowlist: String? = getGPMPrivilegedAppAllowlist()
+        if (privilegedAllowlist != null) {
+            if (request.callingAppInfo.getOrigin(privilegedAllowlist) != null) {
+                clientDataHash = publicKeyRequest.clientDataHash
+            }
         }
 
         if (callingAppOriginInfo != null) {
@@ -130,7 +133,7 @@ class GetPasskeyActivity : FragmentActivity() {
     }
 
     /**
-     * This method helps check the asset linking to verify client app idenity
+     * This method helps check the asset linking to verify client app identity
      * @param rpId : Relying party identifier
      * @param callingAppInfo : Information pertaining to the calling application.
      */

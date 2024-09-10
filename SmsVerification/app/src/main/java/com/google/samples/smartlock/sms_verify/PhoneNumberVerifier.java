@@ -1,12 +1,16 @@
 package com.google.samples.smartlock.sms_verify;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -14,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -86,6 +92,7 @@ public class PhoneNumberVerifier extends Service {
     }
 
     @Override
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public void onCreate() {
         super.onCreate();
         if (smsReceiver == null) {
@@ -97,7 +104,11 @@ public class PhoneNumberVerifier extends Service {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(SmsRetriever.SMS_RETRIEVED_ACTION);
-        getApplicationContext().registerReceiver(smsReceiver, intentFilter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getApplicationContext().registerReceiver(smsReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            getApplicationContext().registerReceiver(smsReceiver, intentFilter);
+        }
         api = new ApiHelper(this);
     }
 
@@ -143,6 +154,7 @@ public class PhoneNumberVerifier extends Service {
     }
 
     public void notifyStatus(int status, @Nullable String phoneNo) {
+
         if (status < STATUS_STARTED || status >= STATUS_RESPONSE_VERIFIED) {
             isVerifying = false;
         } else {
@@ -264,6 +276,8 @@ public class PhoneNumberVerifier extends Service {
         return isVerifying;
     }
 
+    @NonNull
+    @SuppressWarnings("deprecation")
     private Notification getNotification(Context context, int status, @Nullable String phoneNo) {
         if (phoneNo != null) {
             Intent cancelI = new Intent(this, PhoneNumberVerifier.class);
@@ -276,7 +290,18 @@ public class PhoneNumberVerifier extends Service {
                     getString(R.string.cancel_verification), cancelPI
             ).build();
 
-            notification = new NotificationCompat.Builder(context)
+            NotificationCompat.Builder builder = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                NotificationChannel notificationChannel = new NotificationChannel("SmsVerification", "SmsVerification", NotificationManager.IMPORTANCE_DEFAULT);
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.createNotificationChannel(notificationChannel);
+                builder = new NotificationCompat.Builder(getApplicationContext(), notificationChannel.getId());
+            } else {
+                //noinspection deprecation
+                builder = new NotificationCompat.Builder(getApplicationContext());
+            }
+
+            notification = builder
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle(context.getString(R.string.phone_verify_notify_title))
                     .setContentText(context.getString(R.string.phone_verify_notify_message, phoneNo))
@@ -290,13 +315,8 @@ public class PhoneNumberVerifier extends Service {
     }
 
     class SmsBrReceiver extends BroadcastReceiver {
-        Handler h = new Handler();
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                doTimeout();
-            }
-        };
+        Handler h = new Handler(Looper.getMainLooper());
+        Runnable r = this::doTimeout;
 
         public void setTimeout() {
             h.postDelayed(r, MAX_TIMEOUT);
@@ -307,6 +327,7 @@ public class PhoneNumberVerifier extends Service {
         }
 
         @Override
+        @SuppressWarnings({"deprecation", "RedundantSuppression"})
         public void onReceive(Context context, Intent intent) {
             if (intent == null) {
                 return;
@@ -317,20 +338,29 @@ public class PhoneNumberVerifier extends Service {
                 cancelTimeout();
                 notifyStatus(STATUS_RESPONSE_RECEIVED, null);
                 Bundle extras = intent.getExtras();
-                Status status = (Status) extras.get(SmsRetriever.EXTRA_STATUS);
-                switch(status.getStatusCode()) {
-                    case CommonStatusCodes.SUCCESS:
-                        String smsMessage = (String) extras.get(SmsRetriever.EXTRA_SMS_MESSAGE);
-                        Log.d(TAG, "Retrieved sms code: " + smsMessage);
-                        if (smsMessage != null) {
-                            verifyMessage(smsMessage);
+                if (extras != null) {
+                    Status status;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        status = extras.getParcelable(SmsRetriever.EXTRA_STATUS, Status.class);
+                    } else {
+                        status = (Status) extras.get(SmsRetriever.EXTRA_STATUS);
+                    }
+                    if (status != null) {
+                        switch (status.getStatusCode()) {
+                            case CommonStatusCodes.SUCCESS:
+                                String smsMessage = (String) extras.get(SmsRetriever.EXTRA_SMS_MESSAGE);
+                                Log.d(TAG, "Retrieved sms code: " + smsMessage);
+                                if (smsMessage != null) {
+                                    verifyMessage(smsMessage);
+                                }
+                                break;
+                            case CommonStatusCodes.TIMEOUT:
+                                doTimeout();
+                                break;
+                            default:
+                                break;
                         }
-                        break;
-                    case CommonStatusCodes.TIMEOUT:
-                        doTimeout();
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
         }

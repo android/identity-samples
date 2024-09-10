@@ -1,3 +1,5 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
 /*
  * Copyright 2023 Google LLC
  *
@@ -21,5 +23,20 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+    }
+}
+
 rootProject.name = "CredentialManagerSample"
 include ':app'

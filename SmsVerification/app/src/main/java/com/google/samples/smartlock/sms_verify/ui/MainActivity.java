@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -73,17 +75,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent i;
-        switch (item.getItemId()) {
-            case R.id.menu_settings:
-                i = new Intent(this, SettingsActivity.class);
-                startActivity(i);
-                break;
-            case R.id.menu_reset_verification:
-                i = new Intent(this, ResetActivity.class);
-                startActivity(i);
-                break;
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Intent intent;
+        if (item.getItemId() == R.id.menu_settings) {
+            intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        } else if (item.getItemId() == R.id.menu_reset_verification){
+            intent = new Intent(this, ResetActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

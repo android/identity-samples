@@ -1,0 +1,70 @@
+[versions]
+android_gradle_plugin            = '8.6.0'
+hilt_android                     = '2.52'
+androidx_hilt                    = '1.2.0'
+kotlin                           = '2.0.20'
+kotlin_coroutines_okhttp         = '1.0'
+kotlinx_coroutines               = '1.7.3'
+junit                            = '4.13.2'
+google_truth                     = '1.4.0'
+material_design                  = '1.12.0'
+okhttp                           = '4.12.0'
+play_services_fido               = '21.1.0'
+androidx_core                    = '1.13.1'
+androidx_core_testing            = '2.2.0'
+androidx_appcompat               = '1.7.0'
+androidx_constraintlayout        = '2.1.4'
+androidx_datastore_preferences   = '1.1.1'
+androidx_fragment_ktx            = '1.8.3'
+androidx_lifecycle               = '2.8.5'
+androidx_test_ext_junit          = '1.2.1'
+androidx_test_ext_truth          = '1.6.0'
+androidx_test_rules              = '1.6.1'
+androidx_test_runner             = '1.6.2'
+androidx_test_monitor            = '1.7.2'
+androidx_test_espresso           = '3.6.1'
+
+
+[plugins]
+android_application              = { id = "com.android.application", version.ref = "android_gradle_plugin" }
+android_library                  = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+kotlin_android                   = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+hilt_android                     = { id = "com.google.dagger.hilt.android", version.ref = "hilt_android" }
+
+
+[libraries]
+androidx_hilt_compiler           = { module = "androidx.hilt:hilt-compiler", version.ref = "androidx_hilt" }
+dagger_hilt_android              = { module = "com.google.dagger:hilt-android", version.ref = "hilt_android" }
+dagger_hilt_compiler             = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt_android" }
+androidx_datastore_preferences   = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx_datastore_preferences" }
+androidx_fragment_ktx            = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx_fragment_ktx" }
+junit                            = { module = "junit:junit", version.ref = "junit" }
+kotlin_stdlib                    = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin_coroutines_okhttp         = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "kotlin_coroutines_okhttp" }
+kotlinx_coroutines_core          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
+kotlinx_coroutines_android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx_coroutines" }
+kotlinx_coroutines_play_services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx_coroutines" }
+material_design                  = { module = "com.google.android.material:material", version.ref = "material_design" }
+androidx_core_ktx                = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
+androidx_core_testing            = { module = "androidx.arch.core:core-testing", version.ref = "androidx_core_testing" }
+androidx_appcompat               = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
+androidx_constraintlayout        = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx_constraintlayout" }
+okhttp                           = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp_logging_interceptor       = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+play_services_fido               = { module = "com.google.android.gms:play-services-fido", version.ref = "play_services_fido" }
+androidx_lifecycle_runtime_ktx   = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx_lifecycle" }
+androidx_lifecycle_livedata_ktx  = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx_lifecycle" }
+androidx_lifecycle_viewmodel_ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx_lifecycle" }
+androidx_test_monitor            = { module = "androidx.test:monitor", version.ref = "androidx_test_monitor" }
+androidx_test_ext_junit          = { module = "androidx.test.ext:junit", version.ref = "androidx_test_ext_junit" }
+androidx_test_ext_truth          = { module = "androidx.test.ext:truth", version.ref = "androidx_test_ext_truth" }
+androidx_test_rules              = { module = "androidx.test:rules", version.ref = "androidx_test_rules" }
+androidx_test_runner             = { module = "androidx.test:runner", version.ref = "androidx_test_runner" }
+androidx_test_espresso_core      = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx_test_espresso" }
+google_truth                     = { module = "com.google.truth:truth", version.ref = "google_truth" }
+
+[bundles]
+kotlin_coroutines                = ["kotlin_coroutines_okhttp", "kotlinx_coroutines_core", "kotlinx_coroutines_android", "kotlinx_coroutines_play_services"]
+androidx_lifecycle               = ["androidx_lifecycle_runtime_ktx", "androidx_lifecycle_livedata_ktx", "androidx_lifecycle_viewmodel_ktx"]
+androidx_test                    = ["androidx_test_ext_junit", "androidx_test_ext_truth", "google_truth", "androidx_test_rules", "androidx_test_runner", "androidx_test_espresso_core"]
+okhttp                           = ["okhttp", "okhttp_logging_interceptor"]

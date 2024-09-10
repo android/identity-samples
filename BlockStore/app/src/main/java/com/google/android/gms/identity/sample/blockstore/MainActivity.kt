@@ -55,5 +55,4 @@ class MainActivity : AppCompatActivity() {
             viewModel.clearBytes()
         }
     }
-
 }

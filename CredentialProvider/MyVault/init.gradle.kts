@@ -14,20 +14,6 @@
  *   limitations under the License.
  */
 
-val ktlintVersion = "1.0.1"
-
-initscript {
-    val spotlessVersion = "6.23.3"
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.diffplug.spotless:spotless-plugin-gradle:$spotlessVersion")
-    }
-}
-
 rootProject {
     subprojects {
         apply<com.diffplug.gradle.spotless.SpotlessPlugin>()
@@ -35,10 +21,8 @@ rootProject {
             kotlin {
                 target("**/*.kt")
                 targetExclude("**/build/**/*.kt")
-                ktlint(ktlintVersion).editorConfigOverride(
-                    mapOf(
-                        "android" to "true",
-                    ),
+                ktlint(libs.versions.ktlint.get()).editorConfigOverride(
+                    mapOf("android" to "true")
                 )
                 licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
             }

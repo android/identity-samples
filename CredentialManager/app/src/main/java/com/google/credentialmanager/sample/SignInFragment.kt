@@ -172,8 +172,8 @@ class SignInFragment : Fragment() {
             return "Got Password - User:${cred.id} Password: ${cred.password}"
         }
         if (result.credential is CustomCredential) {
-            //If you are also using any external sign-in libraries, parse them here with the
-            // utility functions provided.
+            // If you are also using any external sign-in libraries,
+            // parse them here with the utility functions provided.
         }
         return null
     }

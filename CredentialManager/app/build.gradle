@@ -15,12 +15,11 @@
  */
 
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-}
-repositories {
-    google()
-    mavenCentral()
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 // Load keystore properties for our signing key
@@ -31,15 +30,13 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace 'com.google.credentialmanager.sample'
-    compileSdk 34
-    compileSdkPreview "VanillaIceCream"
+    compileSdk 35
     defaultConfig {
         applicationId "com.google.credentialmanager.sample"
         minSdk 21
-        targetSdkPreview "VanillaIceCream"
+        targetSdk 35
         versionCode 1
-        versionName "1.0"
-
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -55,7 +52,6 @@ android {
         }
     }
 
-
     buildTypes {
         release {
             applicationIdSuffix ".release"
@@ -67,19 +63,17 @@ android {
         debug {
             signingConfig signingConfigs.config
         }
-
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+    kotlinOptions {
+        jvmTarget = '17'
     }
+
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
@@ -89,27 +83,29 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    hilt {
+        enableAggregatingTask = true
+    }
 }
 
 dependencies {
+    implementation libs.material.design
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation libs.bundles.androidx.credentials
+    implementation libs.bundles.kotlin.coroutines
+    implementation libs.bundles.androidx.lifecycle
 
-    implementation 'androidx.credentials:credentials-play-services-auth:1.5.0-alpha02'
-    implementation 'androidx.credentials:credentials:1.5.0-alpha02'
+    // Hilt
+    implementation libs.hilt.android
+    kapt libs.hilt.android.compiler
+    implementation libs.hilt.work
+    kapt libs.hilt.compiler
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
-
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
-    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
-
+    testImplementation libs.junit
+    debugImplementation libs.androidx.test.monitor
+    androidTestImplementation libs.bundles.androidx.test
 }
