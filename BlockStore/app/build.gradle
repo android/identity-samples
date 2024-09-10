@@ -59,13 +59,8 @@ dependencies {
     implementation libs.material.design
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation libs.androidx.work.runtime
     implementation libs.androidx.constraintlayout
-    implementation libs.androidx.test.espresso.idling.resource
-
-    testImplementation libs.junit
-    debugImplementation libs.androidx.test.monitor
-    androidTestImplementation libs.bundles.androidx.test
+    implementation libs.androidx.work.runtime
 
     // Hilt
     implementation libs.hilt.android
@@ -81,4 +76,10 @@ dependencies {
 
     // Coroutines
     implementation libs.kotlinx.coroutines.play.services
+
+    // jUnit
+    testImplementation libs.junit
+    debugImplementation libs.androidx.test.monitor
+    androidTestImplementation libs.bundles.androidx.test
+    implementation libs.androidx.test.espresso.idling.resource
 }
