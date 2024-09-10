@@ -1,5 +1,6 @@
 package com.google.samples.smartlock.sms_verify;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -90,6 +92,7 @@ public class PhoneNumberVerifier extends Service {
     }
 
     @Override
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public void onCreate() {
         super.onCreate();
         if (smsReceiver == null) {
@@ -101,7 +104,11 @@ public class PhoneNumberVerifier extends Service {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(SmsRetriever.SMS_RETRIEVED_ACTION);
-        getApplicationContext().registerReceiver(smsReceiver, intentFilter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getApplicationContext().registerReceiver(smsReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            getApplicationContext().registerReceiver(smsReceiver, intentFilter);
+        }
         api = new ApiHelper(this);
     }
 
@@ -147,6 +154,7 @@ public class PhoneNumberVerifier extends Service {
     }
 
     public void notifyStatus(int status, @Nullable String phoneNo) {
+
         if (status < STATUS_STARTED || status >= STATUS_RESPONSE_VERIFIED) {
             isVerifying = false;
         } else {
