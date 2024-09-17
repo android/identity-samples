@@ -55,13 +55,15 @@ android {
 
 dependencies {
     implementation libs.kotlin.stdlib
-    implementation libs.play.services.identity.credentials
     implementation libs.material.design
     implementation libs.androidx.activity.ktx
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.test.espresso.idling.resource
+
+    implementation libs.google.play.services.identity.credentials
+    implementation libs.androidx.credentials.play.services.auth
 
     // Required because the broadcast pending-intent otherwise lacks the intent-flag.
     // IllegalArgumentException: Targeting S+ (version 31 and above) requires that one of
