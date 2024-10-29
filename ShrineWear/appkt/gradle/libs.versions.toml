@@ -1,0 +1,66 @@
+[versions]
+android-gradle-plugin = "8.11.1"
+androidxAppcompat = "1.7.0"
+androidxComposeBom = "2025.05.00"
+androidxCoreKtx = "1.15.0"
+androidxCredentials = "1.5.0"
+androidxLifecycle = "2.8.7"
+androidxNavigationCompose = "2.9.0"
+androidxWearComposeMaterial3 = "1.5.0-beta04"
+composeCompiler = "2.0.21"
+googleid = "1.1.1"
+horologist-auth = "0.7.8-alpha"
+kotlin = "1.8.0"
+kotlin-compose = "2.0.21"
+kotlin-jetbrains = "2.0.21"
+kotlin-serialization = "2.1.0"
+kotlinxCoroutines = "1.9.0"
+kotlinxSerialization = "1.7.3"
+ktlint = "0.50.0"
+okHttp = "4.12.0"
+playServicesAuth = "21.3.0"
+playServicesWearable = "19.0.0"
+spotless = "6.21.0"
+wearRemoteInteractions = "1.1.0"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppcompat" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-material-icons = { module = "androidx.compose.material:material-icons-core"}
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidxCredentials" }
+androidx-credentials-playServicesAuth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidxCredentials" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationCompose" }
+androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "androidxWearComposeMaterial3" }
+androidx-wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "androidxWearComposeMaterial3" }
+androidx-wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "androidxWearComposeMaterial3" }
+androidx-wear-compose-ui-tooling = { group = "androidx.wear.compose", name = "compose-ui-tooling"}
+androidx-wear-remote-interactions = { group = "androidx.wear", name = "wear-remote-interactions", version.ref = "wearRemoteInteractions" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+horologist-auth-ui = { module = "com.google.android.horologist:horologist-auth-ui", version.ref = "horologist-auth" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okHttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okHttp" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+playServicesWearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+
+[plugins]
+
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-jetbrains" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-compose" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+
+[bundles]

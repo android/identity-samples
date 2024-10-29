@@ -1,0 +1,14 @@
+<resources>
+    <dimen name="padding_minimum">4dp</dimen>
+    <dimen name="padding_extra_small">8dp</dimen>
+    <dimen name="padding_small">12dp</dimen>
+    <dimen name="dimen_standard">16dp</dimen>
+    <dimen name="padding_medium">20dp</dimen>
+    <dimen name="padding_large">24dp</dimen>
+    <dimen name="size_standard">32dp</dimen>
+    <dimen name="padding_extra_large">40dp</dimen>
+    <dimen name="size_medium">52dp</dimen>
+    <dimen name="size_large">64dp</dimen>
+    <dimen name="size_extra_large">172dp</dimen>
+    <dimen name="siwg_button_height">30dp</dimen>
+</resources>
