@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="Theme.Shrine.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/shrine</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="Theme.Shrine" parent="android:Theme.Material.Light.NoActionBar"/>
+</resources>

@@ -21,9 +21,7 @@ plugins {
 
 android {
     namespace = "com.example.android.authentication.myvault"
-
     compileSdk = 35
-
     defaultConfig {
         applicationId = "com.example.android.authentication.myvault"
         minSdk = 34
