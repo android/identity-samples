@@ -35,9 +35,12 @@ class HomeViewModel @Inject constructor(
     /**
      * Signs out the user.
      */
-    fun signOut() {
+    fun signOut(
+        deleteRestoreKey: suspend () -> Unit,
+    ) {
         viewModelScope.launch {
             repository.signOut()
+            deleteRestoreKey()
         }
     }
 }
