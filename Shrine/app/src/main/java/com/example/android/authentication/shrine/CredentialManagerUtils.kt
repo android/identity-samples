@@ -17,16 +17,19 @@ package com.example.android.authentication.shrine
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.CreateRestoreCredentialRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
+import androidx.credentials.GetRestoreCredentialOption
 import androidx.credentials.exceptions.CreateCredentialException
 import org.json.JSONObject
 import javax.inject.Inject
@@ -123,6 +126,52 @@ class CredentialManagerUtils @Inject constructor(
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
         return GenericCredentialManagerResponse.CreatePasskeySuccess(createPasskeyResponse = credentialResponse)
+    }
+
+    suspend fun createRestoreKey(
+        requestResult: JSONObject,
+        context: Context,
+    ) {
+        val passkeysEligibility = PasskeysEligibility.isPasskeySupported(context)
+        if (passkeysEligibility.isEligible) {
+            val restoreCredentialRequest = CreateRestoreCredentialRequest(requestResult.toString())
+            try {
+                credentialManager.createCredential(
+                    context,
+                    restoreCredentialRequest,
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    suspend fun getRestoreKey(
+        authenticationJson: JSONObject,
+        activity: Context,
+    ): GenericCredentialManagerResponse {
+        val passkeysEligibility = PasskeysEligibility.isPasskeySupported(activity)
+        if (!passkeysEligibility.isEligible) {
+            return GenericCredentialManagerResponse.Error(errorMessage = passkeysEligibility.reason)
+        }
+
+        val options = GetRestoreCredentialOption(authenticationJson.toString())
+        val getRestoreKeyRequest = GetCredentialRequest(listOf(options))
+        val result: GetCredentialResponse?
+        try {
+            result = credentialManager.getCredential(
+                activity,
+                getRestoreKeyRequest,
+            )
+        } catch (e: Exception) {
+            return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
+        }
+        return GenericCredentialManagerResponse.GetPasskeySuccess(result)
+    }
+
+    suspend fun deleteRestoreKey() {
+        val clearRequest = ClearCredentialStateRequest()
+        credentialManager.clearCredentialState(clearRequest)
     }
 }
 

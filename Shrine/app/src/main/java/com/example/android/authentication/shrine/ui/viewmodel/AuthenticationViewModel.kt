@@ -58,11 +58,13 @@ class AuthenticationViewModel @Inject constructor(
      * Requests a sign-in challenge from the server.
      *
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
-     * @param getPasskey Lambda function that calls CredManUtil's getPasskey method with Activity reference
+     * @param getPasskey Lambda that calls CredManUtil's getPasskey method with Activity reference
+     * @param createRestoreCredential Lambda that
      */
     fun signInWithPasskeysRequest(
         onSuccess: (Boolean) -> Unit,
         getPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
+        createRestoreCredential: suspend (JSONObject) -> Unit,
     ) {
         _uiState.value = AuthenticationUiState(isLoading = true)
         viewModelScope.launch {
@@ -72,6 +74,7 @@ class AuthenticationViewModel @Inject constructor(
                     signInWithPasskeysResponse(
                         passkeyResponse.getPasskeyResponse,
                         onSuccess,
+                        createRestoreCredential,
                     )
                 } else if (passkeyResponse is GenericCredentialManagerResponse.Error) {
                     _uiState.update {
@@ -93,6 +96,7 @@ class AuthenticationViewModel @Inject constructor(
     private fun signInWithPasskeysResponse(
         response: GetCredentialResponse,
         onSuccess: (navigateToHome: Boolean) -> Unit,
+        createRestoreCredential: suspend (JSONObject) -> Unit,
     ) {
         viewModelScope.launch {
             val isSuccess = repository.signInWithPasskeysResponse(response)
@@ -100,6 +104,12 @@ class AuthenticationViewModel @Inject constructor(
                 val isPasswordCredential = response.credential is PasswordCredential
                 repository.setSignedInState(!isPasswordCredential)
                 onSuccess(isPasswordCredential)
+
+                // On Success
+                repository.registerPasskeyCreationRequest()?.let { data ->
+                    createRestoreCredential(data)
+                }
+
                 _uiState.update {
                     AuthenticationUiState(
                         isSignInWithPasskeysSuccess = true,
@@ -116,6 +126,29 @@ class AuthenticationViewModel @Inject constructor(
             }
         }
     }
+
+    fun checkForStoredRestoreKey(
+        getRestoreKey: suspend (JSONObject) -> GenericCredentialManagerResponse,
+    ) {
+        viewModelScope.launch {
+            repository.signInWithPasskeysRequest()?.let { data ->
+                val restoreKeyResponse = getRestoreKey(data)
+                if (restoreKeyResponse is GenericCredentialManagerResponse.GetPasskeySuccess) {
+                    signInWithPasskeysResponse(
+                        restoreKeyResponse.getPasskeyResponse,
+                        { },
+                        { },
+                    )
+                } else if (restoreKeyResponse is GenericCredentialManagerResponse.Error) {
+                    _uiState.update {
+                        AuthenticationUiState(
+                            passkeyRequestErrorMessage = restoreKeyResponse.errorMessage,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 data class AuthenticationUiState(
@@ -123,4 +156,5 @@ data class AuthenticationUiState(
     @StringRes val passkeyResponseMessageResourceId: Int = R.string.empty_string,
     val passkeyRequestErrorMessage: String? = null,
     val isSignInWithPasskeysSuccess: Boolean = false,
+    val isRestoreCredentialFound: Boolean = false,
 )

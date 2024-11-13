@@ -69,19 +69,32 @@ fun AuthenticationScreen(
     val errorDialogViewModel: ErrorDialogViewModel = hiltViewModel()
 
     // Passing in the lambda / context to the VM
-    val activityContext = LocalContext.current
+    val context = LocalContext.current
     val onSignInWithPasskeysRequest = {
         viewModel.signInWithPasskeysRequest(
             onSuccess = { flag ->
                 navigateToHome(flag)
             },
-        ) { jsonObject ->
-            credentialManagerUtils.getPasskey(
-                context = activityContext,
-                creationResult = jsonObject,
-            )
-        }
+            getPasskey = { jsonObject ->
+                credentialManagerUtils.getPasskey(
+                    context = context,
+                    creationResult = jsonObject,
+                )
+            },
+            createRestoreCredential = { createRestoreCredObject ->
+                credentialManagerUtils.createRestoreKey(
+                    context = context,
+                    requestResult = createRestoreCredObject,
+                )
+            },
+        )
     }
+
+    viewModel.checkForStoredRestoreKey(
+        getRestoreKey = { requestResult ->
+            credentialManagerUtils.getRestoreKey(requestResult, context)
+        },
+    )
 
     AuthenticationScreen(
         onSignInWithPasskeysRequest = onSignInWithPasskeysRequest,
