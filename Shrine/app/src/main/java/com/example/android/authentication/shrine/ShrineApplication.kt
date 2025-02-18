@@ -33,6 +33,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -61,6 +62,11 @@ object AppModule {
             "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
         return OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
+            .addInterceptor(HttpLoggingInterceptor { message ->
+                println("LOG-APP: $message")
+            }.apply {
+                level= HttpLoggingInterceptor.Level.BODY
+            })
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(40, TimeUnit.SECONDS)
             .connectTimeout(40, TimeUnit.SECONDS)

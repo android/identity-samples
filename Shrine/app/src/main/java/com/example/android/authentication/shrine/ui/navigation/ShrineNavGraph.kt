@@ -89,6 +89,7 @@ fun ShrineNavGraph(
                 onHelpButtonClicked = { navController.navigate(ShrineAppDestinations.Help.name) },
                 navigateToLogin = navigateToLogin,
                 viewModel = hiltViewModel(),
+                credentialManagerUtils = credentialManagerUtils,
             )
         }
 

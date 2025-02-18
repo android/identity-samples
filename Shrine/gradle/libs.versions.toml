@@ -1,6 +1,6 @@
 [versions]
 coreSplashscreen = "1.0.1"
-credentials = "1.3.0-alpha03"
+credentials = "1.5.0-rc01"
 googleid = "1.1.1"
 googleServicesPlugin = "4.4.1"
 hilt = "2.51"
@@ -37,8 +37,8 @@ espressoCore = "3.5.1"
 
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServicesPlugin" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 hilt-android-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }

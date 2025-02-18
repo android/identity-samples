@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.android.authentication.shrine.CredentialManagerUtils
 import com.example.android.authentication.shrine.R
 import com.example.android.authentication.shrine.ui.common.LogoHeading
 import com.example.android.authentication.shrine.ui.common.ShrineButton
@@ -55,13 +56,20 @@ fun MainMenuScreen(
     navigateToLogin: () -> Unit,
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
+    credentialManagerUtils: CredentialManagerUtils,
 ) {
+    val onSignOut = {
+        viewModel.signOut(
+            deleteRestoreKey = credentialManagerUtils::deleteRestoreKey,
+        )
+    }
+
     MainMenuScreen(
         onShrineButtonClicked = onShrineButtonClicked,
         onSettingsButtonClicked = onSettingsButtonClicked,
         onHelpButtonClicked = onHelpButtonClicked,
         navigateToLogin = navigateToLogin,
-        onSignOut = viewModel::signOut,
+        onSignOut = onSignOut,
         modifier = modifier,
     )
 }

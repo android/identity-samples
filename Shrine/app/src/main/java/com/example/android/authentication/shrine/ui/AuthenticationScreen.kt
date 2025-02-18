@@ -27,7 +27,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -67,20 +70,46 @@ fun AuthenticationScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val errorDialogViewModel: ErrorDialogViewModel = hiltViewModel()
+    var shouldCheckForRestoreKey by remember { mutableStateOf(true) }
 
     // Passing in the lambda / context to the VM
-    val activityContext = LocalContext.current
+    val context = LocalContext.current
+    val createRestoreKey = {
+        viewModel.createRestoreKey(
+            updateCredMan = { createRestoreCredObject ->
+                credentialManagerUtils.createRestoreKey(
+                    context = context,
+                    requestResult = createRestoreCredObject
+                )
+            }
+        )
+    }
+
     val onSignInWithPasskeysRequest = {
         viewModel.signInWithPasskeysRequest(
             onSuccess = { flag ->
+                createRestoreKey()
                 navigateToHome(flag)
             },
-        ) { jsonObject ->
-            credentialManagerUtils.getPasskey(
-                context = activityContext,
-                creationResult = jsonObject,
-            )
-        }
+            getPasskey = { jsonObject ->
+                credentialManagerUtils.getPasskey(
+                    context = context,
+                    creationResult = jsonObject,
+                )
+            },
+        )
+    }
+
+    if (shouldCheckForRestoreKey) {
+        shouldCheckForRestoreKey = false
+        viewModel.checkForStoredRestoreKey(
+            getRestoreKey = { requestResult ->
+                credentialManagerUtils.getRestoreKey(requestResult, context)
+            },
+            onSuccess = {
+                navigateToHome(true)
+            }
+        )
     }
 
     AuthenticationScreen(
