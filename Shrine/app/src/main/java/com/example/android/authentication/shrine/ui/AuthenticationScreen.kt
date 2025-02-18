@@ -70,13 +70,13 @@ fun AuthenticationScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val errorDialogViewModel: ErrorDialogViewModel = hiltViewModel()
-    var shouldCheckForRestoreKey by remember { mutableStateOf(true) }
+    var isFirstCheckForRestoreKey by remember { mutableStateOf(true) }
 
     // Passing in the lambda / context to the VM
     val context = LocalContext.current
     val createRestoreKey = {
         viewModel.createRestoreKey(
-            updateCredMan = { createRestoreCredObject ->
+            createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
                     requestResult = createRestoreCredObject
@@ -100,8 +100,8 @@ fun AuthenticationScreen(
         )
     }
 
-    if (shouldCheckForRestoreKey) {
-        shouldCheckForRestoreKey = false
+    if (isFirstCheckForRestoreKey) {
+        isFirstCheckForRestoreKey = false
         viewModel.checkForStoredRestoreKey(
             getRestoreKey = { requestResult ->
                 credentialManagerUtils.getRestoreKey(requestResult, context)

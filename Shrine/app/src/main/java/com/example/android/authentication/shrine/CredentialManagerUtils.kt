@@ -162,7 +162,6 @@ class CredentialManagerUtils @Inject constructor(
                 restoreCredentialRequest,
             ) as CreateRestoreCredentialResponse
         } catch (e: Exception) {
-            e.printStackTrace()
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
         return GenericCredentialManagerResponse.CreatePasskeySuccess(createPasskeyResponse = credentialResponse)

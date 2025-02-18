@@ -85,7 +85,7 @@ fun RegisterScreen(
     val context = LocalContext.current
     val createRestoreKey = {
         viewModel.createRestoreKey(
-            updateCredMan = { createRestoreCredObject ->
+            createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
                     requestResult = createRestoreCredObject

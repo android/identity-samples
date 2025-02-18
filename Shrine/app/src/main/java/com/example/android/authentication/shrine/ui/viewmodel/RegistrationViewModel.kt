@@ -102,18 +102,18 @@ class RegistrationViewModel @Inject constructor(
     /**
      * Creates a restore key by registering a new passkey.
      *
-     * @param updateCredMan A suspend function that takes a [JSONObject] and returns a
+     * @param createRestoreKeyOnCredMan A suspend function that takes a [JSONObject] and returns a
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the restore key.
      *
      * @see GenericCredentialManagerResponse
      */
     fun createRestoreKey(
-        updateCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse
+        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse
     ) {
         viewModelScope.launch {
             repository.registerPasskeyCreationRequest()?.let { data ->
-                val createRestoreKeyResponse = updateCredMan(data)
+                val createRestoreKeyResponse = createRestoreKeyOnCredMan(data)
                 if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
                     repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
                 }

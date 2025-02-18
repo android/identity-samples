@@ -34,6 +34,9 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Signs out the user.
+     *
+     * @param deleteRestoreKey Lambda function received from Composable that triggers
+     * Credential Manager's deleteRestoreKey
      */
     fun signOut(
         deleteRestoreKey: suspend () -> Unit,
