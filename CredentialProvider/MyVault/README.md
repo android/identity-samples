@@ -14,6 +14,7 @@ The app demonstrates how to:
 - Register as a `CredentialProviderService` so that users can store and retrieve passwords and passkeys using the app.
 - Save passwords/passkeys to the app. These are stored locally in a database for demonstration purposes only. In a real app this data should be sent to a server to allow the user's credentials to be synchronized across all their devices.
 - Retrieve credentials from the app to assist with user login in another app or website.
+- Implement your own biometrics prompt(single tap credential creation & sign-in)
 - Delete passkeys or passwords.
 
 # Requirements
@@ -103,6 +104,9 @@ These additional activities are described below.
 - `CredentialsDataSource` - CRUD operations for credentials, backed by a Room DAO.
 
 For more detailed information on how to create, save and retrieve credentials using the Credential Manager API, refer to the [official documentation]((https://developer.android.com/training/sign-in/credential-provider))
+
+To implement your own biometrics prompt, refer to the [biometrics documentation](https://developer.android.com/identity/sign-in/single-tap-biometric)
+
 
 ## License
 

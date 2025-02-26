@@ -40,7 +40,7 @@ object AppDependencies {
 
     var providerIcon: Icon? = null
 
-    lateinit var RPIconDataSource: RPIconDataSource
+    lateinit var rpIconDataSource: RPIconDataSource
 
     /**
      * Initializes the core components required for the application's data storage and icon handling.
@@ -63,7 +63,7 @@ object AppDependencies {
             .fallbackToDestructiveMigration()
             .build()
 
-        RPIconDataSource = RPIconDataSource(context.applicationInfo.dataDir)
+        rpIconDataSource = RPIconDataSource(context.applicationInfo.dataDir)
         providerIcon = Icon.createWithResource(context, R.drawable.android_secure)
 
         credentialsRepository =

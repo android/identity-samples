@@ -16,7 +16,6 @@
 package com.example.android.authentication.myvault.ui.home
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -37,7 +36,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.android.authentication.myvault.R
@@ -157,7 +155,7 @@ private fun TopAppBarContent(openDrawer: () -> Unit) {
         modifier = Modifier,
         title = {
             Text(
-                text = stringResource(R.string.credentials)
+                text = stringResource(R.string.credentials),
             )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(

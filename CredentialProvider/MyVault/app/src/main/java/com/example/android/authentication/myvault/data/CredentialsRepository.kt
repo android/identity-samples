@@ -19,6 +19,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.hardware.biometrics.BiometricManager
+import android.os.Build
 import android.os.Bundle
 import androidx.credentials.provider.BeginCreateCredentialRequest
 import androidx.credentials.provider.BeginCreateCredentialResponse
@@ -28,6 +30,7 @@ import androidx.credentials.provider.BeginGetCredentialRequest
 import androidx.credentials.provider.BeginGetCredentialResponse.Builder
 import androidx.credentials.provider.BeginGetPasswordOption
 import androidx.credentials.provider.BeginGetPublicKeyCredentialOption
+import androidx.credentials.provider.BiometricPromptData
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
@@ -39,7 +42,9 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * This class is responsible for creating and retrieving  credential entries (password & passkey) to & from the database
+ * Manages the creation and retrieval of credential entries (passwords and passkeys)
+ * to and from the MyVault Provider. This class also configures the biometric prompt
+ * for Android API level 35 and higher.
  */
 class CredentialsRepository(
     private val sharedPreferences: SharedPreferences,
@@ -47,6 +52,8 @@ class CredentialsRepository(
     private val applicationContext: Context,
 ) {
     private val requestCode: AtomicInteger = AtomicInteger()
+    private val allowedAuthenticator =
+        BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
     /**
      * This method queries credentials from your database, create passkey and password entries to populate.
@@ -153,19 +160,20 @@ class CredentialsRepository(
                 val passwordItemCurrent = it.next()
 
                 // Create Password entry
-                val entry = PasswordCredentialEntry.Builder(
-                    applicationContext,
-                    passwordItemCurrent.username,
-                    createNewPendingIntent(
-                        passwordItemCurrent.username,
-                        GET_PASSWORD_INTENT,
-                    ),
-                    option,
-                )
-                    .setDisplayName("display-${passwordItemCurrent.username}")
-                    .setIcon(AppDependencies.providerIcon!!)
-                    .setLastUsedTime(Instant.ofEpochMilli(passwordItemCurrent.lastUsedTimeMs))
-                    .build()
+                val entryBuilder =
+                    configurePasswordCredentialEntryBuilder(passwordItemCurrent, option)
+
+                // Configure own biometric prompt data
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    entryBuilder.setBiometricPromptData(
+                        BiometricPromptData(
+                            cryptoObject = null,
+                            allowedAuthenticators = allowedAuthenticator,
+                        ),
+                    )
+                }
+
+                val entry = entryBuilder.build()
                 // Add the entry to the response builder.
                 responseBuilder.addCredentialEntry(entry)
             }
@@ -173,6 +181,32 @@ class CredentialsRepository(
             return false
         }
         return true
+    }
+
+    /**
+     * Configures a {@link PasswordCredentialEntry.Builder} for a given password item.
+     *
+     * @param passwordItemCurrent The {@link PasswordItem} containing the password details.
+     * @param option              The {@link BeginGetPasswordOption} containing the request parameters.
+     * @return A {@link PasswordCredentialEntry.Builder} configured with the provided
+     *         password details and request options.
+     */
+    private fun configurePasswordCredentialEntryBuilder(
+        passwordItemCurrent: PasswordItem,
+        option: BeginGetPasswordOption,
+    ): PasswordCredentialEntry.Builder {
+        val entryBuilder = PasswordCredentialEntry.Builder(
+            applicationContext,
+            passwordItemCurrent.username,
+            createNewPendingIntent(
+                passwordItemCurrent.username,
+                GET_PASSWORD_INTENT,
+            ),
+            option,
+        ).setDisplayName("display-${passwordItemCurrent.username}")
+            .setIcon(AppDependencies.providerIcon!!)
+            .setLastUsedTime(Instant.ofEpochMilli(passwordItemCurrent.lastUsedTimeMs))
+        return entryBuilder
     }
 
     /**
@@ -207,24 +241,54 @@ class CredentialsRepository(
                 )
 
                 // Create a PublicKeyCredentialEntry object to represent the passkey
-                val entryBuilder = PublicKeyCredentialEntry.Builder(
-                    applicationContext,
-                    passkey.username,
-                    pendingIntent,
-                    option,
-                )
-                    .setDisplayName(passkey.displayName)
-                    .setLastUsedTime(Instant.ofEpochMilli(passkey.lastUsedTimeMs))
-                    .setIcon(AppDependencies.providerIcon!!)
+                val entryBuilder =
+                    configurePublicKeyCredentialEntryBuilder(passkey, pendingIntent, option)
 
-                val entry = entryBuilder
-                    .build()
+                // Configure biometric prompt data
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    entryBuilder.setBiometricPromptData(
+                        BiometricPromptData(
+                            cryptoObject = null,
+                            allowedAuthenticators = allowedAuthenticator,
+                        ),
+                    )
+                }
+
+                val entry = entryBuilder.build()
+                // Add the entry to the response builder.
                 responseBuilder.addCredentialEntry(entry)
             }
         } catch (e: IOException) {
             return false
         }
         return true
+    }
+
+    /**
+     * Creates a {@link PublicKeyCredentialEntry.Builder} for a given passkey.
+     *
+     * @param passkey       The {@link PasskeyItem} containing the passkey details.
+     * @param pendingIntent The {@link PendingIntent} to be associated with the entry,
+     *                      used to launch the passkey retrieval process.
+     * @param option        The {@link BeginGetPublicKeyCredentialOption} containing the
+     *                      request parameters for the passkey retrieval.
+     * @return A {@link PublicKeyCredentialEntry.Builder} configured with the provided
+     *         passkey details, pending intent, and request options.
+     */
+    private fun configurePublicKeyCredentialEntryBuilder(
+        passkey: PasskeyItem,
+        pendingIntent: PendingIntent,
+        option: BeginGetPublicKeyCredentialOption,
+    ): PublicKeyCredentialEntry.Builder {
+        val entryBuilder = PublicKeyCredentialEntry.Builder(
+            applicationContext,
+            passkey.username,
+            pendingIntent,
+            option,
+        ).setDisplayName(passkey.displayName)
+            .setLastUsedTime(Instant.ofEpochMilli(passkey.lastUsedTimeMs))
+            .setIcon(AppDependencies.providerIcon!!)
+        return entryBuilder
     }
 
     /**
@@ -261,15 +325,18 @@ class CredentialsRepository(
     }
 
     /**
-     * Adds a CreateEntry to the BeginCreateCredentialResponse.
+     * Handles the creation of a credential query response.
      *
-     * Each CreateEntry should correspond to an account where the credential can be saved,
-     * and must have a PendingIntent set along with other required metadata.
+     * <p>This method constructs a {@link BeginCreateCredentialResponse} that
+     * includes a {@link CreateEntry} for an account where credentials can be
+     * saved. The {@link CreateEntry} contains a {@link PendingIntent} and other
+     * metadata required for the credential creation process.
      *
      * @param passwordCount The number of password credentials associated with the account.
-     * @param passkeyCount The number of passkey credentials associated with the account.
-     * @param intentType The type of intent to be used for the PendingIntent.
-     * @return A BeginCreateCredentialResponse with the CreateEntry added.
+     * @param passkeyCount  The number of passkey credentials associated with the account.
+     * @param intentType    The type of intent to be used for the {@link PendingIntent}.
+     * @return A {@link BeginCreateCredentialResponse} containing the created
+     *         {@link CreateEntry}.
      */
     private fun handleCreateCredentialQuery(
         passwordCount: Int,
@@ -278,46 +345,69 @@ class CredentialsRepository(
     ): BeginCreateCredentialResponse {
         // Each CreateEntry should correspond to an account where the credential can be saved,
         // and must have a PendingIntent set along with other required metadata.
-        return BeginCreateCredentialResponse.Builder()
-            .addCreateEntry(
-                createEntry(
-                    intentType,
-                    passwordCount,
-                    passkeyCount,
-                ),
-            ).build()
+
+        // Create the CreateEntry using the provided parameters.
+        val createCredentialEntry = createEntry(
+            intentType,
+            passwordCount,
+            passkeyCount,
+        )
+        // Build and return the BeginCreateCredentialResponse with the created CreateEntry.
+        return BeginCreateCredentialResponse.Builder().addCreateEntry(
+            createCredentialEntry,
+        ).build()
     }
 
     /**
-     * Creates a CreateEntry object for the user account based on their credential preferences.
+     * Creates a {@link CreateEntry} object for the user account.
      *
-     * @param intentType The type of intent to be used for the PendingIntent.
+     * <p>This method constructs a {@link CreateEntry} that represents an account
+     * where credentials can be saved. It sets various properties of the
+     * {@link CreateEntry}, including the account identifier, a {@link PendingIntent}
+     * for credential creation, the last used time, the number of password and
+     * passkey credentials, the total credential count, and a description.
+     * Additionally, it configures biometric prompt data if the device is running
+     * Android API level 35 or higher.
+     *
+     * @param intentType    The type of intent to be used for the {@link PendingIntent}.
      * @param passwordCount The number of password credentials associated with the account.
-     * @param passkeyCount The number of passkey credentials associated with the account.
-     * @return A CreateEntry object.
+     * @param passkeyCount  The number of passkey credentials associated with the account.
+     * @return A {@link CreateEntry} object configured with the specified parameters.
      */
     private fun createEntry(
         intentType: String,
         passwordCount: Int,
         passkeyCount: Int,
-    ) = CreateEntry.Builder(
-        USER_ACCOUNT,
-        createNewPendingIntent(USER_ACCOUNT, intentType),
-    ).setLastUsedTime(
-        Instant.ofEpochMilli(
-            sharedPreferences.getLong(
-                KEY_ACCOUNT_LAST_USED_MS,
-                0L,
+    ): CreateEntry {
+        // Create a CreateEntry.Builder with the user account and a PendingIntent.
+        val createEntryBuilder = CreateEntry.Builder(
+            USER_ACCOUNT,
+            createNewPendingIntent(USER_ACCOUNT, intentType),
+        ).setLastUsedTime(
+            Instant.ofEpochMilli(
+                sharedPreferences.getLong(
+                    KEY_ACCOUNT_LAST_USED_MS,
+                    0L,
+                ),
             ),
-        ),
-    )
-        .setPasswordCredentialCount(passwordCount)
-        .setPublicKeyCredentialCount(passkeyCount)
-        .setTotalCredentialCount(passwordCount + passkeyCount)
-        .setDescription(
-            CREDENTIAL_DESCRIPTION,
-        )
-        .build()
+        ).setPasswordCredentialCount(passwordCount).setPublicKeyCredentialCount(passkeyCount)
+            .setTotalCredentialCount(passwordCount + passkeyCount).setDescription(
+                CREDENTIAL_DESCRIPTION,
+            )
+
+        // Configure biometric prompt data if the device is running Android API level 35 or higher.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            createEntryBuilder.setBiometricPromptData(
+                BiometricPromptData(
+                    cryptoObject = null,
+                    allowedAuthenticators = allowedAuthenticator,
+                ),
+            )
+        }
+
+        // Build and return the CreateEntry.
+        return createEntryBuilder.build()
+    }
 
     companion object {
         private const val CREATE_PASSWORD_INTENT =

@@ -52,7 +52,6 @@ import java.util.concurrent.atomic.AtomicInteger
 class MyVaultService(private val credentialsRepository: CredentialsRepository = AppDependencies.credentialsRepository) :
     CredentialProviderService() {
 
-
     /**
      * Called by the Android System in response to a client app calling
      * [androidx.credentials.CredentialManager.createCredential], to create/save a credential
