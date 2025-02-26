@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.google.webkit.webviewsample
 
 import android.os.Bundle
@@ -14,7 +29,6 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.google.webkit.webviewsample.theme.WebViewSampleTheme
 
-
 /**
  * Generates a WebView that uses the Webkit API to handle WebView passkey authentication requests.
  */
@@ -26,38 +40,29 @@ class MainActivity : ComponentActivity() {
             WebViewSampleTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.background,
                 ) {
-                    AndroidView(factory = {
-                        WebView(it).apply {
-                            settings.javaScriptEnabled = true
-                            webViewClient = WebViewClientImpl()
-                        }
-                    },
+                    AndroidView(
+                        factory = {
+                            WebView(it).apply {
+                                settings.javaScriptEnabled = true
+                                webViewClient = WebViewClientImpl()
+                            }
+                        },
                         update = { webView ->
                             run {
                                 webView.loadUrl(url)
                                 if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
-                                    Log.e("WebViewPasskeyDemo", "WebView supports passkeys.")
                                     WebSettingsCompat.setWebAuthenticationSupport(
                                         webView.settings,
                                         WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP,
                                     )
-                                    Log.e(
-                                        "WebViewPasskeyDemo",
-                                        "getWebAuthenticationSupport result: " +
-                                                WebSettingsCompat.getWebAuthenticationSupport(
-                                                    webView.settings
-                                                ),
-                                    )
                                 } else {
-                                    Log.e(
-                                        "WebViewPasskeyDemo",
-                                        "WebView does not support passkeys."
-                                    )
+                                    // App does not support passkeys in WebView.
                                 }
                             }
-                        })
+                        },
+                    )
                 }
             }
         }

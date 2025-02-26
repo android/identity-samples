@@ -1,3 +1,8 @@
+# Webkit Web View Sample
+This is a sample app which uses the [Webkit library](https://developer.android.com/jetpack/androidx/releases/webkit#1.12.0)
+to implement passkey creation in WebView. It's a simple app that supports passkey creation and
+deletion via a webpage and server hosted on glitch.me.
+
 # Set Up Instructions
 Assuming the GlitchMe site and server is up and running (the glitch me site can
 be found [here](https://glitch.com/edit/#!/alder-sunny-bicycle)), this app should
@@ -11,7 +16,16 @@ signature is known to the server, which will be in the steps below.
 3. Double check there is a 'debug.keystore' file at the root. This is important
 as the server expects your app to have the SHA256 from this keystore.
 4. 'Run' the app via the 'run' button (the green play triangle).
-5. Enjoy!
+5. Wait for the webpage to load, and then try creating and deleting passkeys.
+
+## Using the app
+1. Enter a username to register with the app. This can be any username you want to use.
+2. Tap through the password screen as the password will not be used in this sample.
+3. On the next screen, tap "Create a passkey" to go initiate the passkey creation process and go
+through the authentication process.
+4. If successful, a passkey will show up under "Your registered passkeys." Note that you can only
+create one passkey per platform for each user.
+5. You can delete passkeys from the list once they are created by selecting the delete icon.
 
 ## Running your own server
 If you'd like to manage a server directly, you can choose to Remix this project on glitch.me which
