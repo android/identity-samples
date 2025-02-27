@@ -18,6 +18,10 @@ package com.google.webkit.webviewsample
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
+/**
+ * A simple WebViewClient class that causes the WebView to continue loading the URL during load.
+ * See the corresponding [documentation](https://developer.android.com/reference/android/webkit/WebViewClient#shouldOverrideUrlLoading(android.webkit.WebView,%20android.webkit.WebResourceRequest)
+ */
 class WebViewClientImpl : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         return false
