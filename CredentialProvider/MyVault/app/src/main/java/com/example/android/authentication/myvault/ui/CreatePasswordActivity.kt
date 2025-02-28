@@ -15,7 +15,6 @@
  */
 package com.example.android.authentication.myvault.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,11 +23,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
-import androidx.credentials.provider.BiometricPromptResult
 import androidx.credentials.provider.PendingIntentHandler
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.lifecycle.lifecycleScope
 import com.example.android.authentication.myvault.AppDependencies
+import com.example.android.authentication.myvault.BiometricErrorUtils
 import com.example.android.authentication.myvault.data.PasswordMetaData
 import com.example.android.authentication.myvault.ui.password.PasswordScreen
 import kotlinx.coroutines.launch
@@ -61,11 +60,17 @@ class CreatePasswordActivity : ComponentActivity() {
         accountId: String?,
     ) {
         if (createRequest != null) {
-            // Retrieve the biometric prompt result from the createRequest.
+            // Retrieve the BiometricPromptResult from the request.
             val biometricPromptResult = createRequest.biometricPromptResult
 
-            // Check if there was an error during the biometric flow. If so, handle the error and return.
-            if (isValidBiometricFlowError(biometricPromptResult)) return
+            // Validate the error message in biometric result
+            val biometricErrorMessage =
+                BiometricErrorUtils.getBiometricErrorMessage(this, biometricPromptResult)
+
+            // If there's valid biometric error, set up the failure response and finish.
+            if (biometricErrorMessage.isNotEmpty()) {
+                return
+            }
 
             if (createRequest.callingRequest is CreatePasswordRequest) {
                 val request: CreatePasswordRequest =
@@ -146,32 +151,6 @@ class CreatePasswordActivity : ComponentActivity() {
                 },
             )
         }
-    }
-
-    /**
-     * Checks if there was an error during the biometric authentication flow.
-     *
-     * This method determines whether the biometric authentication flow resulted in
-     * an error. It checks if the {@link BiometricPromptResult} is null or if the
-     * authentication was successful. If neither of these conditions is met, it
-     * returns true, indicating an error. Otherwise, it returns false.
-     *
-     * Note: This method does not handle the error itself. It only determines
-     * if an error occurred. The error handling is expected to be done elsewhere.
-     *
-     * @param biometricPromptResult The result of the biometric authentication prompt.
-     * @return True if there was an error during the biometric flow, false otherwise.
-     */
-    @SuppressLint("StringFormatMatches")
-    private fun isValidBiometricFlowError(biometricPromptResult: BiometricPromptResult?): Boolean {
-        // If the biometricPromptResult is null, there was no error.
-        if (biometricPromptResult == null) return false
-
-        // If the biometricPromptResult indicates success, there was no error.
-        if (biometricPromptResult.isSuccessful) return false
-
-        // If we reach this point, there was an error during the biometric flow.
-        return true
     }
 
     /**

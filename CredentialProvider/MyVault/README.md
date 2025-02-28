@@ -14,7 +14,7 @@ The app demonstrates how to:
 - Register as a `CredentialProviderService` so that users can store and retrieve passwords and passkeys using the app.
 - Save passwords/passkeys to the app. These are stored locally in a database for demonstration purposes only. In a real app this data should be sent to a server to allow the user's credentials to be synchronized across all their devices.
 - Retrieve credentials from the app to assist with user login in another app or website.
-- Implement your own biometrics prompt(single tap credential creation & sign-in)
+- Implement your own biometric prompts for single-tap credential creation and sign-in.
 - Delete passkeys or passwords.
 
 # Requirements

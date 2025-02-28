@@ -15,7 +15,6 @@
  */
 package com.example.android.authentication.myvault.ui
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.SigningInfo
@@ -29,12 +28,12 @@ import androidx.biometric.BiometricPrompt.PromptInfo.Builder
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.exceptions.GetCredentialUnknownException
-import androidx.credentials.provider.BiometricPromptResult
 import androidx.credentials.provider.CallingAppInfo
 import androidx.credentials.provider.PendingIntentHandler
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.fragment.app.FragmentActivity
 import com.example.android.authentication.myvault.AppDependencies
+import com.example.android.authentication.myvault.BiometricErrorUtils
 import com.example.android.authentication.myvault.R
 import com.example.android.authentication.myvault.data.PasskeyMetadata
 import com.example.android.authentication.myvault.fido.AssetLinkVerifier
@@ -102,11 +101,18 @@ class CreatePasskeyActivity : FragmentActivity() {
     private fun handleCreatePublicKeyCredentialRequest(request: ProviderCreateCredentialRequest) {
         val accountId = intent.getStringExtra(KEY_ACCOUNT_ID)
 
-        // Retrieve the biometric prompt result from the request.
+        // Retrieve the BiometricPromptResult from the request.
         val biometricPromptResult = request.biometricPromptResult
 
-        // Check if there was an error during the biometric flow. If so, handle the error and return.
-        if (isValidBiometricFlowError(biometricPromptResult)) return
+        // Validate the error message in biometric result
+        val biometricErrorMessage =
+            BiometricErrorUtils.getBiometricErrorMessage(this, biometricPromptResult)
+
+        // If there's valid biometric error, set up the failure response and finish.
+        if (biometricErrorMessage.isNotEmpty()) {
+            setUpFailureResponseAndFinish(biometricErrorMessage)
+            return
+        }
 
         // access the associated intent and pass it into the PendingIntentHandler class to get the ProviderCreateCredentialRequest.
         if (request.callingRequest is CreatePublicKeyCredentialRequest) {
@@ -136,50 +142,6 @@ class CreatePasskeyActivity : FragmentActivity() {
             setUpFailureResponseAndFinish(getString(R.string.unexpected_create_request_found_in_intent))
             return
         }
-    }
-
-    /**
-     * Checks if there was an error during the biometric authentication flow.
-     *
-     * This method determines whether the biometric authentication flow resulted in
-     * an error. It checks if the {@link BiometricPromptResult} is null or if the
-     * authentication was successful. If neither of these conditions is met, it
-     * extracts the error code and message from the {@link BiometricPromptResult}
-     * and sets up a failure response to be sent to the client.
-     *
-     * @param biometricPromptResult The result of the biometric authentication prompt.
-     * @return True if there was an error during the biometric flow, false otherwise.
-     */
-    @SuppressLint("StringFormatMatches")
-    private fun isValidBiometricFlowError(biometricPromptResult: BiometricPromptResult?): Boolean {
-        // If the biometricPromptResult is null, there was no error.
-        if (biometricPromptResult == null) return false
-        if (biometricPromptResult.isSuccessful) return false
-
-        // Initialize default values for the error code and message.
-        var biometricAuthErrorCode = -1
-        var biometricAuthErrorMsg = getString(R.string.unknown_failure)
-
-        // Check if there is an authentication error in the biometricPromptResult.
-        if (biometricPromptResult.authenticationError != null) {
-            biometricAuthErrorCode = biometricPromptResult.authenticationError!!.errorCode
-            biometricAuthErrorMsg = biometricPromptResult.authenticationError!!.errorMsg.toString()
-        }
-
-        // Build the error message to be sent to the client.
-        setUpFailureResponseAndFinish(
-            buildString {
-                append(
-                    getString(
-                        R.string.biometric_error_code_with_message,
-                        biometricAuthErrorCode,
-                    ),
-                )
-                append(biometricAuthErrorMsg)
-                append(getString(R.string.other_providers_error_message))
-            },
-        )
-        return true
     }
 
     /**

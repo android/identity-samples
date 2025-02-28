@@ -186,26 +186,26 @@ class CredentialsRepository(
     /**
      * Configures a {@link PasswordCredentialEntry.Builder} for a given password item.
      *
-     * @param passwordItemCurrent The {@link PasswordItem} containing the password details.
+     * @param currentPasswordItem The {@link PasswordItem} containing the password details.
      * @param option              The {@link BeginGetPasswordOption} containing the request parameters.
      * @return A {@link PasswordCredentialEntry.Builder} configured with the provided
      *         password details and request options.
      */
     private fun configurePasswordCredentialEntryBuilder(
-        passwordItemCurrent: PasswordItem,
+        currentPasswordItem: PasswordItem,
         option: BeginGetPasswordOption,
     ): PasswordCredentialEntry.Builder {
         val entryBuilder = PasswordCredentialEntry.Builder(
             applicationContext,
-            passwordItemCurrent.username,
+            currentPasswordItem.username,
             createNewPendingIntent(
-                passwordItemCurrent.username,
+                currentPasswordItem.username,
                 GET_PASSWORD_INTENT,
             ),
             option,
-        ).setDisplayName("display-${passwordItemCurrent.username}")
+        ).setDisplayName("display-${currentPasswordItem.username}")
             .setIcon(AppDependencies.providerIcon!!)
-            .setLastUsedTime(Instant.ofEpochMilli(passwordItemCurrent.lastUsedTimeMs))
+            .setLastUsedTime(Instant.ofEpochMilli(currentPasswordItem.lastUsedTimeMs))
         return entryBuilder
     }
 
