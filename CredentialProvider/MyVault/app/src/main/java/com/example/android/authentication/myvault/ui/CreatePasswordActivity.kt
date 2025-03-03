@@ -25,7 +25,9 @@ import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.provider.PendingIntentHandler
 import androidx.credentials.provider.ProviderCreateCredentialRequest
+import androidx.lifecycle.lifecycleScope
 import com.example.android.authentication.myvault.AppDependencies
+import com.example.android.authentication.myvault.BiometricErrorUtils
 import com.example.android.authentication.myvault.data.PasswordMetaData
 import com.example.android.authentication.myvault.ui.password.PasswordScreen
 import kotlinx.coroutines.launch
@@ -58,21 +60,96 @@ class CreatePasswordActivity : ComponentActivity() {
         accountId: String?,
     ) {
         if (createRequest != null) {
+            // Retrieve the BiometricPromptResult from the request.
+            val biometricPromptResult = createRequest.biometricPromptResult
+
+            // Validate the error message in biometric result
+            val biometricErrorMessage =
+                BiometricErrorUtils.getBiometricErrorMessage(this, biometricPromptResult)
+
+            // If there's valid biometric error, set up the failure response and finish.
+            if (biometricErrorMessage.isNotEmpty()) {
+                return
+            }
+
             if (createRequest.callingRequest is CreatePasswordRequest) {
                 val request: CreatePasswordRequest =
                     createRequest.callingRequest as CreatePasswordRequest
 
-                setContent {
-                    val coroutineScope = rememberCoroutineScope()
-                    PasswordScreen(
-                        onSave = {
-                            coroutineScope.launch {
-                                onSaveClick(request, createRequest, accountId)
-                            }
-                        },
+                // Check if the biometric prompt result contains a successful authentication result.
+                if (biometricPromptResult?.authenticationResult != null) {
+                    // If biometric authentication was successful, use the biometric flow to save the password.
+                    savePasswordWithBiometricFlow(
+                        request,
+                        createRequest,
+                        accountId,
                     )
+                    return
                 }
+
+                // If biometric authentication was not used or was not successful, use the default flow.
+                savePasswordWithDefaultFlow(request, createRequest, accountId)
             }
+        }
+    }
+
+    /**
+     * Saves the password using the biometric authentication flow.
+     *
+     * This method initiates the process of saving a password when the user has
+     * successfully authenticated using biometrics. It launches a coroutine in the
+     * lifecycle scope to perform the actual saving operation asynchronously.
+     *
+     * @param request       The {@link CreatePasswordRequest} containing the password
+     *                      creation details.
+     * @param createRequest The {@link ProviderCreateCredentialRequest} containing
+     *                      additional information about the request.
+     * @param accountId     The ID of the account associated with the password.
+     */
+    private fun savePasswordWithBiometricFlow(
+        request: CreatePasswordRequest,
+        createRequest: ProviderCreateCredentialRequest,
+        accountId: String?,
+    ) {
+        lifecycleScope.launch {
+            onSaveClick(request, createRequest, accountId)
+        }
+    }
+
+    /**
+     * Saves the password using the default flow.
+     *
+     * This method handles the process of saving a password when biometric
+     * authentication is not used or was not successful. It sets up the UI using
+     * Compose's {@code setContent} to display the {@link PasswordScreen}.
+     * When the user interacts with the {@link PasswordScreen} to save the password,
+     * it launches a coroutine in the remembered coroutine scope to perform the
+     * actual saving operation asynchronously.
+     *
+     * @param request       The {@link CreatePasswordRequest} containing the password
+     *                      creation details.
+     * @param createRequest The {@link ProviderCreateCredentialRequest} containing
+     *                      additional information about the request.
+     * @param accountId     The ID of the account associated with the password.
+     */
+    private fun savePasswordWithDefaultFlow(
+        request: CreatePasswordRequest,
+        createRequest: ProviderCreateCredentialRequest?,
+        accountId: String?,
+    ) {
+        setContent {
+            val coroutineScope = rememberCoroutineScope()
+            // Display the PasswordScreen.
+            PasswordScreen(
+                // Define the action to be taken when the user clicks the save button.
+                onSave = {
+                    // Launch a coroutine in the remembered scope to perform the save operation.
+                    coroutineScope.launch {
+                        // Call the onSaveClick method to handle the actual saving of the password.
+                        onSaveClick(request, createRequest, accountId)
+                    }
+                },
+            )
         }
     }
 
@@ -85,13 +162,13 @@ class CreatePasswordActivity : ComponentActivity() {
      */
     private suspend fun onSaveClick(
         request: CreatePasswordRequest,
-        createRequest: ProviderCreateCredentialRequest,
+        createRequest: ProviderCreateCredentialRequest?,
         accountId: String?,
     ) {
         savePassword(
             request.id,
             request.password,
-            createRequest.callingAppInfo.packageName,
+            createRequest?.callingAppInfo?.packageName,
             accountId,
         )
         // Set the response back

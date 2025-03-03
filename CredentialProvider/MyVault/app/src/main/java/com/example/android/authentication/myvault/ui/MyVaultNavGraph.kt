@@ -54,7 +54,7 @@ fun MyVaultNavGraph(
                 homeViewModel = viewModel(
                     factory = HomeViewModelFactory(
                         AppDependencies.credentialsDataSource,
-                        AppDependencies.RPIconDataSource,
+                        AppDependencies.rpIconDataSource,
                     ),
                 ),
                 openDrawer = openDrawer,

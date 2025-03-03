@@ -33,6 +33,7 @@ import androidx.credentials.provider.PendingIntentHandler
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.fragment.app.FragmentActivity
 import com.example.android.authentication.myvault.AppDependencies
+import com.example.android.authentication.myvault.BiometricErrorUtils
 import com.example.android.authentication.myvault.R
 import com.example.android.authentication.myvault.data.PasskeyMetadata
 import com.example.android.authentication.myvault.fido.AssetLinkVerifier
@@ -61,32 +62,6 @@ import java.time.Instant
  */
 class CreatePasskeyActivity : FragmentActivity() {
     private val credentialsDataSource = AppDependencies.credentialsDataSource
-
-    companion object {
-        private const val INVALID_ALLOWLIST = "{\"apps\": [\n" +
-            "   {\n" +
-            "      \"type\": \"android\", \n" +
-            "      \"info\": {\n" +
-            "         \"package_name\": \"androidx.credentials.test\",\n" +
-            "         \"signatures\" : [\n" +
-            "         {\"build\": \"release\",\n" +
-            "             \"cert_fingerprint_sha256\": \"HELLO\"\n" +
-            "         },\n" +
-            "         {\"build\": \"ud\",\n" +
-            "         \"cert_fingerprint_sha256\": \"YELLOW\"\n" +
-            "         }]\n" +
-            "      }\n" +
-            "    }\n" +
-            "]}\n" +
-            "\n"
-        private const val GPM_ALLOWLIST_URL =
-            "https://www.gstatic.com/gpm-passkeys-privileged-apps/apps.json"
-
-        private const val TAG = "MyVault"
-        const val KEY_ACCOUNT_LAST_USED_MS = "key_account_last_used_ms"
-        const val KEY_ACCOUNT_ID = "key_account_id"
-        const val USER_ACCOUNT = "user_account"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -126,18 +101,45 @@ class CreatePasskeyActivity : FragmentActivity() {
     private fun handleCreatePublicKeyCredentialRequest(request: ProviderCreateCredentialRequest) {
         val accountId = intent.getStringExtra(KEY_ACCOUNT_ID)
 
+        // Retrieve the BiometricPromptResult from the request.
+        val biometricPromptResult = request.biometricPromptResult
+
+        // Validate the error message in biometric result
+        val biometricErrorMessage =
+            BiometricErrorUtils.getBiometricErrorMessage(this, biometricPromptResult)
+
+        // If there's valid biometric error, set up the failure response and finish.
+        if (biometricErrorMessage.isNotEmpty()) {
+            setUpFailureResponseAndFinish(biometricErrorMessage)
+            return
+        }
+
         // access the associated intent and pass it into the PendingIntentHandler class to get the ProviderCreateCredentialRequest.
         if (request.callingRequest is CreatePublicKeyCredentialRequest) {
             val publicKeyRequest: CreatePublicKeyCredentialRequest =
                 request.callingRequest as CreatePublicKeyCredentialRequest
-            createPasskey(
+
+            // Check if the biometric prompt result contains a successful authentication result.
+            if (biometricPromptResult?.authenticationResult != null) {
+                // If biometric authentication was successful, use the biometric flow to create the passkey.
+                createPasskeyWithBiometricFlow(
+                    publicKeyRequest.requestJson,
+                    request.callingAppInfo,
+                    publicKeyRequest.clientDataHash,
+                    accountId,
+                )
+                return
+            }
+
+            // If biometric authentication was not used or was not successful, use the default flow.
+            createPasskeyWithDefaultFlow(
                 publicKeyRequest.requestJson,
                 request.callingAppInfo,
                 publicKeyRequest.clientDataHash,
                 accountId,
             )
         } else {
-            setUpFailureResponseAndFinish("Unexpected create request found in intent")
+            setUpFailureResponseAndFinish(getString(R.string.unexpected_create_request_found_in_intent))
             return
         }
     }
@@ -151,7 +153,7 @@ class CreatePasskeyActivity : FragmentActivity() {
      * @param clientDataJSON during the signature request; only meaningful when [origin] is set
      * @param clientDataHash a clientDataHash value to sign over in place of assembling and hashing
      */
-    private fun createPasskey(
+    private fun createPasskeyWithDefaultFlow(
         requestJson: String,
         callingAppInfo: CallingAppInfo?,
         clientDataHash: ByteArray?,
@@ -164,12 +166,7 @@ class CreatePasskeyActivity : FragmentActivity() {
 
         val request = PublicKeyCredentialCreationOptions(requestJson)
 
-        var callingAppInfoOrigin: String? = null
-        if (hasRequestContainsOrigin(callingAppInfo)) {
-            callingAppInfoOrigin = validatePrivilegedCallingApp(
-                callingAppInfo,
-            ) ?: return
-        } else {
+        if (!hasRequestContainsOrigin(callingAppInfo)) {
             // Native call. Check for asset links
             validateAssetLinks(request.rp.id, callingAppInfo)
         }
@@ -199,36 +196,84 @@ class CreatePasskeyActivity : FragmentActivity() {
                 ) {
                     super.onAuthenticationSucceeded(result)
 
-                    // Generate CredentialID
-                    val credentialId = ByteArray(32)
-                    SecureRandom().nextBytes(credentialId)
-
-                    // Generate key
-                    val keyPair = generateKeyPair()
-
-                    // Save the private key in your local database against callingAppInfo.packageName.
-                    savePasskeyInCredentialsDataStore(request, credentialId, keyPair)
-
-                    updateMetaInSharedPreferences(accountId)
-
-                    var callingOrigin = appInfoToOrigin(callingAppInfo)
-                    if (callingAppInfoOrigin != null) {
-                        callingOrigin = callingAppInfoOrigin
-                    }
-                    val response = constructWebAuthnResponse(
-                        keyPair,
-                        request,
-                        credentialId,
-                        callingOrigin,
+                    createPasskeyWithBiometricFlow(
+                        requestJson,
                         callingAppInfo,
                         clientDataHash,
+                        accountId,
                     )
-
-                    setIntentForCredentialCredentialResponse(credentialId, response)
                 }
             },
         )
         authenticate(biometricPrompt)
+    }
+
+    /**
+     * Creates a passkey with own biometric flow on Android 15 & higher.
+     *
+     * This method handles the process of creating a passkey, including validating
+     * the calling application, generating a credential ID and key pair, saving
+     * the passkey, updating metadata, constructing a WebAuthn response, and setting
+     * the intent for the credential response.
+     *
+     * @param requestJson The JSON string representing the public key credential
+     * creation options.
+     * @param callingAppInfo Information about the calling application. If null, the
+     * method will finish execution.
+     * @param clientDataHash A hash of the client data.
+     * @param accountId The ID of the account.
+     * @throws IllegalArgumentException if the calling app is not privileged and
+     * asset links validation fails.
+     */
+    private fun createPasskeyWithBiometricFlow(
+        requestJson: String,
+        callingAppInfo: CallingAppInfo?,
+        clientDataHash: ByteArray?,
+        accountId: String?,
+    ) {
+        if (callingAppInfo == null) {
+            finish()
+            return
+        }
+
+        val request = PublicKeyCredentialCreationOptions(requestJson)
+
+        var callingAppInfoOrigin: String? = null
+        if (hasRequestContainsOrigin(callingAppInfo)) {
+            callingAppInfoOrigin = validatePrivilegedCallingApp(
+                callingAppInfo,
+            ) ?: return
+        } else {
+            // Native call. Check for asset links
+            validateAssetLinks(request.rp.id, callingAppInfo)
+        }
+
+        // Generate CredentialID
+        val credentialId = ByteArray(32)
+        SecureRandom().nextBytes(credentialId)
+
+        // Generate key
+        val keyPair = generateKeyPair()
+
+        // Save the private key in your local database against callingAppInfo.packageName.
+        savePasskeyInCredentialsDataStore(request, credentialId, keyPair)
+
+        updateMetaInSharedPreferences(accountId)
+
+        var callingOrigin = appInfoToOrigin(callingAppInfo)
+        if (callingAppInfoOrigin != null) {
+            callingOrigin = callingAppInfoOrigin
+        }
+        val response = constructWebAuthnResponse(
+            keyPair,
+            request,
+            credentialId,
+            callingOrigin,
+            callingAppInfo,
+            clientDataHash,
+        )
+
+        setIntentForCredentialCredentialResponse(credentialId, response)
     }
 
     /**
@@ -304,7 +349,7 @@ class CreatePasskeyActivity : FragmentActivity() {
         }
 
         if (!isRpValid) {
-            setUpFailureResponseAndFinish("Failed to validate rp")
+            setUpFailureResponseAndFinish(getString(R.string.failed_to_validate_rp))
             return
         }
     }
@@ -345,11 +390,11 @@ class CreatePasskeyActivity : FragmentActivity() {
                     privilegedAppsAllowlist,
                 )
             } catch (e: IllegalStateException) {
-                val message = "Incoming call is not privileged to get the origin"
+                val message = getString(R.string.incoming_call_is_not_privileged_to_get_the_origin)
                 setUpFailureResponseAndFinish(message)
                 null
             } catch (e: IllegalArgumentException) {
-                val message = "Privileged allowlist is not formatted properly"
+                val message = getString(R.string.privileged_allowlist_is_not_formatted_properly)
                 setUpFailureResponseAndFinish(message)
                 null
             }
@@ -360,7 +405,14 @@ class CreatePasskeyActivity : FragmentActivity() {
     }
 
     /**
-     * Method to retrieve the list of privileged apps allowlisted by GPM
+     * Retrieves the list of privileged apps allowlisted by Google Password Manager (GPM).
+     *
+     * This method fetches the allowlist from a remote URL ({@link #GPM_ALLOWLIST_URL})
+     * in a background thread. The allowlist is expected to be a string.
+     *
+     * @return The allowlist of privileged apps as a string, or {@code null} if the
+     *         allowlist could not be retrieved or if an error occurred during the
+     *         retrieval process.
      */
     private fun getGPMPrivilegedAppAllowlist(): String? {
         val gpmAllowlist: String? = runBlocking {
@@ -470,6 +522,22 @@ class CreatePasskeyActivity : FragmentActivity() {
         return coseKey
     }
 
+    /**
+     * Converts a {@link BigInteger} to a fixed-size byte array of length 32.
+     *
+     * This method takes a non-negative {@link BigInteger} and converts it into a
+     * fixed-size byte array of length 32. If the {@link BigInteger} requires fewer
+     * than 32 bytes to represent, it will be right-padded with zeros. If the
+     * {@link BigInteger} is larger than 32 bytes, an assertion error will be thrown.
+     *
+     * The {@link BigInteger#toByteArray()} method may add a leading zero byte if the
+     * most-significant bit of the first byte is one. This method handles this case by
+     * removing the leading zero byte before padding.
+     *
+     * @param n The non-negative {@link BigInteger} to convert.
+     * @return A byte array of length 32 representing the {@link BigInteger}.
+     * @throws AssertionError If the input {@link BigInteger} is negative or requires more than 32 bytes.
+     */
     private fun bigIntToFixedArray(n: BigInteger): ByteArray {
         assert(n.signum() >= 0)
 
@@ -534,5 +602,32 @@ class CreatePasskeyActivity : FragmentActivity() {
                 ),
             )
         }
+    }
+
+    companion object {
+        private const val INVALID_ALLOWLIST = "{\"apps\": [\n" +
+            "   {\n" +
+            "      \"type\": \"android\", \n" +
+            "      \"info\": {\n" +
+            "         \"package_name\": \"androidx.credentials.test\",\n" +
+            "         \"signatures\" : [\n" +
+            "         {\"build\": \"release\",\n" +
+            "             \"cert_fingerprint_sha256\": \"HELLO\"\n" +
+            "         },\n" +
+            "         {\"build\": \"ud\",\n" +
+            "         \"cert_fingerprint_sha256\": \"YELLOW\"\n" +
+            "         }]\n" +
+            "      }\n" +
+            "    }\n" +
+            "]}\n" +
+            "\n"
+
+        private const val GPM_ALLOWLIST_URL =
+            "https://www.gstatic.com/gpm-passkeys-privileged-apps/apps.json"
+
+        private const val TAG = "MyVault"
+        const val KEY_ACCOUNT_LAST_USED_MS = "key_account_last_used_ms"
+        const val KEY_ACCOUNT_ID = "key_account_id"
+        const val USER_ACCOUNT = "user_account"
     }
 }

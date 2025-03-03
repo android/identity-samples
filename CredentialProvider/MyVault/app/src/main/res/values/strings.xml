@@ -61,4 +61,12 @@
     <string name="initialized">Initialized</string>
     <string name="hide">HIDE</string>
     <string name="show">SHOW</string>
+    <string name="biometric_error_code_with_message">"Biometric error code: %1$s with message: "</string>
+    <string name="other_providers_error_message">" indicating failed flow. MyVault chooses to handle this flow by stopping the process. Other providers may choose to handle this differently"</string>
+    <string name="incoming_call_is_not_privileged_to_get_the_origin">Incoming call is not privileged to get the origin</string>
+    <string name="privileged_allowlist_is_not_formatted_properly">Privileged allowlist is not formatted properly</string>
+    <string name="failed_to_validate_rp">Failed to validate RP</string>
+    <string name="unexpected_create_request_found_in_intent">Unexpected create request found in intent</string>
+    <string name="unknown_failure">Unknown Failure</string>
+    <string name="could_not_retrieve_gpm_allowlist">Could not retrieve GPM allowlist</string>
 </resources>
