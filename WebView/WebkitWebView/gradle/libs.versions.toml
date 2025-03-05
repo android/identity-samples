@@ -11,11 +11,6 @@ webkit = "1.12.1"
 # BOM Versions
 composeBom = "2024.06.00"
 
-# Testing Versions
-jUnit = "4.13.2"
-espressoCore = "3.5.1"
-
-
 [libraries]
 google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServicesPlugin" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
@@ -31,13 +26,6 @@ compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-material = { group = "androidx.compose.material", name = "material" }
-
-# Testing
-junit = { group = "junit", name = "junit", version.ref = "jUnit"}
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidPlugin" }
