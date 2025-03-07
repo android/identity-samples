@@ -144,6 +144,8 @@ class AuthenticationViewModel @Inject constructor(
                         response = restoreKeyResponse.getPasskeyResponse,
                         onSuccess = onSuccess
                     )
+                } else {
+                    repository.clearSessionIdFromDataStore()
                 }
             }
         }

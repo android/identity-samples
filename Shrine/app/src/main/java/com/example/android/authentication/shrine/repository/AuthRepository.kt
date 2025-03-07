@@ -279,11 +279,9 @@ class AuthRepository @Inject constructor(
                 } else {
                     Log.e(TAG, "Cannot call registerResponse")
                 }
-                return false
             } else {
                 Log.e(TAG, "Cannot call registerResponse")
             }
-            return false
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse")
         }
@@ -324,6 +322,12 @@ class AuthRepository @Inject constructor(
     suspend fun setSignedInState(flag: Boolean) {
         dataStore.edit { prefs ->
             prefs[IS_SIGNED_IN_THROUGH_PASSKEYS] = flag
+        }
+    }
+
+    suspend fun clearSessionIdFromDataStore() {
+        dataStore.edit { prefs ->
+            prefs.remove(SESSION_ID)
         }
     }
 }
