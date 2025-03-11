@@ -1,0 +1,4 @@
+<resources>
+  <string name="app_name">WebViewSample</string>
+  <string name="server_url">https://alder-sunny-bicycle.glitch.me/</string>
+</resources>
