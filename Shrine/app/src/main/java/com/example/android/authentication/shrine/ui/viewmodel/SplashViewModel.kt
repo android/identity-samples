@@ -16,8 +16,14 @@
 package com.example.android.authentication.shrine.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.android.authentication.shrine.repository.AuthRepository
+import com.example.android.authentication.shrine.ui.navigation.ShrineAppDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -31,6 +37,30 @@ class SplashViewModel @Inject constructor(
     private val repository: AuthRepository,
 ) : ViewModel() {
 
+    private val _uiState = MutableStateFlow(SplashScreenState())
+    val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val startDestination = if (isSignedInThroughPassword()) {
+                if (isSignedInThroughPasskeys()) {
+                    ShrineAppDestinations.MainMenuRoute.name
+                } else {
+                    ShrineAppDestinations.CreatePasskeyRoute.name
+                }
+            } else {
+                ShrineAppDestinations.AuthRoute.name
+            }
+
+            _uiState.update {
+                SplashScreenState(
+                    nextScreen = startDestination,
+                    isLoading = false
+                )
+            }
+        }
+    }
+
     /**
      * Checks if the user is signed in using a password.
      *
@@ -39,7 +69,7 @@ class SplashViewModel @Inject constructor(
      *
      * @return True if the user is signed in using a password, false otherwise.
      */
-    suspend fun isSignedInThroughPassword(): Boolean {
+    private suspend fun isSignedInThroughPassword(): Boolean {
         return repository.isSignedInThroughPassword()
     }
 
@@ -51,7 +81,12 @@ class SplashViewModel @Inject constructor(
      *
      * @return True if the user is signed in using passkeys, false otherwise.
      */
-    suspend fun isSignedInThroughPasskeys(): Boolean {
+    private suspend fun isSignedInThroughPasskeys(): Boolean {
         return repository.isSignedInThroughPasskeys()
     }
 }
+
+data class SplashScreenState(
+    val isLoading: Boolean = true,
+    val nextScreen: String = ShrineAppDestinations.AuthRoute.name
+)

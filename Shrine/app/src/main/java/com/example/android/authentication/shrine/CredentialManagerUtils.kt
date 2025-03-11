@@ -17,16 +17,22 @@ package com.example.android.authentication.shrine
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.ClearCredentialStateRequest.Companion.TYPE_CLEAR_RESTORE_CREDENTIAL
 import androidx.credentials.CreateCredentialRequest
+import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.CreateRestoreCredentialRequest
+import androidx.credentials.CreateRestoreCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
+import androidx.credentials.GetRestoreCredentialOption
 import androidx.credentials.exceptions.CreateCredentialException
 import org.json.JSONObject
 import javax.inject.Inject
@@ -124,6 +130,80 @@ class CredentialManagerUtils @Inject constructor(
         }
         return GenericCredentialManagerResponse.CreatePasskeySuccess(createPasskeyResponse = credentialResponse)
     }
+
+    /**
+     * Creates a restore key using the Credential Manager API.
+     *
+     * @param requestResult A [JSONObject] containing the data required for creating the restore
+     * credential. This data is used to create a [CreateRestoreCredentialRequest]
+     *
+     * @param context The Android Context used for checking passkey eligibility and interacting
+     * with the Credential Manager API.
+     *
+     * @return A [CreateRestoreCredentialResponse] indicating the result of the operation
+     *
+     * @throws Exception If any error occurs during the credential creation process.
+     */
+    suspend fun createRestoreKey(
+        requestResult: JSONObject,
+        context: Context,
+    ): GenericCredentialManagerResponse {
+        val passkeysEligibility = PasskeysEligibility.isPasskeySupported(context)
+        val credentialResponse: CreateRestoreCredentialResponse
+
+        if (!passkeysEligibility.isEligible) {
+            return GenericCredentialManagerResponse.Error(errorMessage = passkeysEligibility.reason)
+        }
+
+        val restoreCredentialRequest = CreateRestoreCredentialRequest(requestResult.toString())
+        try {
+            credentialResponse = credentialManager.createCredential(
+                context,
+                restoreCredentialRequest,
+            ) as CreateRestoreCredentialResponse
+        } catch (e: Exception) {
+            return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
+        }
+        return GenericCredentialManagerResponse.CreatePasskeySuccess(createPasskeyResponse = credentialResponse)
+    }
+
+    /**
+     * Retrieves the restore key using the Credential Manager API.
+     *
+     * @param authenticationJson The JSON object containing authentication information.
+     * @param context The application context.
+     * @return A [GenericCredentialManagerResponse] object indicating success or failure.
+     */
+    suspend fun getRestoreKey(
+        authenticationJson: JSONObject,
+        context: Context,
+    ): GenericCredentialManagerResponse {
+        val passkeysEligibility = PasskeysEligibility.isPasskeySupported(context)
+        if (!passkeysEligibility.isEligible) {
+            return GenericCredentialManagerResponse.Error(errorMessage = passkeysEligibility.reason)
+        }
+
+        val options = GetRestoreCredentialOption(authenticationJson.toString())
+        val getRestoreKeyRequest = GetCredentialRequest(listOf(options))
+        val result: GetCredentialResponse?
+        try {
+            result = credentialManager.getCredential(
+                context,
+                getRestoreKeyRequest,
+            )
+        } catch (e: Exception) {
+            return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
+        }
+        return GenericCredentialManagerResponse.GetPasskeySuccess(result)
+    }
+
+    /**
+     * Deletes the restore key using the Credential Manager API.
+     */
+    suspend fun deleteRestoreKey() {
+        val clearRequest = ClearCredentialStateRequest(requestType = TYPE_CLEAR_RESTORE_CREDENTIAL)
+        credentialManager.clearCredentialState(clearRequest)
+    }
 }
 
 sealed class GenericCredentialManagerResponse {
@@ -132,7 +212,7 @@ sealed class GenericCredentialManagerResponse {
     ) : GenericCredentialManagerResponse()
 
     data class CreatePasskeySuccess(
-        val createPasskeyResponse: CreatePublicKeyCredentialResponse,
+        val createPasskeyResponse: CreateCredentialResponse,
     ) : GenericCredentialManagerResponse()
 
     data class Error(

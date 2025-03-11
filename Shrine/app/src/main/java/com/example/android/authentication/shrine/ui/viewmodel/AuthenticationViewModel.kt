@@ -58,7 +58,7 @@ class AuthenticationViewModel @Inject constructor(
      * Requests a sign-in challenge from the server.
      *
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
-     * @param getPasskey Lambda function that calls CredManUtil's getPasskey method with Activity reference
+     * @param getPasskey Lambda that calls CredManUtil's getPasskey method with Activity reference
      */
     fun signInWithPasskeysRequest(
         onSuccess: (Boolean) -> Unit,
@@ -100,6 +100,7 @@ class AuthenticationViewModel @Inject constructor(
                 val isPasswordCredential = response.credential is PasswordCredential
                 repository.setSignedInState(!isPasswordCredential)
                 onSuccess(isPasswordCredential)
+
                 _uiState.update {
                     AuthenticationUiState(
                         isSignInWithPasskeysSuccess = true,
@@ -116,11 +117,70 @@ class AuthenticationViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Checks for a stored restore key and attempts to sign in with it if found.
+     *
+     * @param getRestoreKey A suspend function that takes a [JSONObject] and returns a [GenericCredentialManagerResponse].
+     * This function is responsible for retrieving the restore key from the CredentialManager.
+     *
+     * @param onSuccess A lambda that takes a [Boolean] indicating the success of the sign-in operation.
+     *
+     * @see GenericCredentialManagerResponse
+     * @see signInWithPasskeysResponse
+     */
+    fun checkForStoredRestoreKey(
+        getRestoreKey: suspend (JSONObject) -> GenericCredentialManagerResponse,
+        onSuccess: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            repository.signInWithPasskeysRequest()?.let { data ->
+                val restoreKeyResponse = getRestoreKey(data)
+                if (restoreKeyResponse is GenericCredentialManagerResponse.GetPasskeySuccess) {
+                    _uiState.update {
+                        AuthenticationUiState(isLoading = true)
+                    }
+                    signInWithPasskeysResponse(
+                        response = restoreKeyResponse.getPasskeyResponse,
+                        onSuccess = onSuccess
+                    )
+                } else {
+                    repository.clearSessionIdFromDataStore()
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates a restore key by registering a new passkey.
+     *
+     * @param createRestoreKeyOnCredMan A suspend function that takes a [JSONObject] and returns a
+     * [GenericCredentialManagerResponse]. This function is responsible for creating
+     * the restore key.
+     *
+     * @see GenericCredentialManagerResponse
+     */
+    fun createRestoreKey(
+        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse
+    ) {
+        viewModelScope.launch {
+            repository.registerPasskeyCreationRequest()?.let { data ->
+                val createRestoreKeyResponse = createRestoreKeyOnCredMan(data)
+                if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                    repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
+                }
+            }
+        }
+    }
 }
 
+/**
+ * Data class that stores tha data of Authentication Screen
+ */
 data class AuthenticationUiState(
     val isLoading: Boolean = false,
     @StringRes val passkeyResponseMessageResourceId: Int = R.string.empty_string,
     val passkeyRequestErrorMessage: String? = null,
     val isSignInWithPasskeysSuccess: Boolean = false,
+    val isRestoreCredentialFound: Boolean = false,
 )

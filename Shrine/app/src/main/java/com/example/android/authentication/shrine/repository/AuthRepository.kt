@@ -16,9 +16,12 @@
 package com.example.android.authentication.shrine.repository
 
 import android.util.Log
+import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.CreateRestoreCredentialResponse
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
+import androidx.credentials.RestoreCredential
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -173,10 +176,22 @@ class AuthRepository @Inject constructor(
      * @return True if the registration was successful, false otherwise.
      */
     suspend fun registerPasskeyCreationResponse(
-        credentialResponse: CreatePublicKeyCredentialResponse,
+        credentialResponse: CreateCredentialResponse,
     ): Boolean {
         try {
-            val registrationResponseJson = JSONObject(credentialResponse.registrationResponseJson)
+            val registrationResponseJson = when (credentialResponse) {
+                is CreatePublicKeyCredentialResponse -> {
+                    JSONObject(credentialResponse.registrationResponseJson)
+                }
+
+                is CreateRestoreCredentialResponse -> {
+                    JSONObject(credentialResponse.responseJson)
+                }
+
+                else -> {
+                    return false
+                }
+            }
 
             val result = authApi.registerPasskeyCreationResponse(
                 sessionId = dataStore.read(SESSION_ID)!!,
@@ -231,7 +246,11 @@ class AuthRepository @Inject constructor(
     suspend fun signInWithPasskeysResponse(credentialResponse: GetCredentialResponse): Boolean {
         try {
             val signInResponse =
-                credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON")
+                credentialResponse.credential.data.getString(if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
+                    "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
+                } else {
+                    "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
+                })
             if (signInResponse != null) {
                 val signInResponseJSON = JSONObject(signInResponse)
                 val response = signInResponseJSON.getJSONObject("response")
@@ -260,11 +279,9 @@ class AuthRepository @Inject constructor(
                 } else {
                     Log.e(TAG, "Cannot call registerResponse")
                 }
-                return false
             } else {
                 Log.e(TAG, "Cannot call registerResponse")
             }
-            return false
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse")
         }
@@ -305,6 +322,12 @@ class AuthRepository @Inject constructor(
     suspend fun setSignedInState(flag: Boolean) {
         dataStore.edit { prefs ->
             prefs[IS_SIGNED_IN_THROUGH_PASSKEYS] = flag
+        }
+    }
+
+    suspend fun clearSessionIdFromDataStore() {
+        dataStore.edit { prefs ->
+            prefs.remove(SESSION_ID)
         }
     }
 }

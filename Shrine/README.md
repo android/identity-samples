@@ -17,6 +17,7 @@ This sample app implements the following use cases:
 * Generate a new passkey for an existing account
 * Store the credentials for created accounts in the user's Google Password Manager account.
 * Sign in flow with passkeys support
+* Sign in flow with restore credentials support
 * Logout from the account.
 
 ## Requirements
@@ -198,6 +199,38 @@ This section describes how to send a sign-in response to the server and authenti
 1.  Call `signinResponse` from `AuthRespository.kt`. Pass the response and credential to the method as parameters.
 
 2.  If successful, the user has been signed in and you can redirect them to the home screen.
+
+
+### **Restore credentials of a returning user on a new device**
+
+This section describes how to implement restore credentials
+
+1. On a successful user authentication, create a Restore Key
+
+   1. Call `AuthRepository`'s `registerPasskeyCreationRequest` method 
+   
+   2. With the PasskeyCreationRequest recieved from the above method, call `CredentialManagerUtils`'s `createRestoreKey` method 
+   
+   3. Then call `AuthRepository`'s `registerPasskeyCreationResponse` method
+
+
+2. Once on a new device, check if there is any restore key present on the device or not (brought to the new device in the process of Backup and Restore)
+
+   1. Call `AuthRepository`'s `signInWithPasskeysRequest` method 
+   
+   2. With the PasskeyCreationRequest recieved from the above method, call `CredentialManagerUtils`'s `getRestoreKey` method 
+   
+   3. If there is a RestoreKey present this will return a `GenericCredentialManagerResponse.GetPasskeySuccess` else this will return a `GenericCredentialManagerResponse.Error`
+
+
+3. Sign in using the found Restore Key
+
+   1. If a restore key is found in the above step, simply use it to sign-in using `AuthRepository`'s `signInWithPasskeysResponse` method
+
+
+4. Delete a Restore Key
+
+   1. If a user logs out of the app, make sure to clear the stored restore key by calling `CredentialManagerUtils`'s `deleteRestoreKey`
 
 
 ## **Specific use case handling**
