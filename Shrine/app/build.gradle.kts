@@ -35,11 +35,11 @@ val keystoreProperties = Properties()
 keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
-    namespace = "com.example.android.authentication.shrine"
+    namespace = "com.authentication.shrine"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.android.authentication.shrine"
+        applicationId = "com.authentication.shrine"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
