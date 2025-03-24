@@ -79,9 +79,9 @@ fun AuthenticationScreen(
             createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
-                    requestResult = createRestoreCredObject
+                    requestResult = createRestoreCredObject,
                 )
-            }
+            },
         )
     }
 
@@ -108,7 +108,7 @@ fun AuthenticationScreen(
             },
             onSuccess = {
                 navigateToHome(true)
-            }
+            },
         )
     }
 
@@ -182,7 +182,9 @@ fun AuthenticationScreen(
 
         if (!uiState.passkeyRequestErrorMessage.isNullOrBlank()) {
             showErrorDialog()
-            ErrorAlertDialog(uiState.passkeyRequestErrorMessage)
+            ErrorAlertDialog(
+                errorMessage = uiState.passkeyRequestErrorMessage,
+            )
         }
 
         if (!uiState.isSignInWithPasskeysSuccess) {

@@ -88,9 +88,9 @@ fun RegisterScreen(
             createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
-                    requestResult = createRestoreCredObject
+                    requestResult = createRestoreCredObject,
                 )
-            }
+            },
         )
     }
 
