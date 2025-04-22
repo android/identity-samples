@@ -424,7 +424,9 @@ class AuthApi @Inject constructor(
                 }
             }
             jsonReader.endObject()
-            jsonArray.put(jsonObject)
+            if(jsonObject.length() != 0) {
+                jsonArray.put(jsonObject)
+            }
         }
         jsonReader.endArray()
         return jsonArray
