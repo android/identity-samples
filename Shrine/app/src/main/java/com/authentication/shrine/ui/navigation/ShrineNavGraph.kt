@@ -117,17 +117,18 @@ fun ShrineNavGraph(
 
         composable(route = ShrineAppDestinations.Settings.name) {
             SettingsScreen(
+                viewModel = hiltViewModel(),
                 onCreatePasskeyClicked = {
-                    navController.navigate(ShrineAppDestinations.Placeholder.name)
+                    navController.navigate(ShrineAppDestinations.CreatePasskeyRoute.name)
                 },
                 onChangePasswordClicked = {
                     navController.navigate(ShrineAppDestinations.Placeholder.name)
                 },
-                onHelpClicked = {
-                    navController.navigate(ShrineAppDestinations.Help.name)
-                },
                 onLearnMoreClicked = {
                     navController.navigate(ShrineAppDestinations.LearnMore.name)
+                },
+                onManagePasskeysClicked = {
+                    navController.navigate(ShrineAppDestinations.Placeholder.name)
                 },
             )
         }

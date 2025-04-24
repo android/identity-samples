@@ -18,7 +18,7 @@ package com.authentication.shrine.ui.common
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
@@ -33,11 +33,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.dark_button
+import com.authentication.shrine.ui.theme.light_button
 
 /**
  * The default shape for Shrine buttons.
  */
-private val ButtonShape = CutCornerShape(10)
+private val ButtonShape = RoundedCornerShape(50)
 
 /**
  * A custom button composable for the Shrine app.
@@ -55,7 +56,7 @@ fun ShrineButton(
     onClick: () -> Unit,
     buttonText: String,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = dark_button,
+    isButtonDark: Boolean = true,
     isButtonEnabled: Boolean = true,
     shape: Shape = ButtonShape,
     border: BorderStroke? = null,
@@ -66,7 +67,11 @@ fun ShrineButton(
         modifier = modifier.fillMaxWidth(),
         shape = shape,
         colors = ButtonColors(
-            containerColor = backgroundColor,
+            containerColor = if (isButtonDark) {
+                dark_button
+            } else {
+                light_button
+            },
             contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = MaterialTheme.colorScheme.outline,
             disabledContentColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -75,7 +80,14 @@ fun ShrineButton(
         border = border,
         interactionSource = interactionSource,
     ) {
-        Text(text = buttonText)
+        Text(
+            text = buttonText,
+            color = if (isButtonDark) {
+                light_button
+            } else {
+                dark_button
+            }
+        )
     }
 }
 

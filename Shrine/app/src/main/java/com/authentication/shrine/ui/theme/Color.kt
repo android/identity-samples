@@ -18,8 +18,8 @@ package com.authentication.shrine.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val md_theme_light_primary = Color(0xFFDFBFC0)
-val dark_button = Color(0xFFDFBFC0)
-val light_button = Color(0xFFFFEFF0)
+val dark_button = Color(0xFF006B5F)
+val light_button = Color(0xFFFFFFFF)
 val md_theme_light_onPrimary = Color(0xFF291718)
 val md_theme_light_primaryContainer = Color(0xFFFFD9E3)
 val md_theme_light_onPrimaryContainer = Color(0xFF3E001F)
@@ -35,7 +35,7 @@ val md_theme_light_error = Color(0xFFBA1A1A)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
 val md_theme_light_onError = Color(0xFFFFFFFF)
 val md_theme_light_onErrorContainer = Color(0xFF410002)
-val md_theme_light_background = Color(0xFFEFDFDF)
+val md_theme_light_background = Color(0xFFFFFFFF)
 val md_theme_light_onBackground = Color(0xFF3F0018)
 val md_theme_light_surface = Color.Transparent
 val md_theme_light_onSurface = Color(0xFF3F0018)

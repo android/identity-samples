@@ -171,7 +171,7 @@ fun AuthenticationScreen(
             ShrineButton(
                 onClick = navigateToRegister,
                 buttonText = stringResource(id = R.string.sign_up),
-                backgroundColor = light_button,
+                isButtonDark = false,
                 isButtonEnabled = !uiState.isLoading,
             )
         }

@@ -332,4 +332,8 @@ class AuthRepository @Inject constructor(
             prefs.remove(SESSION_ID)
         }
     }
+
+    suspend fun getUsername(): String {
+        return dataStore.read(USERNAME).orEmpty()
+    }
 }

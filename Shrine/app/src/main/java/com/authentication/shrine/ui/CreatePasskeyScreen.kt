@@ -195,7 +195,7 @@ private fun CreatePasskeyActions(
         ShrineButton(
             onClick = onNotNowClicked,
             buttonText = stringResource(R.string.not_now),
-            backgroundColor = light_button,
+            isButtonDark = false,
             isButtonEnabled = !uiState.isLoading,
         )
     }
