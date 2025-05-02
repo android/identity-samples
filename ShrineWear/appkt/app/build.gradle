@@ -1,0 +1,127 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+android {
+
+    compileSdkVersion 35
+
+    signingConfigs {
+        debug {
+            def keystoreFile = project.rootProject.file('debug.keystore')
+            if (keystoreFile.exists()) {
+                storeFile file(keystoreFile.toPath())
+            } else {
+                Properties properties = new Properties()
+                def propertiesFile = project.rootProject.file('local.properties')
+                if (propertiesFile.exists()) {
+                    properties.load(propertiesFile.newDataInputStream())
+                    storeFile file(properties.getProperty("key_path"))
+                }
+            }
+
+        }
+    }
+    defaultConfig {
+        applicationId "com.androidauth.shrineWear"
+        minSdk 30
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+        buildConfigField("String", "CLIENT_ID", CLIENT_ID)
+        buildConfigField("String", "CLIENT_SECRET", CLIENT_SECRET)
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    namespace 'com.androidauth.shrineWear'
+}
+
+dependencies {
+    implementation(platform(libs.kotlin.bom))
+
+    implementation libs.playServicesWearable
+
+    implementation libs.androidx.core.ktx
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.kotlinx.serialization.core
+    implementation libs.kotlinx.serialization.json
+
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.material.icons
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.compose.material.icons.extended
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.navigation.compose
+
+    // Wear Dependencies
+    implementation libs.androidx.wear.compose.material3
+    implementation libs.androidx.wear.compose.navigation
+
+    // Wear Horologist SIWG composables
+    implementation libs.horologist.auth.ui
+
+    // AndroidX/Team Specific package
+    implementation libs.androidx.credentials
+    implementation libs.androidx.credentials.playServicesAuth
+
+    // Firebase Specific
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.auth.ktx
+    implementation libs.firebase.database.ktx
+    implementation libs.firebase.functions.ktx
+
+    implementation libs.googleid
+    implementation libs.androidx.wear.remote.interactions
+    implementation libs.compose.ui.tooling
+
+    // For Legacy Sign in With Google-- might need core as well
+    implementation(libs.play.services.auth)
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
+    androidTestImplementation libs.androidx.compose.ui.test.junit4
+    debugImplementation libs.androidx.compose.ui.tooling
+    debugImplementation libs.androidx.compose.ui.test.manifest
+}
