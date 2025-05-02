@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.androidauth.shrineWear.ui
 
 import android.app.Application
@@ -7,8 +22,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.wear.remote.interactions.RemoteActivityHelper
-import com.androidauth.shrineWear.R
 import com.androidauth.shrineWear.BuildConfig
+import com.androidauth.shrineWear.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -26,14 +41,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-// TODO Add your client id & secret here (for dev purposes only).
-private val CLIENT_ID = BuildConfig.CLIENT_ID
-private val CLIENT_SECRET = BuildConfig.CLIENT_SECRET
-private const val TAG = "LegacyAuthViewModel"
-
 data class DeviceGrantState(
     val statusCode: Int = R.string.oauth_device_authorization_default,
-    val resultMessage: String = ""
+    val resultMessage: String = "",
 )
 
 class OAuthViewModel(application: Application) : AndroidViewModel(application) {
@@ -73,7 +83,7 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
         val verificationUri: String,
         val userCode: String,
         val deviceCode: String,
-        val interval: Int
+        val interval: Int,
     )
 
     /**
@@ -83,21 +93,21 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
      */
     private suspend fun retrieveVerificationInfo(): Result<VerificationInfo> {
         return try {
-            Log.d(TAG, "Retrieving verification info...")
+            Log.d(TAG, DEBUG_RETRIEVING_VERIFICATION_INF0)
             val responseJson = doPostRequest(
                 url = "https://oauth2.googleapis.com/device/code",
                 params = mapOf(
                     "client_id" to CLIENT_ID,
-                    "scope" to "https://www.googleapis.com/auth/userinfo.profile"
-                )
+                    "scope" to "https://www.googleapis.com/auth/userinfo.profile",
+                ),
             )
             Result.success(
                 VerificationInfo(
                     verificationUri = responseJson.getString("verification_url"),
                     userCode = responseJson.getString("user_code"),
                     deviceCode = responseJson.getString("device_code"),
-                    interval = responseJson.getInt("interval")
-                )
+                    interval = responseJson.getInt("interval"),
+                ),
             )
         } catch (e: CancellationException) {
             throw e
@@ -123,7 +133,7 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
                 addCategory(Intent.CATEGORY_BROWSABLE)
                 data = Uri.parse(verificationUri)
             },
-            null
+            null,
         )
     }
 
@@ -134,9 +144,9 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
      * For this sample the various exceptions aren't handled.
      */
     private tailrec suspend fun retrieveToken(deviceCode: String, interval: Int): String {
-        Log.d(TAG, "Polling for token...")
+        Log.d(TAG, DEBUG_POLLING_FOR_TOKEN)
         return fetchToken(deviceCode).getOrElse {
-            Log.d(TAG, "No token yet. Waiting...")
+            Log.d(TAG, DEBUG_NO_TOKEN_YET)
             delay(interval * 1000L)
             return retrieveToken(deviceCode, interval)
         }
@@ -150,8 +160,8 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
                     "client_id" to CLIENT_ID,
                     "client_secret" to CLIENT_SECRET,
                     "device_code" to deviceCode,
-                    "grant_type" to "urn:ietf:params:oauth:grant-type:device_code"
-                )
+                    "grant_type" to "urn:ietf:params:oauth:grant-type:device_code",
+                ),
             )
 
             Result.success(responseJson.getString("access_token"))
@@ -172,8 +182,8 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
             val responseJson = doGetRequest(
                 url = "https://www.googleapis.com/oauth2/v2/userinfo",
                 requestHeaders = mapOf(
-                    "Authorization" to "Bearer $token"
-                )
+                    "Authorization" to "Bearer $token",
+                ),
             )
             Result.success(responseJson.getString("name"))
         } catch (e: CancellationException) {
@@ -184,14 +194,13 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     /**
      * Simple implementation of a POST request. Normally you'd use a library to do these requests.
      */
     private suspend fun doPostRequest(
         url: String,
         params: Map<String, String>,
-        dispatcher: CoroutineDispatcher = Dispatchers.IO
+        dispatcher: CoroutineDispatcher = Dispatchers.IO,
     ): JSONObject {
         return withContext(dispatcher) {
             val conn = (URL(url).openConnection() as HttpURLConnection)
@@ -215,7 +224,7 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
             val inputReader = BufferedReader(InputStreamReader(conn.inputStream, "UTF-8"))
             val response = inputReader.readText()
 
-            Log.d("PostRequestUtil", "Response: $response")
+            Log.d(TAG, DEBUG_POST_REQUEST_UTIL_RESPONSE.format(response))
 
             JSONObject(response)
         }
@@ -227,7 +236,7 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun doGetRequest(
         url: String,
         requestHeaders: Map<String, String>,
-        dispatcher: CoroutineDispatcher = Dispatchers.IO
+        dispatcher: CoroutineDispatcher = Dispatchers.IO,
     ): JSONObject {
         return withContext(dispatcher) {
             val conn = (URL(url).openConnection() as HttpURLConnection)
@@ -237,9 +246,23 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
             val inputReader = BufferedReader(InputStreamReader(conn.inputStream, "UTF-8"))
             val response = inputReader.readText()
 
-            Log.d("RequestUtil", "Response: $response")
+            Log.d(TAG, DEBUG_REQUEST_UTIL_RESPONSE.format(response))
 
             JSONObject(response)
         }
+    }
+
+    companion object {
+        // TODO Add your client id & secret here (for dev purposes only).
+        private const val CLIENT_ID = BuildConfig.CLIENT_ID
+        private const val CLIENT_SECRET = BuildConfig.CLIENT_SECRET
+
+        // Logging constants
+        private const val TAG = "OAuthViewModel"
+        private const val DEBUG_NO_TOKEN_YET = "No token yet. Waiting..."
+        private const val DEBUG_POLLING_FOR_TOKEN = "Polling for token..."
+        private const val DEBUG_POST_REQUEST_UTIL_RESPONSE = "PostRequestUtil Response: %s"
+        private const val DEBUG_REQUEST_UTIL_RESPONSE = "RequestUtil Response: %s"
+        private const val DEBUG_RETRIEVING_VERIFICATION_INF0 = "Retrieving verification info..."
     }
 }

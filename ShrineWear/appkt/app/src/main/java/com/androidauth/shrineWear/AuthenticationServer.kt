@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.androidauth.shrineWear
 
 import android.util.Base64
@@ -11,8 +26,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-const val SERVER_CLIENT_ID = ""
-data class CredentialData (
+const val SERVER_CLIENT_ID = BuildConfig.CLIENT_SECRET
+
+data class CredentialData(
     val cookie: String?,
     val json: String?,
     val token: String?,
@@ -84,7 +100,7 @@ class AuthenticationServer {
 
     private suspend fun getCredentialAssertionData(
         requestType: String,
-        request: Map<String, String>
+        request: Map<String, String>,
     ): CredentialData {
         return suspendCoroutine { continuation ->
             val data: MutableMap<String, Any> = HashMap()
@@ -138,5 +154,4 @@ class AuthenticationServer {
     private fun b64Encode(str: ByteArray): String {
         return Base64.encodeToString(str, Base64.NO_WRAP or Base64.URL_SAFE)
     }
-
 }
