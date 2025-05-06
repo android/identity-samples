@@ -13,10 +13,14 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineEditText
+import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.common.ShrineToolbar
 import com.authentication.shrine.ui.theme.ShrineTheme
@@ -67,8 +72,11 @@ fun SettingsScreen(
     uiState: SettingsUiState,
     modifier: Modifier = Modifier,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -100,6 +108,16 @@ fun SettingsScreen(
                 uiState = uiState
             )
         }
+
+        if (!uiState.isLoading) {
+            ShrineLoader()
+        }
+
+        if (uiState.errorMessage.isNotBlank()) {
+            LaunchedEffect(uiState) {
+                snackbarHostState.showSnackbar(message = uiState.errorMessage)
+            }
+        }
     }
 }
 
@@ -120,21 +138,22 @@ fun SecuritySection(
         if (uiState.userHasPasskeys) {
             PasskeysManagementTab(
                 onManageClicked = onManagePasskeysClicked,
-                noOfPasskeys = uiState.noOfPasskeys
+                noOfPasskeys = uiState.passkeysList.size,
+                isButtonEnabled = !uiState.isLoading
             )
         } else {
             CreatePasskeyTab(
                 onLearnMoreClicked = onLearnMoreClicked,
-                onCreatePasskeyClicked = onCreatePasskeyClicked
+                onCreatePasskeyClicked = onCreatePasskeyClicked,
+                isButtonEnabled = !uiState.isLoading
             )
         }
 
-        if (uiState.userHasPassword) {
-            PasswordManagementTab(
-                onChangePasswordClicked = onChangePasswordClicked,
-                lastPasswordChange = uiState.passwordChanged
-            )
-        }
+        PasswordManagementTab(
+            onChangePasswordClicked = onChangePasswordClicked,
+            lastPasswordChange = uiState.passwordChanged,
+            isButtonEnabled = !uiState.isLoading
+        )
     }
 }
 
@@ -142,6 +161,7 @@ fun SecuritySection(
 fun PasskeysManagementTab(
     onManageClicked: () -> Unit,
     noOfPasskeys: Int,
+    isButtonEnabled: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -178,6 +198,7 @@ fun PasskeysManagementTab(
 
         TextButton(
             onClick = onManageClicked,
+            enabled = isButtonEnabled
         ) {
             Text(
                 stringResource(R.string.manage),
@@ -190,7 +211,8 @@ fun PasskeysManagementTab(
 @Composable
 fun CreatePasskeyTab(
     onLearnMoreClicked: () -> Unit,
-    onCreatePasskeyClicked: () -> Unit
+    onCreatePasskeyClicked: () -> Unit,
+    isButtonEnabled: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -241,6 +263,7 @@ fun CreatePasskeyTab(
         ShrineButton(
             onClick = onCreatePasskeyClicked,
             buttonText = stringResource(R.string.create_passkey),
+            isButtonEnabled = isButtonEnabled,
         )
     }
 }
@@ -248,7 +271,8 @@ fun CreatePasskeyTab(
 @Composable
 fun PasswordManagementTab(
     onChangePasswordClicked: () -> Unit,
-    lastPasswordChange: String
+    lastPasswordChange: String,
+    isButtonEnabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -281,6 +305,7 @@ fun PasswordManagementTab(
 
         TextButton(
             onClick = onChangePasswordClicked,
+            enabled = isButtonEnabled
         ) {
             Text(stringResource(R.string.change), color = Companion.Black)
         }

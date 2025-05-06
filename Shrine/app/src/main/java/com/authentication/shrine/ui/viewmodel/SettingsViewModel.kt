@@ -2,6 +2,8 @@ package com.authentication.shrine.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.authentication.shrine.model.PasskeyCredential
+import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,25 +19,44 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
 
-    // TODO: Change the logic once we are able to fetch list of passkeys for a user
     init {
         viewModelScope.launch {
-            _uiState.update {
-                SettingsUiState(
-                    userHasPasskeys = authRepository.isSignedInThroughPasskeys(),
-                    userHasPassword = authRepository.isSignedInThroughPassword(),
-                    username = authRepository.getUsername()
-                )
+            getPasskeysList()
+        }
+    }
+
+    fun getPasskeysList() {
+        _uiState.update {
+            SettingsUiState(isLoading = true)
+        }
+
+        viewModelScope.launch {
+            val data = authRepository.getListOfPasskeys()
+            if (data != null) {
+                _uiState.update {
+                    SettingsUiState(
+                        userHasPasskeys = data.credentials.isNotEmpty(),
+                        username = "", // Set the username from Datastore
+                        passkeysList = data.credentials,
+                        // passwordChanged = Fetch from datastore
+                    )
+                }
+            } else {
+                _uiState.update {
+                    SettingsUiState(
+                        errorMessage = "Some error occurred while getting the list of passkeys"
+                    )
+                }
             }
         }
     }
 }
 
 data class SettingsUiState(
+    val isLoading: Boolean = false,
     val userHasPasskeys: Boolean = true,
-    val userHasPassword: Boolean = false,
     val username: String = "",
-    val noOfPasskeys: Int = 3,
-    val aaguidList: List<String> = listOf(),
+    val passkeysList: List<PasskeyCredential> = listOf(),
     val passwordChanged: String = "Jan 1, 2025",
+    val errorMessage: String = ""
 )

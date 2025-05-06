@@ -68,4 +68,5 @@
     <string name="how_passkeys_work">How passkeys work</string>
     <string name="create_passkey_text">"You can sign in securely with your passkey using your fingerprint, face, or other screen lock method. "</string>
     <string name="last_changed">Last changed: %1$s</string>
+    <string name="passkey_management">Passkey Management</string>
 </resources>

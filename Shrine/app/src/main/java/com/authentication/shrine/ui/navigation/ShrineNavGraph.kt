@@ -133,6 +133,10 @@ fun ShrineNavGraph(
             )
         }
 
+        composable(route = ShrineAppDestinations.PasskeyManagementTab.name) {
+
+        }
+
         composable(route = ShrineAppDestinations.ShrineApp.name) {
             ShrineAppScreen()
         }
