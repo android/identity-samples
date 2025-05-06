@@ -1,6 +1,6 @@
 [versions]
 coreSplashscreen = "1.0.1"
-credentials = "1.5.0-rc01"
+credentials = "1.5.0"
 googleid = "1.1.1"
 googleServicesPlugin = "4.4.1"
 hilt = "2.51"
@@ -13,6 +13,7 @@ playServicesAuth = "21.1.1"
 playServicesFido = "21.0.0"
 activity = "1.9.0"
 navigation = "2.7.7"
+retrofit = "2.9.0"
 sysUiController = "0.28.0"
 googleFonts = "1.6.8"
 ktx = "1.13.1"
@@ -37,6 +38,7 @@ espressoCore = "3.5.1"
 
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServicesPlugin" }
@@ -46,6 +48,7 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "playServicesFido" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 system-ui-controller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "sysUiController" }
 google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
