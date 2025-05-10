@@ -45,7 +45,7 @@ mobile).
 Credential Providers like Google Password Manager are mostly responsible for storing and syncing
 these credentials from other other devices. The public half of passkey pairs, however, can only be
 stored and synced by you, the Credential Manager integrator.  We recommend an encrypted credentials
-server for this purpose, see [authenticationServer::loginWithPasskey](AuthenticationServer.kt#L68).
+server for this purpose, see [authenticationServer::loginWithPasskey](authenticator/AuthenticationServer.kt#L68).
 
 To use a credential created on another device, your provider on Wear must be **the same** as the one
 you used to create credentials for your app on another device type.

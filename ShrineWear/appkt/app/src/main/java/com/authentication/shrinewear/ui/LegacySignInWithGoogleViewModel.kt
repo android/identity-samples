@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.androidauth.shrineWear.BuildConfig
+import com.authentication.shrinewear.BuildConfig
+import com.authentication.shrinewear.authenticator.SERVER_CLIENT_ID
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.horologist.auth.ui.googlesignin.signin.GoogleSignInViewModel
@@ -41,8 +42,7 @@ val LegacySignInWithGoogleViewModelFactory: ViewModelProvider.Factory = viewMode
         val gsiOptions = GoogleSignInOptions
             .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
-            .requestServerAuthCode(BuildConfig.CLIENT_ID)
-            .requestIdToken(BuildConfig.CLIENT_ID)
+            .requestServerAuthCode(SERVER_CLIENT_ID)
             .build()
 
         val googleSignInClient = GoogleSignIn.getClient(application, gsiOptions)

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
 import android.app.Application
 import android.content.Intent
@@ -22,8 +22,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.wear.remote.interactions.RemoteActivityHelper
-import com.androidauth.shrineWear.BuildConfig
-import com.androidauth.shrineWear.R
+import com.authentication.shrinewear.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -253,9 +252,9 @@ class OAuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     companion object {
-        // TODO Add your client id & secret here (for dev purposes only).
-        private const val CLIENT_ID = BuildConfig.CLIENT_ID
-        private const val CLIENT_SECRET = BuildConfig.CLIENT_SECRET
+        // Todo(reader): Add your client secret here and server id here.
+        private const val CLIENT_ID = ""
+        private const val CLIENT_SECRET = ""
 
         // Logging constants
         private const val TAG = "OAuthViewModel"
