@@ -1,0 +1,48 @@
+# Workflow name
+name: Build WebkitWebView Sample
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create dummy keystore.properties if not exists
+        run: |
+          if [ ! -f WebView/WebkitWebView/keystore.properties ]; then
+            echo "Creating dummy keystore.properties for CI build"
+            echo "storeFile=debug.keystore" > WebView/WebkitWebView/keystore.properties
+            echo "storePassword=android" >> WebView/WebkitWebView/keystore.properties
+            echo "keyAlias=androiddebugkey" >> WebView/WebkitWebView/keystore.properties
+            echo "keyPassword=android" >> WebView/WebkitWebView/keystore.properties
+          fi
+          if [ ! -f WebView/WebkitWebView/debug.keystore ]; then
+            echo "Generating dummy debug.keystore for CI build"
+            keytool -genkey -v -keystore WebView/WebkitWebView/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+        working-directory: . # Run from checkout root
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./WebView/WebkitWebView
+
+      - name: Build WebkitWebView app
+        working-directory: ./WebView/WebkitWebView
+        run: ./gradlew app:assembleDebug
