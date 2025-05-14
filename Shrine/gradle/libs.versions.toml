@@ -1,4 +1,5 @@
 [versions]
+coilSvg = "2.6.0"
 coreSplashscreen = "1.0.1"
 credentials = "1.5.0"
 googleid = "1.1.1"
@@ -25,6 +26,7 @@ playServicesLocation = "21.2.0"
 spotless = "6.21.0"
 ktlint = "0.50.0"
 ksp = "1.9.0-1.0.13"
+coil = "2.7.0"
 
 # BOM Versions
 firebaseBom = "33.1.1"
@@ -38,6 +40,7 @@ espressoCore = "3.5.1"
 
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilSvg" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
@@ -55,6 +58,7 @@ core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
 browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 datastore-pref = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePrefs" }
 gms-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 # Firebase
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
