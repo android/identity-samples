@@ -1,0 +1,110 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'com.google.gms.google-services'
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+android {
+
+    compileSdkVersion 35
+
+    signingConfigs {
+        debug {
+            storeFile file( project.rootProject.file('debug.keystore'))
+        }
+    }
+    defaultConfig {
+        applicationId "com.androidauth.shrineWear"
+        minSdk 30
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+        buildConfigField("String", "CLIENT_ID", CLIENT_ID)
+        buildConfigField("String", "CLIENT_SECRET", CLIENT_SECRET)
+        buildConfigField("String", "SERVER_CLIENT_ID", SERVER_CLIENT_ID)
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    namespace 'com.androidauth.shrineWear'
+}
+
+dependencies {
+    implementation(platform(libs.kotlin.bom))
+    implementation(platform(libs.androidx.compose.bom))
+
+    implementation libs.androidx.core.ktx
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.kotlinx.serialization.core
+    implementation libs.kotlinx.serialization.json
+
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.compose.material.icons
+    implementation libs.androidx.compose.material.icons.extended
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.navigation.compose
+
+    // Wear Dependencies
+    implementation libs.androidx.wear.compose.material3
+    implementation libs.androidx.wear.compose.navigation
+
+    // Wear Horologist SIWG composables
+    implementation libs.horologist.auth.ui
+
+    // AndroidX/Team Specific package
+    implementation libs.androidx.credentials
+    implementation libs.androidx.credentials.playServicesAuth
+
+    // Firebase Specific
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.auth.ktx
+    implementation libs.firebase.database.ktx
+    implementation libs.firebase.functions.ktx
+
+    implementation libs.androidx.wear.remote.interactions
+    implementation libs.googleid
+    implementation libs.playServicesWearable
+
+    // For Legacy Sign in With Google
+    implementation(libs.play.services.auth)
+}
