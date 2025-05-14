@@ -163,7 +163,9 @@ fun CreatePasskeyScreen(
 
         if (!uiState.errorMessage.isNullOrBlank()) {
             showErrorDialog()
-            ErrorAlertDialog(uiState.errorMessage)
+            ErrorAlertDialog(
+                uiState.errorMessage,
+            )
         }
     }
 }

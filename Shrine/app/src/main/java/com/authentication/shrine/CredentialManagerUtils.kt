@@ -34,6 +34,8 @@ import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.GetRestoreCredentialOption
 import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -74,6 +76,12 @@ class CredentialManagerUtils @Inject constructor(
                 ),
             )
             result = credentialManager.getCredential(context, credentialRequest)
+        } catch (e: GetCredentialCancellationException) {
+            // When credential selector bottom-sheet is cancelled
+            return GenericCredentialManagerResponse.CancellationError
+        } catch (e: GetPublicKeyCredentialDomException) {
+            // When the user verification / biometric bottom sheet is cancelled
+            return GenericCredentialManagerResponse.CancellationError
         } catch (e: Exception) {
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
@@ -218,4 +226,6 @@ sealed class GenericCredentialManagerResponse {
     data class Error(
         val errorMessage: String,
     ) : GenericCredentialManagerResponse()
+
+    data object CancellationError : GenericCredentialManagerResponse()
 }

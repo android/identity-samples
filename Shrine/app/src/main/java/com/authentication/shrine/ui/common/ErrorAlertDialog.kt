@@ -41,7 +41,9 @@ fun ErrorAlertDialog(
 
     ErrorAlertDialog(
         errorMessage = errorMessage,
-        hideAlert = viewModel::hideErrorDialog,
+        hideAlert = {
+            viewModel.hideErrorDialog()
+        },
         uiState = errorDialogUiState,
     )
 }

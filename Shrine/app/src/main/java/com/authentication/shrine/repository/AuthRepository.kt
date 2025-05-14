@@ -246,11 +246,13 @@ class AuthRepository @Inject constructor(
     suspend fun signInWithPasskeysResponse(credentialResponse: GetCredentialResponse): Boolean {
         try {
             val signInResponse =
-                credentialResponse.credential.data.getString(if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
-                    "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
-                } else {
-                    "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
-                })
+                credentialResponse.credential.data.getString(
+                    if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
+                        "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
+                    } else {
+                        "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
+                    },
+                )
             if (signInResponse != null) {
                 val signInResponseJSON = JSONObject(signInResponse)
                 val response = signInResponseJSON.getJSONObject("response")

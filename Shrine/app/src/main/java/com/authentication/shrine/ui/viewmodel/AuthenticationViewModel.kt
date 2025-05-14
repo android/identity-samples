@@ -80,6 +80,9 @@ class AuthenticationViewModel @Inject constructor(
                             passkeyRequestErrorMessage = passkeyResponse.errorMessage,
                         )
                     }
+                } else if (passkeyResponse is GenericCredentialManagerResponse.CancellationError) {
+                    repository.clearSessionIdFromDataStore()
+                    _uiState.update { AuthenticationUiState() }
                 }
             }
         }
@@ -133,7 +136,7 @@ class AuthenticationViewModel @Inject constructor(
      */
     fun checkForStoredRestoreKey(
         getRestoreKey: suspend (JSONObject) -> GenericCredentialManagerResponse,
-        onSuccess: (Boolean) -> Unit
+        onSuccess: (Boolean) -> Unit,
     ) {
         viewModelScope.launch {
             if (!repository.isSignedInThroughPasskeys() && !repository.isSignedInThroughPassword()) {
@@ -145,7 +148,7 @@ class AuthenticationViewModel @Inject constructor(
                         }
                         signInWithPasskeysResponse(
                             response = restoreKeyResponse.getPasskeyResponse,
-                            onSuccess = onSuccess
+                            onSuccess = onSuccess,
                         )
                     } else {
                         repository.clearSessionIdFromDataStore()
@@ -165,7 +168,7 @@ class AuthenticationViewModel @Inject constructor(
      * @see GenericCredentialManagerResponse
      */
     fun createRestoreKey(
-        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse
+        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
     ) {
         viewModelScope.launch {
             repository.registerPasskeyCreationRequest()?.let { data ->
