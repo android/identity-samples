@@ -23,8 +23,10 @@ import com.authentication.shrine.BuildConfig
 import com.authentication.shrine.api.ApiResult.SignedOutFromServer
 import com.authentication.shrine.api.ApiResult.Success
 import com.authentication.shrine.decodeBase64
+import com.authentication.shrine.model.PasskeysList
 import com.google.android.gms.fido.fido2.api.common.Attachment
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType.PUBLIC_KEY
+import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request.Builder
@@ -82,7 +84,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun setUsername(username: String): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/username").method(
+            Builder().url("$BASE_URL/auth/username").method(
                 "POST",
                 createJSONRequestBody {
                     name(USERNAME).value(username)
@@ -102,7 +104,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun setPassword(sessionId: String, password: String): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/password").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/auth/password").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -122,7 +124,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun registerPasskeyCreationRequest(sessionId: String): ApiResult<JSONObject> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/registerRequest").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerRequest").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -159,7 +161,7 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/registerResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerResponse").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -193,7 +195,7 @@ class AuthApi @Inject constructor(
         val call = client.newCall(
             Builder().url(
                 buildString {
-                    append("$BASE_URL/signinRequest")
+                    append("$BASE_URL/webauthn/signinRequest")
                 },
             ).method("POST", createJSONRequestBody {})
                 .build(),
@@ -220,7 +222,7 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/signinResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/signinResponse").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -238,6 +240,93 @@ class AuthApi @Inject constructor(
         )
         val apiResponse = call.await()
         return apiResponse.result(errorMessage = "Error in SignIn Response") { }
+    }
+
+    /**
+     * Retrieves a list of passkeys associated with the current session.
+     *
+     * This is a suspend function that makes an asynchronous API call to fetch the passkeys.
+     * It uses the provided session ID to authenticate the request.
+     *
+     * @param sessionId The session ID used for authentication.
+     * @return An [ApiResult] object containing either a [PasskeysList] on success,
+     *         or an [ApiException] on failure.
+     *         The [PasskeysList] contains a list of [PasskeyCredential] objects.
+     *         Possible failure cases include network errors, invalid session ID,
+     *         or an empty response body.
+     * @throws ApiException if the response body is empty.
+     */
+    suspend fun getKeys(
+        sessionId: String,
+    ): ApiResult<PasskeysList> {
+        val call = client.newCall(
+            Builder().url("$BASE_URL/webauthn/getKeys")
+                .addHeader("Cookie", formatCookie(sessionId))
+                .method(
+                    "POST",
+                    JSONObject().toString().toRequestBody(),
+                ).build(),
+        )
+
+        val apiResponse = call.await()
+        return apiResponse.result(errorMessage = "Error in getting keys") {
+            parseListOfPasskeys(body ?: throw ApiException(message = "Empty response from getKeys"))
+        }
+    }
+
+    /**
+     * Parses a [ResponseBody] containing a JSON object representing a list of passkeys
+     * into a [PasskeysList] data class object.
+     *
+     * This method manually parses the JSON using [JsonReader] to extract the relevant data
+     * and construct the [PasskeysList] object. It specifically looks for "rpId", "userId",
+     * and a "credentials" array containing passkey details.
+     *
+     * @param responseBody The [ResponseBody] containing the JSON data to be parsed.
+     * @return A [PasskeysList] object populated with the data from the JSON response.
+     * @throws IOException if an I/O error occurs while reading the response body.
+     * @throws JSONException if the response body is not valid JSON or does not match
+     *         the expected structure for passkey data.
+     */
+    private fun parseListOfPasskeys(
+        responseBody: ResponseBody,
+    ): PasskeysList {
+        val jsonObject = JSONObject()
+        JsonReader(responseBody.byteStream().bufferedReader()).use { jsonReader ->
+            jsonReader.beginObject()
+            while (jsonReader.hasNext()) {
+                when (jsonReader.nextName()) {
+                    "rpId" -> jsonObject.put("rpId", jsonReader.nextString())
+                    "userId" -> jsonObject.put("userId", jsonReader.nextString())
+                    "credentials" -> {
+                        val jsonArray = JSONArray()
+                        jsonReader.beginArray()
+                        while (jsonReader.hasNext()) {
+                            val pkDataJsonObject = JSONObject()
+                            jsonReader.beginObject()
+                            while (jsonReader.hasNext()) {
+                                when (jsonReader.nextName()) {
+                                    "id" -> pkDataJsonObject.put("id", jsonReader.nextString())
+                                    "passkeyUserId" -> pkDataJsonObject.put("passkeyUserId", jsonReader.nextString())
+                                    "name" -> pkDataJsonObject.put("name", jsonReader.nextString())
+                                    "credentialType" -> pkDataJsonObject.put("credentialType", jsonReader.nextString())
+                                    "aaguid" -> pkDataJsonObject.put("aaguid", jsonReader.nextString())
+                                    "registeredAt" -> pkDataJsonObject.put("registeredAt", jsonReader.nextString())
+                                    "providerIcon" -> pkDataJsonObject.put("providerIcon", jsonReader.nextString())
+                                    else -> jsonReader.skipValue()
+                                }
+                            }
+                            jsonReader.endObject()
+                            jsonArray.put(pkDataJsonObject)
+                        }
+                        jsonReader.endArray()
+                        jsonObject.put("credentials", jsonArray)
+                    }
+                }
+            }
+        }
+
+        return Gson().fromJson(jsonObject.toString(), PasskeysList::class.java)
     }
 
     /**
@@ -335,6 +424,8 @@ class AuthApi @Inject constructor(
                             parseRp(reader),
                         )
                     }
+
+                    else -> reader.skipValue()
                 }
             }
             reader.endObject()
@@ -410,12 +501,11 @@ class AuthApi @Inject constructor(
         jsonReader: JsonReader,
     ): JSONArray {
         val jsonArray = JSONArray()
-        var jsonObject = JSONObject()
         jsonReader.beginArray()
         while (jsonReader.hasNext()) {
+            val jsonObject = JSONObject()
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
-                jsonObject = JSONObject()
                 when (jsonReader.nextName()) {
                     "id" -> jsonObject.put("id", jsonReader.nextString().decodeBase64())
                     "type" -> jsonReader.skipValue()
@@ -429,6 +519,7 @@ class AuthApi @Inject constructor(
             }
         }
         jsonReader.endArray()
+        Log.d("dluyfiy", jsonArray.toString())
         return jsonArray
     }
 
