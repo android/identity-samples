@@ -34,7 +34,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.gildor.coroutines.okhttp.await
@@ -243,16 +242,30 @@ class AuthApi @Inject constructor(
         return apiResponse.result(errorMessage = "Error in SignIn Response") { }
     }
 
+    /**
+     * Retrieves a list of passkeys associated with the current session.
+     *
+     * This is a suspend function that makes an asynchronous API call to fetch the passkeys.
+     * It uses the provided session ID to authenticate the request.
+     *
+     * @param sessionId The session ID used for authentication.
+     * @return An [ApiResult] object containing either a [PasskeysList] on success,
+     *         or an [ApiException] on failure.
+     *         The [PasskeysList] contains a list of [PasskeyCredential] objects.
+     *         Possible failure cases include network errors, invalid session ID,
+     *         or an empty response body.
+     * @throws ApiException if the response body is empty.
+     */
     suspend fun getKeys(
-        sessionId: String
+        sessionId: String,
     ): ApiResult<PasskeysList> {
         val call = client.newCall(
             Builder().url("$BASE_URL/webauthn/getKeys")
                 .addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
-                    JSONObject().toString().toRequestBody()
-                ).build()
+                    JSONObject().toString().toRequestBody(),
+                ).build(),
         )
 
         val apiResponse = call.await()
@@ -261,14 +274,28 @@ class AuthApi @Inject constructor(
         }
     }
 
+    /**
+     * Parses a [ResponseBody] containing a JSON object representing a list of passkeys
+     * into a [PasskeysList] data class object.
+     *
+     * This method manually parses the JSON using [JsonReader] to extract the relevant data
+     * and construct the [PasskeysList] object. It specifically looks for "rpId", "userId",
+     * and a "credentials" array containing passkey details.
+     *
+     * @param responseBody The [ResponseBody] containing the JSON data to be parsed.
+     * @return A [PasskeysList] object populated with the data from the JSON response.
+     * @throws IOException if an I/O error occurs while reading the response body.
+     * @throws JSONException if the response body is not valid JSON or does not match
+     *         the expected structure for passkey data.
+     */
     private fun parseListOfPasskeys(
-        responseBody: ResponseBody
+        responseBody: ResponseBody,
     ): PasskeysList {
         val jsonObject = JSONObject()
         JsonReader(responseBody.byteStream().bufferedReader()).use { jsonReader ->
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
-                when(jsonReader.nextName()) {
+                when (jsonReader.nextName()) {
                     "rpId" -> jsonObject.put("rpId", jsonReader.nextString())
                     "userId" -> jsonObject.put("userId", jsonReader.nextString())
                     "credentials" -> {
@@ -490,6 +517,7 @@ class AuthApi @Inject constructor(
             jsonArray.put(jsonObject)
         }
         jsonReader.endArray()
+        Log.d("dluyfiy", jsonArray.toString())
         return jsonArray
     }
 

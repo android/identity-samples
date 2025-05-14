@@ -247,11 +247,13 @@ class AuthRepository @Inject constructor(
     suspend fun signInWithPasskeysResponse(credentialResponse: GetCredentialResponse): Boolean {
         try {
             val signInResponse =
-                credentialResponse.credential.data.getString(if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
-                    "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
-                } else {
-                    "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
-                })
+                credentialResponse.credential.data.getString(
+                    if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
+                        "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
+                    } else {
+                        "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
+                    },
+                )
             if (signInResponse != null) {
                 val signInResponseJSON = JSONObject(signInResponse)
                 val response = signInResponseJSON.getJSONObject("response")
@@ -326,16 +328,33 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /**
+     * Clears the stored session ID from the data store asynchronously.
+     *
+     * This is a suspend function that edits the data store to remove the session ID.
+     */
     suspend fun clearSessionIdFromDataStore() {
         dataStore.edit { prefs ->
             prefs.remove(SESSION_ID)
         }
     }
 
+    /**
+     * Retrieves the stored username asynchronously.
+     *
+     * This is a suspend function that reads the username from the data store.
+     *
+     * @return The stored username as a [String]. Returns an empty string if no username is found.
+     */
     suspend fun getUsername(): String {
         return dataStore.read(USERNAME).orEmpty()
     }
 
+    /**
+     * Retrieves a list of Passkeys from the Backend
+     *
+     * @return [PasskeysList] Object holding a list of Passkey details
+     * */
     suspend fun getListOfPasskeys(): PasskeysList? {
         val sessionId = dataStore.read(SESSION_ID)
         if (!sessionId.isNullOrBlank()) {

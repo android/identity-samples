@@ -34,6 +34,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -51,6 +53,32 @@ class ShrineApplication : Application()
 object AppModule {
 
     /**
+     * Creates and provides a Retrofit instance with interceptors and timeouts
+     *
+     * @return Retrofit Instance
+     * */
+    @Singleton
+    @Provides
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    /**
+     * Creates a AuthApiService
+     *
+     * @return AuthApiService
+     * */
+    @Singleton
+    @Provides
+    fun provideAuthApiService(): String {
+        return ""
+    }
+
+    /**
      * Creates and provides an OkHttpClient instance with interceptors and timeouts.
      *
      * @return The OkHttpClient instance.
@@ -62,11 +90,13 @@ object AppModule {
             "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
         return OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
-            .addInterceptor(HttpLoggingInterceptor { message ->
-                println("LOG-APP: $message")
-            }.apply {
-                level= HttpLoggingInterceptor.Level.BODY
-            })
+            .addInterceptor(
+                HttpLoggingInterceptor { message ->
+                    println("LOG-APP: $message")
+                }.apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(40, TimeUnit.SECONDS)
             .connectTimeout(40, TimeUnit.SECONDS)

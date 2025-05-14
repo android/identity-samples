@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 val md_theme_light_primary = Color(0xFFDFBFC0)
 val dark_button = Color(0xFF006B5F)
 val light_button = Color(0xFFFFFFFF)
+val grayBackground = Color(0xFFF4F4F4)
 val md_theme_light_onPrimary = Color(0xFF291718)
 val md_theme_light_primaryContainer = Color(0xFFFFD9E3)
 val md_theme_light_onPrimaryContainer = Color(0xFF3E001F)

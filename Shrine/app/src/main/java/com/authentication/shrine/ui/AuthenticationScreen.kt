@@ -45,7 +45,6 @@ import com.authentication.shrine.ui.common.LogoHeading
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.light_button
 import com.authentication.shrine.ui.viewmodel.AuthenticationUiState
 import com.authentication.shrine.ui.viewmodel.AuthenticationViewModel
 import com.authentication.shrine.ui.viewmodel.ErrorDialogViewModel
@@ -79,9 +78,9 @@ fun AuthenticationScreen(
             createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
-                    requestResult = createRestoreCredObject
+                    requestResult = createRestoreCredObject,
                 )
-            }
+            },
         )
     }
 
@@ -108,7 +107,7 @@ fun AuthenticationScreen(
             },
             onSuccess = {
                 navigateToHome(true)
-            }
+            },
         )
     }
 

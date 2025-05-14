@@ -135,6 +135,9 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.material.iconsExtended)
 
+    implementation(libs.coil.kt.compose)
+    implementation(libs.coil.svg)
+
     // Navigation
     implementation(libs.navigation.compose)
     implementation(libs.system.ui.controller)

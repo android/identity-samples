@@ -55,7 +55,7 @@ class SplashViewModel @Inject constructor(
             _uiState.update {
                 SplashScreenState(
                     nextScreen = startDestination,
-                    isLoading = false
+                    isLoading = false,
                 )
             }
         }
@@ -88,5 +88,5 @@ class SplashViewModel @Inject constructor(
 
 data class SplashScreenState(
     val isLoading: Boolean = true,
-    val nextScreen: String = ShrineAppDestinations.AuthRoute.name
+    val nextScreen: String = ShrineAppDestinations.AuthRoute.name,
 )

@@ -109,7 +109,7 @@ class RegistrationViewModel @Inject constructor(
      * @see GenericCredentialManagerResponse
      */
     fun createRestoreKey(
-        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse
+        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
     ) {
         viewModelScope.launch {
             repository.registerPasskeyCreationRequest()?.let { data ->
