@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrine.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.androidauth.shrineWear.Graph
-import com.androidauth.shrineWear.R
+import com.authentication.shrine.Graph
+import com.authentication.shrine.R
 
 /**
  * Composable function representing the home screen of the application.
