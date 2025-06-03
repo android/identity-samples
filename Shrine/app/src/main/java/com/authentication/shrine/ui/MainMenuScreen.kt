@@ -15,6 +15,7 @@
  */
 package com.authentication.shrine.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +38,6 @@ import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.LogoHeading
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.light_button
 import com.authentication.shrine.ui.viewmodel.HomeViewModel
 
 /**
@@ -103,6 +104,7 @@ fun MainMenuScreen(
     ) { contentPadding ->
         Column(
             modifier = Modifier
+                .background(Color(0xFFC5EAE2))
                 .padding(contentPadding)
                 .fillMaxHeight()
                 .padding(dimensionResource(R.dimen.padding_medium)),
@@ -154,7 +156,7 @@ private fun MainMenuButtonsList(
         ShrineButton(
             onClick = onSettingsButtonClicked,
             buttonText = stringResource(R.string.settings),
-            backgroundColor = light_button,
+            isButtonDark = false,
         )
 
         ShrineButton(
@@ -168,7 +170,7 @@ private fun MainMenuButtonsList(
                 navigateToLogin()
             },
             buttonText = stringResource(R.string.sign_out),
-            backgroundColor = light_button,
+            isButtonDark = false,
         )
     }
 }
