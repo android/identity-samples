@@ -82,7 +82,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun setUsername(username: String): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/username").method(
+            Builder().url("$BASE_URL/auth/username").method(
                 "POST",
                 createJSONRequestBody {
                     name(USERNAME).value(username)
@@ -102,7 +102,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun setPassword(sessionId: String, password: String): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/password").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/auth/password").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -122,7 +122,7 @@ class AuthApi @Inject constructor(
      */
     suspend fun registerPasskeyCreationRequest(sessionId: String): ApiResult<JSONObject> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/registerRequest").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerRequest").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -159,7 +159,7 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/registerResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerResponse").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -193,7 +193,7 @@ class AuthApi @Inject constructor(
         val call = client.newCall(
             Builder().url(
                 buildString {
-                    append("$BASE_URL/signinRequest")
+                    append("$BASE_URL/webauthn/signinRequest")
                 },
             ).method("POST", createJSONRequestBody {})
                 .build(),
@@ -220,7 +220,7 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/signinResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/signinResponse").addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -335,6 +335,8 @@ class AuthApi @Inject constructor(
                             parseRp(reader),
                         )
                     }
+
+                    else -> reader.skipValue()
                 }
             }
             reader.endObject()
@@ -410,12 +412,11 @@ class AuthApi @Inject constructor(
         jsonReader: JsonReader,
     ): JSONArray {
         val jsonArray = JSONArray()
-        var jsonObject = JSONObject()
         jsonReader.beginArray()
         while (jsonReader.hasNext()) {
+            val jsonObject = JSONObject()
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
-                jsonObject = JSONObject()
                 when (jsonReader.nextName()) {
                     "id" -> jsonObject.put("id", jsonReader.nextString().decodeBase64())
                     "type" -> jsonReader.skipValue()
@@ -424,7 +425,7 @@ class AuthApi @Inject constructor(
                 }
             }
             jsonReader.endObject()
-            if(jsonObject.length() != 0) {
+            if (jsonObject.length() != 0) {
                 jsonArray.put(jsonObject)
             }
         }

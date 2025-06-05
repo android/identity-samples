@@ -327,6 +327,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /**
+     * Clears the stored session ID from the data store asynchronously.
+     *
+     * This is a suspend function that edits the data store to remove the session ID.
+     */
     suspend fun clearSessionIdFromDataStore() {
         dataStore.edit { prefs ->
             prefs.remove(SESSION_ID)
