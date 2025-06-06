@@ -30,6 +30,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.ApiResult
 import com.authentication.shrine.api.AuthApi
+import com.authentication.shrine.model.PasskeysList
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
@@ -336,5 +337,40 @@ class AuthRepository @Inject constructor(
         dataStore.edit { prefs ->
             prefs.remove(SESSION_ID)
         }
+    }
+
+    /**
+     * Retrieves the stored username asynchronously.
+     *
+     * This is a suspend function that reads the username from the data store.
+     *
+     * @return The stored username as a [String]. Returns an empty string if no username is found.
+     */
+    suspend fun getUsername(): String {
+        return dataStore.read(USERNAME).orEmpty()
+    }
+
+    /**
+     * Retrieves a list of Passkeys from the Backend
+     *
+     * @return [PasskeysList] Object holding a list of Passkey details
+     * */
+    suspend fun getListOfPasskeys(): PasskeysList? {
+        val sessionId = dataStore.read(SESSION_ID)
+        if (!sessionId.isNullOrBlank()) {
+            when (val apiResult = authApi.getKeys(sessionId)) {
+                is ApiResult.SignedOutFromServer -> {
+                    signOut()
+                }
+
+                is ApiResult.Success -> {
+                    dataStore.edit { prefs ->
+                        apiResult.sessionId?.let { prefs[SESSION_ID] = it }
+                    }
+                    return apiResult.data
+                }
+            }
+        }
+        return null
     }
 }

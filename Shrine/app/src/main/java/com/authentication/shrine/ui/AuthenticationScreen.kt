@@ -45,7 +45,6 @@ import com.authentication.shrine.ui.common.LogoHeading
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.light_button
 import com.authentication.shrine.ui.viewmodel.AuthenticationUiState
 import com.authentication.shrine.ui.viewmodel.AuthenticationViewModel
 import com.authentication.shrine.ui.viewmodel.ErrorDialogViewModel
@@ -171,7 +170,7 @@ fun AuthenticationScreen(
             ShrineButton(
                 onClick = navigateToRegister,
                 buttonText = stringResource(id = R.string.sign_up),
-                backgroundColor = light_button,
+                isButtonDark = false,
                 isButtonEnabled = !uiState.isLoading,
             )
         }
