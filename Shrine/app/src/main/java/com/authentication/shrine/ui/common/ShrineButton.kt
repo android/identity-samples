@@ -42,7 +42,7 @@ import com.authentication.shrine.ui.theme.light_button
 private val ButtonShape = RoundedCornerShape(50)
 private val BorderStroke = BorderStroke(
     width = 1.dp,
-    color = grayBackground
+    color = grayBackground,
 )
 
 /**

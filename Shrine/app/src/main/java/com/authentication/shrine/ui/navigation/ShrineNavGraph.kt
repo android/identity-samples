@@ -132,6 +132,7 @@ fun ShrineNavGraph(
                 onManagePasskeysClicked = {
                     navController.navigate(ShrineAppDestinations.PasskeyManagementTab.name)
                 },
+                onBackClicked = { navController.popBackStack() },
             )
         }
 
@@ -146,6 +147,7 @@ fun ShrineNavGraph(
                 onLearnMoreClicked = {
                     navController.navigate(ShrineAppDestinations.LearnMore.name)
                 },
+                onBackClicked = { navController.popBackStack() },
                 viewModel = viewModel,
             )
         }

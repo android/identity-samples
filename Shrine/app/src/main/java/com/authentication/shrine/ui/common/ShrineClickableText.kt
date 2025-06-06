@@ -49,8 +49,8 @@ fun ShrineClickableText(
             link = LinkAnnotation.Clickable(
                 tag = "url",
                 styles = TextLinkStyles(style = SpanStyle(fontWeight = FontWeight.Bold)),
-                linkInteractionListener = { onTextClick() }
-            )
+                linkInteractionListener = { onTextClick() },
+            ),
         ) {
             append(clickableText)
         }
