@@ -27,25 +27,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale.Companion
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.authentication.shrine.R
@@ -70,6 +71,7 @@ import kotlinx.coroutines.Dispatchers
 @Composable
 fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
+    onBackClicked: () -> Unit,
     viewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -77,6 +79,7 @@ fun PasskeyManagementScreen(
 
     PasskeyManagementScreen(
         onLearnMoreClicked = onLearnMoreClicked,
+        onBackClicked = onBackClicked,
         passkeysList = uiState.passkeysList,
         modifier = modifier,
     )
@@ -92,6 +95,7 @@ fun PasskeyManagementScreen(
 @Composable
 fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
+    onBackClicked: () -> Unit,
     passkeysList: List<PasskeyCredential>,
     modifier: Modifier = Modifier,
 ) {
@@ -108,7 +112,10 @@ fun PasskeyManagementScreen(
                 .background(MaterialTheme.colorScheme.background),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.dimen_standard)),
         ) {
-            ShrineToolbar(true)
+            ShrineToolbar(
+                showBack = true,
+                onBackClicked = onBackClicked,
+            )
 
             ShrineTextHeader(stringResource(R.string.passkeys))
 
@@ -121,7 +128,7 @@ fun PasskeyManagementScreen(
             )
 
             PasskeysListColumn(
-                passkeysList = passkeysList
+                passkeysList = passkeysList,
             )
         }
     }
@@ -185,14 +192,17 @@ fun PasskeysDetailsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.dimen_standard)),
     ) {
-        AsyncImage(
-            modifier = Modifier.size(48.dp),
-            model = ImageRequest.Builder(LocalContext.current)
+        val painter = rememberAsyncImagePainter(
+            ImageRequest.Builder(LocalContext.current)
                 .data(iconUrl.toImageSvgString() ?: R.drawable.ic_passkey)
                 .decoderFactory(SvgDecoder.Factory())
                 .decoderDispatcher(Dispatchers.IO)
                 .build(),
-            contentScale = Companion.Inside,
+        )
+
+        Icon(
+            modifier = Modifier.size(48.dp),
+            painter = painter,
             contentDescription = stringResource(R.string.credential_provider_logo),
         )
 
@@ -212,10 +222,17 @@ fun PasskeysDetailsRow(
             )
         }
 
-        Text(
-            text = stringResource(R.string.delete),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        TextButton(
+            onClick = {
+                // TODO: Add the delete passkeys functionality and integrate Signal API
+            },
+        ) {
+            Text(
+                text = stringResource(R.string.delete),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
     }
 }
 
@@ -228,7 +245,18 @@ fun PasskeyManagementScreenPreview() {
     ShrineTheme {
         PasskeyManagementScreen(
             onLearnMoreClicked = { },
-            passkeysList = listOf(),
+            onBackClicked = { },
+            passkeysList = listOf(
+                PasskeyCredential(
+                    id = "",
+                    passkeyUserId = "",
+                    name = "Name",
+                    credentialType = "",
+                    aaguid = "",
+                    registeredAt = 1648956579,
+                    providerIcon = "",
+                ),
+            ),
         )
     }
 }

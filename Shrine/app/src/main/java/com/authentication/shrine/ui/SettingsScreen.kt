@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -39,14 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.ShrineButton
@@ -76,6 +70,7 @@ fun SettingsScreen(
     onChangePasswordClicked: () -> Unit,
     onLearnMoreClicked: () -> Unit,
     onManagePasskeysClicked: () -> Unit,
+    onBackClicked: () -> Unit,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
 
@@ -84,6 +79,7 @@ fun SettingsScreen(
         onCreatePasskeyClicked = onCreatePasskeyClicked,
         onChangePasswordClicked = onChangePasswordClicked,
         onManagePasskeysClicked = onManagePasskeysClicked,
+        onBackClicked = onBackClicked,
         uiState = uiState,
     )
 }
@@ -104,6 +100,7 @@ fun SettingsScreen(
     onChangePasswordClicked: () -> Unit,
     onLearnMoreClicked: () -> Unit,
     onManagePasskeysClicked: () -> Unit,
+    onBackClicked: () -> Unit,
     uiState: SettingsUiState,
     modifier: Modifier = Modifier,
 ) {
@@ -120,7 +117,10 @@ fun SettingsScreen(
                 .background(MaterialTheme.colorScheme.background),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.dimen_standard)),
         ) {
-            ShrineToolbar(true)
+            ShrineToolbar(
+                showBack = true,
+                onBackClicked = onBackClicked,
+            )
 
             ShrineTextHeader(stringResource(R.string.account))
 
@@ -252,7 +252,7 @@ fun PasskeysManagementTab(
         ) {
             Text(
                 stringResource(R.string.manage),
-                color = Companion.Black,
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
     }
@@ -361,7 +361,10 @@ fun PasswordManagementTab(
             onClick = onChangePasswordClicked,
             enabled = isButtonEnabled,
         ) {
-            Text(stringResource(R.string.change), color = Companion.Black)
+            Text(
+                text = stringResource(R.string.change),
+                color = MaterialTheme.colorScheme.onBackground,
+            )
         }
     }
 }
@@ -378,6 +381,7 @@ fun SettingPreview() {
             onChangePasswordClicked = { },
             onLearnMoreClicked = { },
             onManagePasskeysClicked = { },
+            onBackClicked = { },
             uiState = SettingsUiState(userHasPasskeys = false),
         )
     }

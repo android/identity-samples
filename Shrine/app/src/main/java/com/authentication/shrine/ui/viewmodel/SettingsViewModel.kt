@@ -73,6 +73,6 @@ data class SettingsUiState(
     val userHasPasskeys: Boolean = true,
     val username: String = "",
     val passkeysList: List<PasskeyCredential> = listOf(),
-    val passwordChanged: String = "Jan 1, 2025",
+    val passwordChanged: String = "",
     @StringRes val errorMessage: Int = -1,
 )

@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
@@ -33,6 +34,7 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 @Composable
 fun ShrineToolbar(
     showBack: Boolean = false,
+    onBackClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -42,11 +44,11 @@ fun ShrineToolbar(
     ) {
         if (showBack) {
             IconButton(
-                onClick = { },
+                onClick = onBackClicked,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "",
+                    contentDescription = stringResource(R.string.back_arrow_on_toolbar),
                 )
             }
         }
@@ -57,6 +59,9 @@ fun ShrineToolbar(
 @Composable
 fun ShrineToolbarPreview() {
     ShrineTheme {
-        ShrineToolbar(true)
+        ShrineToolbar(
+            showBack = true,
+            onBackClicked = { },
+        )
     }
 }

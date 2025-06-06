@@ -30,12 +30,7 @@ fun Long.toReadableDate(): String {
 fun String.toImageSvgString(): String? {
     val headerString = "data:image/svg+xml;base64,"
     if (indexOf(headerString) != -1) {
-        var base64String = subSequence(headerString.length, length).toString()
-        base64String += if (base64String.length % 4 == 0) {
-            ""
-        } else {
-            "="
-        }
+        val base64String = subSequence(headerString.length, length).toString()
         val decodedSvgString = Base64.decode(base64String).decodeToString()
         return decodedSvgString
     } else {

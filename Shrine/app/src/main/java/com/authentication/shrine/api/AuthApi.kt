@@ -291,42 +291,7 @@ class AuthApi @Inject constructor(
     private fun parseListOfPasskeys(
         responseBody: ResponseBody,
     ): PasskeysList {
-        val jsonObject = JSONObject()
-        JsonReader(responseBody.byteStream().bufferedReader()).use { jsonReader ->
-            jsonReader.beginObject()
-            while (jsonReader.hasNext()) {
-                when (jsonReader.nextName()) {
-                    "rpId" -> jsonObject.put("rpId", jsonReader.nextString())
-                    "userId" -> jsonObject.put("userId", jsonReader.nextString())
-                    "credentials" -> {
-                        val jsonArray = JSONArray()
-                        jsonReader.beginArray()
-                        while (jsonReader.hasNext()) {
-                            val passkeyDataJsonObject = JSONObject()
-                            jsonReader.beginObject()
-                            while (jsonReader.hasNext()) {
-                                when (jsonReader.nextName()) {
-                                    "id" -> passkeyDataJsonObject.put("id", jsonReader.nextString())
-                                    "passkeyUserId" -> passkeyDataJsonObject.put("passkeyUserId", jsonReader.nextString())
-                                    "name" -> passkeyDataJsonObject.put("name", jsonReader.nextString())
-                                    "credentialType" -> passkeyDataJsonObject.put("credentialType", jsonReader.nextString())
-                                    "aaguid" -> passkeyDataJsonObject.put("aaguid", jsonReader.nextString())
-                                    "registeredAt" -> passkeyDataJsonObject.put("registeredAt", jsonReader.nextString())
-                                    "providerIcon" -> passkeyDataJsonObject.put("providerIcon", jsonReader.nextString())
-                                    else -> jsonReader.skipValue()
-                                }
-                            }
-                            jsonReader.endObject()
-                            jsonArray.put(passkeyDataJsonObject)
-                        }
-                        jsonReader.endArray()
-                        jsonObject.put("credentials", jsonArray)
-                    }
-                }
-            }
-        }
-
-        return Gson().fromJson(jsonObject.toString(), PasskeysList::class.java)
+        return Gson().fromJson(responseBody.string(), PasskeysList::class.java)
     }
 
     /**

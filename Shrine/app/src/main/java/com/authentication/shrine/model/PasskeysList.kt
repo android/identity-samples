@@ -23,8 +23,8 @@ package com.authentication.shrine.model
  * @param credentials List of credentials data
  * */
 data class PasskeysList(
-    var rpId: String,
-    var userId: String,
+    val rpId: String,
+    val userId: String,
     val credentials: List<PasskeyCredential>,
 )
 
