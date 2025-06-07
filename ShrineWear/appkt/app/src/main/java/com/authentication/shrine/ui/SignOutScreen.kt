@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrine.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,8 +25,8 @@ import androidx.wear.compose.material3.AlertDialog
 import androidx.wear.compose.material3.AlertDialogDefaults
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.androidauth.shrineWear.Graph
-import com.androidauth.shrineWear.R
+import com.authentication.shrine.Graph
+import com.authentication.shrine.R
 
 /**
  * Composable screen displayed after a successful sign-in, allowing the user to sign out.

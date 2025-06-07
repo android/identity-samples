@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear
+package com.authentication.shrine
 
 import android.content.Context
 import android.util.Log
@@ -26,10 +26,10 @@ import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
-import androidx.lifecycle.Lifecycle
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.functions.FirebaseFunctionsException
+import com.authentication.shrine.api.*
 import kotlinx.coroutines.delay
+
 
 /**
  * Defines the types of credentials supported for sign-in.
@@ -37,8 +37,10 @@ import kotlinx.coroutines.delay
 enum class CredentialType {
     /** Represents a Passkey credential. */
     PASSKEY,
+
     /** Represents a Password credential. */
     PASSWORD,
+
     /** Represents a Sign-In With Google (SIWG) credential. */
     SIWG,
 }
@@ -53,7 +55,7 @@ enum class CredentialType {
  */
 class CredentialManagerAuthenticator(context: Context) {
     private val authenticationServer = AuthenticationServer()
-    private val credMan: CredentialManager = CredentialManager.create(context)
+    private val credentialManager: CredentialManager = CredentialManager.create(context)
 
     /**
      * Initiates a sign-in flow using the Android Credential Manager.
@@ -72,58 +74,42 @@ class CredentialManagerAuthenticator(context: Context) {
         activity: Context,
         types: List<CredentialType> = CredentialType.entries,
     ): Boolean {
-        val publicKeyServerParams = authenticationServer.getPublicKeyServerParameters()
-        val getCredentialResponse = credMan.getCredential(
-            activity,
-            createGetCredentialRequest(types, publicKeyServerParams.json!!),
-        )
+        val getCredentialRequest = createGetCredentialRequest(types)
+        Log.e("john", getCredentialRequest.credentialOptions.toString())
+        // confirmed here
+        val getCredentialResponse = credentialManager.getCredential(activity, getCredentialRequest)
+        // never gets to here.
 
-        // The following is a workaround to address a temporary bug where the 'getCredential' call
-        // above is still finishing up even though this activity has now resumed.
-        // It is necessary to attempt to process the 'getCredentialResponse' to determine if
-        // the request has completed. We recommend the progressive delay strategy seen here.
-        // See https://issuetracker.google.com/346289763 for details.
-        val componentActivity = (activity as? ComponentActivity)
-        var isResponseProcessed = false
-        for (i in 1..3) {
-            try {
-                val isActivityResumed = componentActivity?.lifecycle?.currentState?.isAtLeast(
-                    Lifecycle.State.RESUMED,
-                ) == true
+        Log.e("john", "here4")
+        delay(1000L * 3)
 
-                if (isActivityResumed) {
-                    isResponseProcessed = processCredentialResponse(
-                        getCredentialResponse, publicKeyServerParams.cookie!!,
-                    )
-                    if (isResponseProcessed) break
-                } else {
-                    delay(1000L * i)
-                }
-            } catch (e: FirebaseFunctionsException) {
-                Log.w(TAG, WARNING_PROGRESSIVE_DELAY.format(i))
-            }
-        }
 
-        return isResponseProcessed
+        val result = authenticate(getCredentialResponse)
+        Log.e("john", "here5")
+
+        return result
     }
-    /**
+
+    /**signInWithPasskeysRequest
      * Creates a [GetCredentialRequest] based on the desired credential types and a public key request JSON.
      *
      * @param types A list of [CredentialType]s to include in the request. Defaults to all available types.
      * @param requestJSON A JSON string containing the public key credential request options (for Passkeys).
      * @return A configured [GetCredentialRequest] ready to be used with [CredentialManager.getCredential].
      */
-    private fun createGetCredentialRequest(
-        types: List<CredentialType> = CredentialType.entries,
-        requestJSON: String,
+    private suspend fun createGetCredentialRequest(
+        types: List<CredentialType> = CredentialType.entries
     ): GetCredentialRequest {
         val userCredentialOptions = types.map {
             when (it) {
-                CredentialType.PASSKEY -> GetPublicKeyCredentialOption(requestJSON)
-                CredentialType.PASSWORD -> GetPasswordOption(isAutoSelectAllowed = false)
-                CredentialType.SIWG -> authenticationServer.createGetGoogleIdOption(autoSelect = false)
+                CredentialType.PASSKEY -> GetPublicKeyCredentialOption(
+                    authenticationServer.getPublicKeyRequestOptions()
+                )
+                CredentialType.PASSWORD -> GetPasswordOption()
+                CredentialType.SIWG -> authenticationServer.createGetGoogleIdOption()
             }
         }
+        // confirmed here
         return GetCredentialRequest(userCredentialOptions)
     }
 
@@ -138,23 +124,22 @@ class CredentialManagerAuthenticator(context: Context) {
      * @param cookie A cookie string required for Passkey authentication.
      * @return `true` if the credential was successfully processed and authenticated, `false` otherwise.
      */
-    private suspend fun processCredentialResponse(
+    private suspend fun authenticate(
         getCredentialResponse: GetCredentialResponse,
-        cookie: String,
     ): Boolean {
+        Log.e("john", "here6=")
         when (val credential = getCredentialResponse.credential) {
-            is PasswordCredential -> {
-                return authenticationServer.loginWithPassword(credential.id, credential.password)
+            is PublicKeyCredential -> {
+                return authenticationServer.loginWithPasskey(credential)
             }
 
-            is PublicKeyCredential -> {
-                return authenticationServer.loginWithPasskey(
-                    credential.authenticationResponseJson,
-                    cookie,
-                )
+            is PasswordCredential -> {
+                return authenticationServer.loginWithPassword(credential)
             }
 
             is CustomCredential -> {
+                // This section is only shown for educational purposes, as google sign in is
+                // built-in to credential manager with no action needed from the developer.
                 if (credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     Log.e(TAG, ERROR_UNRECOGNIZED_CUSTOM.format(credential.type))
                     return false
@@ -178,12 +163,9 @@ class CredentialManagerAuthenticator(context: Context) {
      * @param token The Google ID token to register.
      */
     suspend fun registerAuthenticatedGoogleToken(token: String) {
-        try {
-            authenticationServer.loginWithGoogleToken(token)
-        } catch (e: FirebaseFunctionsException) {
-            Log.e(TAG, ERROR_LEGACY_SIWG_REGISTRY.format(e.message))
-        }
+        authenticationServer.loginWithGoogleToken(token)
     }
+
 
     /**
      * Performs a sign-out operation on the authentication server.
@@ -197,9 +179,9 @@ class CredentialManagerAuthenticator(context: Context) {
      */
     companion object {
         private const val TAG = "CredentialManagerAuthenticator"
-        private const val ERROR_LEGACY_SIWG_REGISTRY = "Signed in, but failed to register legacy Google Sign in account to app credential repository. Error: %s"
+        private const val ERROR_LEGACY_SIWG_REGISTRY =
+            "Signed in, but failed to register legacy Google Sign in account to app credential repository. Error: %s"
         private const val ERROR_UNRECOGNIZED_CUSTOM = "Unrecognized CustomCredential: %s"
-        private const val WARNING_PROGRESSIVE_DELAY = "Waiting for credentials from server, attempt %i of 3"
         private const val WARNING_UNKNOWN_TYPE = "Unknown type: %s"
     }
 }

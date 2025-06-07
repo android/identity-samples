@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrine.ui
 
 import android.content.Context
 import android.util.Log
@@ -21,9 +21,9 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidauth.shrineWear.CredentialType
-import com.androidauth.shrineWear.Graph
-import com.androidauth.shrineWear.R
+import com.authentication.shrine.CredentialType
+import com.authentication.shrine.Graph
+import com.authentication.shrine.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
