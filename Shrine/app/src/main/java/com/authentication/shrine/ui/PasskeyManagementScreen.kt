@@ -15,6 +15,7 @@
  */
 package com.authentication.shrine.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -57,9 +57,10 @@ import com.authentication.shrine.ui.common.ShrineToolbar
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.SettingsViewModel
-import com.authentication.shrine.utility.toImageSvgString
 import com.authentication.shrine.utility.toReadableDate
-import kotlinx.coroutines.Dispatchers
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.InputStreamReader
 
 /**
  * Stateful composable of the Passkeys Management Screen
@@ -77,10 +78,16 @@ fun PasskeyManagementScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
 
+    val gson = Gson()
+    val am = LocalContext.current.assets.open("aaguids.json")
+    val reader = InputStreamReader(am)
+    val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(reader, object : TypeToken<Map<String, Map<String, String>>>() {}.type)
+
     PasskeyManagementScreen(
         onLearnMoreClicked = onLearnMoreClicked,
         onBackClicked = onBackClicked,
         passkeysList = uiState.passkeysList,
+        aaguidData = aaguidJsonData,
         modifier = modifier,
     )
 }
@@ -97,6 +104,7 @@ fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
     onBackClicked: () -> Unit,
     passkeysList: List<PasskeyCredential>,
+    aaguidData: Map<String, Map<String, String>>,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -129,6 +137,7 @@ fun PasskeyManagementScreen(
 
             PasskeysListColumn(
                 passkeysList = passkeysList,
+                aaguidData = aaguidData,
             )
         }
     }
@@ -142,6 +151,7 @@ fun PasskeyManagementScreen(
 @Composable
 fun PasskeysListColumn(
     passkeysList: List<PasskeyCredential>,
+    aaguidData: Map<String, Map<String, String>>,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -155,7 +165,7 @@ fun PasskeysListColumn(
             items = passkeysList,
             itemContent = { index, item ->
                 PasskeysDetailsRow(
-                    iconUrl = item.providerIcon,
+                    iconSvgString = aaguidData[item.aaguid]?.get("icon_light"),
                     credentialProviderName = item.name,
                     passkeyCreationDate = item.registeredAt.toReadableDate(),
                 )
@@ -175,13 +185,13 @@ fun PasskeysListColumn(
 /**
  * Composable to display one list item of Passkeys detail
  *
- * @param iconUrl Icon URL fetched from the server for the credential provider
+ * @param iconSvgString Icon SVG string fetched from the server for the credential provider
  * @param credentialProviderName Name of the credential provider for the passkey
  * @param passkeyCreationDate Date when the passkey was created
  * */
 @Composable
 fun PasskeysDetailsRow(
-    iconUrl: String,
+    iconSvgString: String?,
     credentialProviderName: String,
     passkeyCreationDate: String,
 ) {
@@ -194,13 +204,12 @@ fun PasskeysDetailsRow(
     ) {
         val painter = rememberAsyncImagePainter(
             ImageRequest.Builder(LocalContext.current)
-                .data(iconUrl.toImageSvgString() ?: R.drawable.ic_passkey)
+                .data(iconSvgString?.toByteArray() ?: R.drawable.ic_passkey)
                 .decoderFactory(SvgDecoder.Factory())
-                .decoderDispatcher(Dispatchers.IO)
                 .build(),
         )
 
-        Icon(
+        Image(
             modifier = Modifier.size(48.dp),
             painter = painter,
             contentDescription = stringResource(R.string.credential_provider_logo),
@@ -246,17 +255,8 @@ fun PasskeyManagementScreenPreview() {
         PasskeyManagementScreen(
             onLearnMoreClicked = { },
             onBackClicked = { },
-            passkeysList = listOf(
-                PasskeyCredential(
-                    id = "",
-                    passkeyUserId = "",
-                    name = "Name",
-                    credentialType = "",
-                    aaguid = "",
-                    registeredAt = 1648956579,
-                    providerIcon = "",
-                ),
-            ),
+            passkeysList = listOf(),
+            aaguidData = mapOf(),
         )
     }
 }

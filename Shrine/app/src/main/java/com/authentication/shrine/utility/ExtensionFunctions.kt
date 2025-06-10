@@ -17,23 +17,9 @@ package com.authentication.shrine.utility
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 fun Long.toReadableDate(): String {
     val dateFormat = SimpleDateFormat("dd-MMM-yyyy")
     val dateString = dateFormat.format(Date(this))
     return dateString
-}
-
-@OptIn(ExperimentalEncodingApi::class)
-fun String.toImageSvgString(): String? {
-    val headerString = "data:image/svg+xml;base64,"
-    if (indexOf(headerString) != -1) {
-        val base64String = subSequence(headerString.length, length).toString()
-        val decodedSvgString = Base64.decode(base64String).decodeToString()
-        return decodedSvgString
-    } else {
-        return null
-    }
 }
