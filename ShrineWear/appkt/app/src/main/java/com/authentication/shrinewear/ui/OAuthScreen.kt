@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
 import android.app.Application
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +31,7 @@ import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.androidauth.shrineWear.R
+import com.authentication.shrinewear.R
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
 /**
