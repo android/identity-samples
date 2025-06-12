@@ -23,8 +23,10 @@ import com.authentication.shrine.BuildConfig
 import com.authentication.shrine.api.ApiResult.SignedOutFromServer
 import com.authentication.shrine.api.ApiResult.Success
 import com.authentication.shrine.decodeBase64
+import com.authentication.shrine.model.PasskeysList
 import com.google.android.gms.fido.fido2.api.common.Attachment
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType.PUBLIC_KEY
+import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request.Builder
@@ -238,6 +240,58 @@ class AuthApi @Inject constructor(
         )
         val apiResponse = call.await()
         return apiResponse.result(errorMessage = "Error in SignIn Response") { }
+    }
+
+    /**
+     * Retrieves a list of passkeys associated with the current session.
+     *
+     * This is a suspend function that makes an asynchronous API call to fetch the passkeys.
+     * It uses the provided session ID to authenticate the request.
+     *
+     * @param sessionId The session ID used for authentication.
+     * @return An [ApiResult] object containing either a [PasskeysList] on success,
+     *         or an [ApiException] on failure.
+     *         The [PasskeysList] contains a list of [PasskeyCredential] objects.
+     *         Possible failure cases include network errors, invalid session ID,
+     *         or an empty response body.
+     * @throws ApiException if the response body is empty.
+     */
+    suspend fun getKeys(
+        sessionId: String,
+    ): ApiResult<PasskeysList> {
+        val call = client.newCall(
+            Builder().url("$BASE_URL/webauthn/getKeys")
+                .addHeader("Cookie", formatCookie(sessionId))
+                .method(
+                    "POST",
+                    JSONObject().toString().toRequestBody(),
+                ).build(),
+        )
+
+        val apiResponse = call.await()
+        return apiResponse.result(errorMessage = "Error in getting keys") {
+            parseListOfPasskeys(body ?: throw ApiException(message = "Empty response from getKeys"))
+        }
+    }
+
+    /**
+     * Parses a [ResponseBody] containing a JSON object representing a list of passkeys
+     * into a [PasskeysList] data class object.
+     *
+     * This method manually parses the JSON using [JsonReader] to extract the relevant data
+     * and construct the [PasskeysList] object. It specifically looks for "rpId", "userId",
+     * and a "credentials" array containing passkey details.
+     *
+     * @param responseBody The [ResponseBody] containing the JSON data to be parsed.
+     * @return A [PasskeysList] object populated with the data from the JSON response.
+     * @throws IOException if an I/O error occurs while reading the response body.
+     * @throws JSONException if the response body is not valid JSON or does not match
+     *         the expected structure for passkey data.
+     */
+    private fun parseListOfPasskeys(
+        responseBody: ResponseBody,
+    ): PasskeysList {
+        return Gson().fromJson(responseBody.string(), PasskeysList::class.java)
     }
 
     /**
