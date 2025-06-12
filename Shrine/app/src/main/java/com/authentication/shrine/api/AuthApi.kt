@@ -62,7 +62,7 @@ class AuthApi @Inject constructor(
         /**
          * The key used for the session ID cookie.
          */
-        private const val SESSION_ID_KEY = "connect.sid="
+        private const val SESSION_ID_KEY = "SESAME_SESSION_COOKIE="
 
         /**
          * The tag for logging.
