@@ -60,4 +60,20 @@
     <string name="dismiss">Dismiss</string>
     <string name="error">Error</string>
     <string name="nav_host_route">Nav Host Route</string>
+    <string name="full_name">Full Name</string>
+    <string name="manage">Manage</string>
+    <string name="sign_in_faster_next_time">Sign in faster next time</string>
+    <string name="icon_passkeys">Icon passkeys</string>
+    <string name="passkeys">Passkeys</string>
+    <string name="how_passkeys_work">How passkeys work</string>
+    <string name="create_passkey_text">"You can sign in securely with your passkey using your fingerprint, face, or other screen lock method. "</string>
+    <string name="last_changed">Last changed: %1$s</string>
+    <string name="passkey_management">Passkey Management</string>
+    <string name="passkeys_info">With passkeys, you can quickly and securely sign in using your fingerprint, face, or other screen-lock method.\n</string>
+    <string name="learn_more_about_passkeys">Learn more about passkeys</string>
+    <string name="credential_provider_logo">Credential Provider Logo</string>
+    <string name="created">Created: %1$s</string>
+    <string name="get_keys_error">Some error occurred while getting the list of passkeys</string>
+    <string name="delete">Delete</string>
+    <string name="back_arrow_on_toolbar">Back Arrow on Toolbar</string>
 </resources>

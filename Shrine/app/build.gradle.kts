@@ -135,6 +135,9 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.material.iconsExtended)
 
+    implementation(libs.coil.kt.compose)
+    implementation(libs.coil.svg)
+
     // Navigation
     implementation(libs.navigation.compose)
     implementation(libs.system.ui.controller)
@@ -151,6 +154,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
     implementation(libs.browser)
+    implementation(libs.converter.gson)
 
     // Testing
     testImplementation(libs.junit)

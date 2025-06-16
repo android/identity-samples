@@ -46,7 +46,6 @@ import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.light_button
 import com.authentication.shrine.ui.viewmodel.CreatePasskeyUiState
 import com.authentication.shrine.ui.viewmodel.CreatePasskeyViewModel
 import com.authentication.shrine.ui.viewmodel.ErrorDialogViewModel
@@ -195,7 +194,7 @@ private fun CreatePasskeyActions(
         ShrineButton(
             onClick = onNotNowClicked,
             buttonText = stringResource(R.string.not_now),
-            backgroundColor = light_button,
+            isButtonDark = false,
             isButtonEnabled = !uiState.isLoading,
         )
     }

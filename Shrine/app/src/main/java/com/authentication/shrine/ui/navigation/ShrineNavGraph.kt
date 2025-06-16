@@ -28,10 +28,12 @@ import com.authentication.shrine.ui.CreatePasskeyScreen
 import com.authentication.shrine.ui.HelpScreen
 import com.authentication.shrine.ui.LearnMoreScreen
 import com.authentication.shrine.ui.MainMenuScreen
+import com.authentication.shrine.ui.PasskeyManagementScreen
 import com.authentication.shrine.ui.PlaceholderScreen
 import com.authentication.shrine.ui.RegisterScreen
 import com.authentication.shrine.ui.SettingsScreen
 import com.authentication.shrine.ui.ShrineAppScreen
+import com.authentication.shrine.ui.viewmodel.SettingsViewModel
 
 /**
  * The navigation graph for the Shrine app.
@@ -117,18 +119,36 @@ fun ShrineNavGraph(
 
         composable(route = ShrineAppDestinations.Settings.name) {
             SettingsScreen(
+                viewModel = hiltViewModel(),
                 onCreatePasskeyClicked = {
-                    navController.navigate(ShrineAppDestinations.Placeholder.name)
+                    navController.navigate(ShrineAppDestinations.CreatePasskeyRoute.name)
                 },
                 onChangePasswordClicked = {
                     navController.navigate(ShrineAppDestinations.Placeholder.name)
                 },
-                onHelpClicked = {
-                    navController.navigate(ShrineAppDestinations.Help.name)
-                },
                 onLearnMoreClicked = {
                     navController.navigate(ShrineAppDestinations.LearnMore.name)
                 },
+                onManagePasskeysClicked = {
+                    navController.navigate(ShrineAppDestinations.PasskeyManagementTab.name)
+                },
+                onBackClicked = { navController.popBackStack() },
+            )
+        }
+
+        composable(route = ShrineAppDestinations.PasskeyManagementTab.name) { backStackEntry ->
+            val viewModel: SettingsViewModel = if (navController.previousBackStackEntry != null) {
+                hiltViewModel(navController.previousBackStackEntry!!)
+            } else {
+                hiltViewModel()
+            }
+
+            PasskeyManagementScreen(
+                onLearnMoreClicked = {
+                    navController.navigate(ShrineAppDestinations.LearnMore.name)
+                },
+                onBackClicked = { navController.popBackStack() },
+                viewModel = viewModel,
             )
         }
 
