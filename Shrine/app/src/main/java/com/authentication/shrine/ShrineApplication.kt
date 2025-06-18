@@ -24,6 +24,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.authentication.shrine.api.AddHeaderInterceptor
+import com.authentication.shrine.api.AuthApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +35,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -63,9 +66,7 @@ object AppModule {
         return OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
             .addInterceptor(
-                HttpLoggingInterceptor { message ->
-                    println("LOG-APP: $message")
-                }.apply {
+                HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 },
             )
@@ -110,5 +111,16 @@ object AppModule {
         credentialManager: CredentialManager,
     ): CredentialManagerUtils {
         return CredentialManagerUtils(credentialManager)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAuthApiService(okHttpClient: OkHttpClient): AuthApiService {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.API_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AuthApiService::class.java)
     }
 }

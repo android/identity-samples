@@ -159,14 +159,12 @@ class RegistrationViewModel @Inject constructor(
      * @param onSuccess Lambda to be invoked when the registration is successful.
      * The boolean parameter indicates whether the user should be navigated to the home screen.
      * @param createPassword Lambda to be invoked when login is success and password needs to be saved
-     * @param createRestoreCredential Lambda that invokes CredManUtil's createRestoreKey method
      */
     fun onPasswordRegister(
         username: String,
         password: String,
         onSuccess: (navigateToHome: Boolean) -> Unit,
         createPassword: suspend (String, String) -> Unit,
-        createRestoreCredential: suspend (JSONObject) -> Unit,
     ) {
         _uiState.value = RegisterUiState(isLoading = true)
 
@@ -181,10 +179,6 @@ class RegistrationViewModel @Inject constructor(
                                 isSuccess = true,
                                 messageResourceId = R.string.password_created_and_saved,
                             )
-                        }
-
-                        repository.registerPasskeyCreationRequest()?.let { data ->
-                            createRestoreCredential(data)
                         }
 
                         onSuccess(true)
