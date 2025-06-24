@@ -10,14 +10,6 @@ repositories {
     mavenCentral()
 }
 
-def getRequiredEnvVar(String varName) {
-    def value = System.getenv(varName)
-    if (value == null || value.trim().isEmpty()) {
-        throw new GradleException("ERROR: Required environment variable '$varName' is not defined or is empty. Please set it in your system's environment variables.")
-    }
-    return value
-}
-
 android {
 
     compileSdkVersion 35
@@ -33,11 +25,8 @@ android {
         targetSdk 35
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary true
-        }
+
         buildConfigField("String", "API_BASE_URL", "\"https://project-sesame-426206.appspot.com\"")
     }
 
@@ -77,9 +66,9 @@ dependencies {
     implementation libs.androidx.compose.material.icons
     implementation libs.androidx.compose.material.icons.extended
     implementation libs.androidx.compose.ui
-    implementation libs.androidx.compose.ui.tooling
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.credentials
+    implementation libs.androidx.credentials.playServicesAuth
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.lifecycle.viewmodel.compose
     implementation libs.androidx.navigation.compose
@@ -87,8 +76,9 @@ dependencies {
     // Wear Androidx Dependencies
     implementation libs.androidx.wear.compose.material3
     implementation libs.androidx.wear.compose.navigation
+    implementation libs.androidx.wear.compose.ui.tooling
+    implementation libs.androidx.wear.compose.foundation
     implementation libs.androidx.wear.remote.interactions
-    // something
 
     // KotlinX
     implementation(platform(libs.kotlin.bom))

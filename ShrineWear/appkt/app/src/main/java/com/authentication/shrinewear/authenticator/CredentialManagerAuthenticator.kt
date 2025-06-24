@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,8 @@ class CredentialManagerAuthenticator(applicationContext: Context) {
             credentialOptions = listOf(
                 GetPublicKeyCredentialOption(authenticationServer.getPublicKeyRequestOptions()),
                 GetPasswordOption(),
-                GetGoogleIdOption.Builder()
-                    .setServerClientId(SERVER_CLIENT_ID)
-                    .setFilterByAuthorizedAccounts(false)
-                    .setAutoSelectEnabled(false)
-                    .build(),
+                GetGoogleIdOption.Builder().setServerClientId(SERVER_CLIENT_ID).build(),
             ),
-            preferImmediatelyAvailableCredentials = true,
         )
     }
 
