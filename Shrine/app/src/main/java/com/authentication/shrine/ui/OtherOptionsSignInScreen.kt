@@ -57,7 +57,7 @@ fun OtherOptionsSignInScreen(
                 onBackClicked = onBackClicked,
             )
             ShrineTextHeader(
-                text = "Other options"
+                text = stringResource(R.string.other_options)
             )
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large))) // Spacer like in RegisterScreen
             ShrineButton(

@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -68,6 +69,7 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.RegisterUiState
 import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
+import com.authentication.shrine.ui.viewmodel.SettingsUiState
 
 /**
  * Stateful composable function that displays the registration screen.
@@ -105,7 +107,7 @@ fun RegisterScreen(
         viewModel.onPasskeyRegister(
             username = emailAddress,
             onSuccess = { flag ->
-                //createRestoreKey()
+                createRestoreKey()
                 navigateToHome(flag)
             },
             createPasskeyCallback = { data ->
@@ -171,6 +173,7 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ShrineToolbar(
                 showBack = true,
@@ -282,6 +285,13 @@ private fun RegisterScreenInputSection(
     }
 }
 
+/**
+ * Composable for the Passkeys Information Tab UI Element
+ *
+ * @param onLearnMoreClicked lambda for more information, navigates to an informational screen
+ * @param onOtherWaysToSignInClicked lambda for other sign in methods, navigates to
+ * @OtherOptionsSignInScreen
+ * */
 @Composable
 private fun PasskeyInformationTab(
     onLearnMoreClicked: () -> Unit,
@@ -319,7 +329,7 @@ private fun PasskeyInformationTab(
             Image(
                 modifier = Modifier.weight(0.2F),
                 painter = painterResource(R.drawable.ic_passkeys_info),
-                contentDescription = "",
+                contentDescription = stringResource(R.string.passkey_icon),
             )
         }
     }

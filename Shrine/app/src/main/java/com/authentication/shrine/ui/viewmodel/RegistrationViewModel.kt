@@ -47,6 +47,14 @@ class RegistrationViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
 
+    /**
+     * Registers a new user with a passkey.
+     *
+     * @param username The username of the new user.
+     * @param onSuccess Lambda to be invoked when the registration is successful.
+     * @param createPasskeyCallback Lambda to be invoked after login is successful, usually to
+     * navigate to the next screen.
+     */
     fun onPasskeyRegister(
         username: String,
         onSuccess: (navigateToHome: Boolean) -> Unit,
@@ -61,7 +69,6 @@ class RegistrationViewModel @Inject constructor(
                 if (isSuccess) {
                     // Now create the passkey and register with the server
                     createPasskey(onSuccess, createPasskeyCallback)
-                    //onSuccess(false)
                 } else {
                     _uiState.update {
                         RegisterUiState(
@@ -69,7 +76,6 @@ class RegistrationViewModel @Inject constructor(
                         )
                     }
                 }
-                repository.setSignedInState(false)
             }
         } else {
             _uiState.update {
@@ -105,7 +111,7 @@ class RegistrationViewModel @Inject constructor(
                         }
                     } else {
                         _uiState.update {
-                            RegisterUiState(isSuccess = true, messageResourceId = R.string.some_error_occurred_please_check_logs)
+                            RegisterUiState(isSuccess = false, messageResourceId = R.string.some_error_occurred_please_check_logs)
                         }
                     }
                     onSuccess(false)
@@ -113,6 +119,7 @@ class RegistrationViewModel @Inject constructor(
                     _uiState.update {
                         RegisterUiState(errorMessage = createPasskeyResponse.errorMessage)
                     }
+                    repository.setSignedInState(false)
                 }
             } else {
                 _uiState.update {

@@ -48,6 +48,7 @@
     <string name="email_icon">Email Icon</string>
     <string name="email_address">Email address</string>
     <string name="password_icon">Password Icon</string>
+    <string name="passkey_icon">Passkey Icon</string>
     <string name="wait_signing_you_in">Wait, signing you in.</string>
     <string name="enter_valid_username_and_password">Enter valid username and password</string>
     <string name="shrine_app_menu_mockup">shrine app menu mockup</string>
@@ -86,5 +87,6 @@
     <string name="delete">Delete</string>
     <string name="back_arrow_on_toolbar">Back Arrow on Toolbar</string>
     <string name="sign_up_with_password">Sign up with password</string>
+    <string name="other_options">Other options</string>
     <string name="register_password">Register with password</string>
 </resources>
