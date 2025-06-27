@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,24 @@
  */
 package com.authentication.shrine.model
 
+/**
+ * Represents the request body for setting or updating a username.
+ * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
+ * when making API calls related to username management.
+ *
+ * @property username The username to be set or updated.
+ */
 data class UsernameRequest(
     val username: String,
 )
 
+/**
+ * Represents the request body for setting or updating a password.
+ * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
+ * when making API calls related to password management.
+ *
+ * @property password The new password.
+ */
 data class PasswordRequest(
     val password: String,
 )

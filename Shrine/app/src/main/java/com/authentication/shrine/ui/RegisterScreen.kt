@@ -69,7 +69,6 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.RegisterUiState
 import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
-import com.authentication.shrine.ui.viewmodel.SettingsUiState
 
 /**
  * Stateful composable function that displays the registration screen.
@@ -123,7 +122,7 @@ fun RegisterScreen(
         onPasskeyRegister = onPasskeyRegister,
         uiState = uiState,
         fullName = fullName,
-        onFullNameChanged = { fullName = it},
+        onFullNameChanged = { fullName = it },
         onLearnMoreClicked = onLearnMoreClicked,
         onOtherWaysToSignInClicked = onOtherWaysToSignInClicked,
         onBackClicked = onBackClicked,
@@ -304,7 +303,7 @@ private fun RegisterScreenInputSection(
 @Composable
 private fun PasskeyInformationTab(
     onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit
+    onOtherWaysToSignInClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier

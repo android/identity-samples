@@ -28,7 +28,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.authentication.shrine.api.ApiException
-import com.authentication.shrine.api.ApiResult
 import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.CredmanResponse
 import com.authentication.shrine.model.PasskeysList
@@ -44,9 +43,7 @@ import com.authentication.shrine.utility.getSessionId
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import okhttp3.Request.Builder
 import org.json.JSONObject
-import ru.gildor.coroutines.okhttp.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -191,7 +188,7 @@ class AuthRepository @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Cannot call registerRequest", e)
         }
         return null
     }

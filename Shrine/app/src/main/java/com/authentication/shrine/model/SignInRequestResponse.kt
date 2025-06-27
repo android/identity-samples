@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,25 @@
  */
 package com.authentication.shrine.model
 
+/**
+ * Represents the server's response to a WebAuthn sign-in request.
+ * This data contains the parameters needed by the client (e.g., a browser or app)
+ * to call `navigator.credentials.get()`. It specifies the challenge, allowed credentials,
+ * timeout, and user verification requirements for the sign-in ceremony.
+ *
+ * @property challenge A server-generated cryptographic challenge that must be signed by the authenticator.
+ *                     This prevents replay attacks.
+ * @property allowCredentials A list of credentials that are allowed to be used for sign-in.
+ *                            Each {@link CredentialDetail} typically contains the `id` and `type`
+ *                            of a credential previously registered by the user. If empty, the client
+ *                            may allow the user to choose from any available passkey for the `rpId`.
+ * @property timeout The time, in milliseconds, that the client has to complete the sign-in ceremony.
+ * @property userVerification Specifies the Relying Party's user verification requirement for this
+ *                            authentication ceremony (e.g., "required", "preferred", "discouraged").
+ * @property rpId The effective domain of the Relying Party (the server or service) for which
+ *                the assertion is being requested. This should match the `rpId` used during registration.
+ * @see CredentialDetail
+ */
 data class SignInRequestResponse(
     val challenge: String,
     val allowCredentials: List<CredentialDetail>,
