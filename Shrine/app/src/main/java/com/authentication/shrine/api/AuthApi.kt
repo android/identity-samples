@@ -77,6 +77,25 @@ class AuthApi @Inject constructor(
     }
 
     /**
+     * Registers a username with the authentication server.
+     *
+     * @param username The username to be used for sign-in.
+     * @return An [ApiResult] indicating the success or failure of the operation.
+     */
+    suspend fun registerUsername(username: String): ApiResult<Unit> {
+        val call = client.newCall(
+            Builder().url("$BASE_URL/auth/new-user").method(
+                "POST",
+                createJSONRequestBody {
+                    name(USERNAME).value(username)
+                },
+            ).build(),
+        )
+        val response = call.await()
+        return response.result(errorMessage = "Error registering username") { }
+    }
+
+    /**
      * Sends a username to the authentication server.
      *
      * @param username The username to be used for sign-in.

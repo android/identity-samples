@@ -63,6 +63,23 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun registerUsername(username: String): Boolean {
+        return when (val result = authApi.registerUsername(username)) {
+            ApiResult.SignedOutFromServer -> {
+                signOut()
+                false
+            }
+
+            is ApiResult.Success<*> -> {
+                dataStore.edit { prefs ->
+                    prefs[USERNAME] = username
+                    prefs[SESSION_ID] = result.sessionId!!
+                }
+                true
+            }
+        }
+    }
+
     /**
      * Sends the username to the server.
      *

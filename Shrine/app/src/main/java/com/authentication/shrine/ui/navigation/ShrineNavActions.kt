@@ -29,6 +29,7 @@ enum class ShrineAppDestinations(@StringRes val title: Int) {
     MainMenuRoute(title = R.string.main_menu),
     AuthRoute(title = R.string.auth),
     RegisterRoute(title = R.string.register),
+    RegisterPasswordRoute(title = R.string.register_password),
     Help(title = R.string.help),
     LearnMore(title = R.string.learn_more),
     Placeholder(title = R.string.todo),
@@ -36,6 +37,7 @@ enum class ShrineAppDestinations(@StringRes val title: Int) {
     ShrineApp(title = R.string.app_name),
     NavHostRoute(title = R.string.nav_host_route),
     PasskeyManagementTab(title = R.string.passkey_management),
+    OtherOptionsSignInRoute(title = R.string.other_ways_to_sign_in)
 }
 
 /**
