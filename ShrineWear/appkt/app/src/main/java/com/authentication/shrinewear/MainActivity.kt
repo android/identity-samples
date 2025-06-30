@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear
+package com.authentication.shrinewear
 
 import android.os.Build
 import android.os.Bundle
@@ -21,9 +21,10 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.wear.compose.material3.MaterialTheme
-import com.androidauth.shrineWear.ui.ShrineApp
+import com.authentication.shrinewear.ui.ShrineApp
 
 private const val TAG = "MainActivity"
+
 /**
  * The main activity for the Shrine Wear OS application.
  *
@@ -45,7 +46,8 @@ class MainActivity : ComponentActivity() {
      * or null if the activity is being created for the first time.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.v(TAG,
+        Log.v(
+            TAG,
             "Verifying Credential Manager availability.  Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT}, has credential manager:" +
                 "${getSystemService("credential") != null}",
         )

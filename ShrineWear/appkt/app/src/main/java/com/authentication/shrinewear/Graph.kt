@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear
+package com.authentication.shrinewear
 
 import android.content.Context
+import com.authentication.shrinewear.authenticator.AuthenticationServer
+import com.authentication.shrinewear.authenticator.CredentialManagerAuthenticator
 
 /**
  * A simple, manual dependency injection container for application-wide singletons.
@@ -37,6 +39,9 @@ object Graph {
      */
     lateinit var credentialManagerAuthenticator: CredentialManagerAuthenticator
         private set
+    lateinit var authenticationServer: AuthenticationServer
+        private set
+
     /**
      * Stores the current authentication status code as an Android string resource ID.
      * This can be used to reflect the authentication state across different parts of the UI.
@@ -55,5 +60,6 @@ object Graph {
      */
     fun provide(context: Context) {
         credentialManagerAuthenticator = CredentialManagerAuthenticator(context)
+        authenticationServer = AuthenticationServer()
     }
 }

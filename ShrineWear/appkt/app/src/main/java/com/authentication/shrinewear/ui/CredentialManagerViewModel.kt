@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
-import android.content.Context
+import android.app.Activity
 import android.util.Log
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidauth.shrineWear.CredentialType
-import com.androidauth.shrineWear.Graph
-import com.androidauth.shrineWear.R
+import com.authentication.shrinewear.Graph
+import com.authentication.shrinewear.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,13 +35,10 @@ import kotlinx.coroutines.launch
  * Defaults to {@link R.string#credman_status_logged_out}.
  * @property inProgress A boolean indicating whether a login operation is currently in progress.
  * Defaults to false.
- * @property credentialTypes A list of {@link CredentialType}s supported for login.
- * Defaults to all entries in the {@link CredentialType} enum.
  */
 data class LoginUiState(
     val statusCode: Int = R.string.credman_status_logged_out,
     val inProgress: Boolean = false,
-    val credentialTypes: List<CredentialType> = CredentialType.entries,
 )
 
 /**
@@ -58,16 +54,12 @@ class CredentialManagerViewModel : ViewModel() {
      *
      * @param context The application context.
      */
-    fun login(context: Context) {
+    fun login(activity: Activity) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(inProgress = true)
 
             try {
-                if (credManAuthenticator.signInWithCredentialManager(
-                        context,
-                        uiState.value.credentialTypes,
-                    )
-                ) {
+                if (credManAuthenticator.signInWithCredentialManager(activity)) {
                     Graph.authenticationStatusCode = R.string.credman_status_authorized
                 } else {
                     Graph.authenticationStatusCode = R.string.status_failed

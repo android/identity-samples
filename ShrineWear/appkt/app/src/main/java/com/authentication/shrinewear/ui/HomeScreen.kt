@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.androidauth.shrineWear.Graph
-import com.androidauth.shrineWear.R
+import com.authentication.shrinewear.Graph
+import com.authentication.shrinewear.R
 
 /**
  * Composable function representing the home screen of the application.
@@ -42,12 +43,12 @@ fun HomeScreen(
     navigateToSignOut: () -> Unit,
 ) {
     val uiState by credentialManagerViewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val activity = LocalContext.current as ComponentActivity
 
     if (!uiState.inProgress) {
         when (Graph.authenticationStatusCode) {
             R.string.credman_status_logged_out -> {
-                credentialManagerViewModel.login(context)
+                credentialManagerViewModel.login(activity)
             }
             R.string.credman_status_dismissed, R.string.credman_status_no_credentials -> {
                 navigateToLegacyLogin()

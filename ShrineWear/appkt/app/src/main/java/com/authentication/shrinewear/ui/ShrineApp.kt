@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.androidauth.shrineWear.ui
+package com.authentication.shrinewear.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +27,7 @@ import androidx.wear.compose.material3.AlertDialogDefaults
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.androidauth.shrineWear.R
+import com.authentication.shrinewear.R
 
 /**
  * The main entry point composable for the Shrine Wear OS application.
@@ -40,6 +40,8 @@ fun ShrineApp() {
     val navController = rememberSwipeDismissableNavController()
     val navigationActions = remember(navController) { ShrineNavActions(navController) }
 
+    // Todo(johnzoeller): This is behaving unpredictably with Credential Manager UI. Fix before
+    // final PR.
     DemoInstructions()
     ShrineNavGraph(navController = navController, navigationActions = navigationActions)
 }

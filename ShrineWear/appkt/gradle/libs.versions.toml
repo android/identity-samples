@@ -9,8 +9,6 @@ androidxNavigationCompose = "2.9.0"
 androidxWearComposeMaterial3 = "1.0.0-alpha37"
 androidxWearComposeNavigation = "1.4.1"
 composeCompiler = "2.0.21"
-firebaseBom = "33.5.1"
-googleServices = "4.4.2"
 googleid = "1.1.1"
 horologist-auth = "0.7.8-alpha"
 kotlin = "1.8.0"
@@ -20,10 +18,12 @@ kotlin-serialization = "2.1.0"
 kotlinxCoroutines = "1.9.0"
 kotlinxSerialization = "1.7.3"
 ktlint = "0.50.0"
+okHttp = "4.12.0"
 playServicesAuth = "21.3.0"
 playServicesWearable = "19.0.0"
 spotless = "6.21.0"
 wearRemoteInteractions = "1.1.0"
+
 
 
 [libraries]
@@ -37,18 +37,12 @@ androidx-compose-ui-tooling = { group = "androidx.wear.compose", name = "compose
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidxCredentials" }
-androidx-credentials-playServicesAuth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidxCredentials" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationCompose" }
 androidx-wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "androidxWearComposeMaterial3" }
 androidx-wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "androidxWearComposeNavigation" }
 androidx-wear-remote-interactions = { group = "androidx.wear", name = "wear-remote-interactions", version.ref = "wearRemoteInteractions" }
-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
-firebase-functions-ktx = { module = "com.google.firebase:firebase-functions-ktx" }
-google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 horologist-auth-ui = { module = "com.google.android.horologist:horologist-auth-ui", version.ref = "horologist-auth" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -56,6 +50,8 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okHttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okHttp" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 playServicesWearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
 
