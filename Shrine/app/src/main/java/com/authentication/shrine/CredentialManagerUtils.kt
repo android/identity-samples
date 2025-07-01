@@ -135,6 +135,8 @@ class CredentialManagerUtils @Inject constructor(
             ) as CreatePublicKeyCredentialResponse
         } catch (e: CreateCredentialException) {
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
+        } catch (e: Exception) {
+            return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
         return GenericCredentialManagerResponse.CreatePasskeySuccess(createPasskeyResponse = credentialResponse)
     }

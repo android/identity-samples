@@ -28,8 +28,10 @@ import com.authentication.shrine.ui.CreatePasskeyScreen
 import com.authentication.shrine.ui.HelpScreen
 import com.authentication.shrine.ui.LearnMoreScreen
 import com.authentication.shrine.ui.MainMenuScreen
+import com.authentication.shrine.ui.OtherOptionsSignInScreen
 import com.authentication.shrine.ui.PasskeyManagementScreen
 import com.authentication.shrine.ui.PlaceholderScreen
+import com.authentication.shrine.ui.RegisterPasswordScreen
 import com.authentication.shrine.ui.RegisterScreen
 import com.authentication.shrine.ui.SettingsScreen
 import com.authentication.shrine.ui.ShrineAppScreen
@@ -98,6 +100,13 @@ fun ShrineNavGraph(
         composable(route = ShrineAppDestinations.RegisterRoute.name) {
             RegisterScreen(
                 navigateToHome = navigateToHome,
+                onLearnMoreClicked = {
+                    navController.navigate(ShrineAppDestinations.LearnMore.name)
+                },
+                onOtherWaysToSignInClicked = {
+                    navController.navigate(ShrineAppDestinations.OtherOptionsSignInRoute.name)
+                },
+                onBackClicked = { navController.popBackStack() },
                 viewModel = hiltViewModel(),
                 credentialManagerUtils = credentialManagerUtils,
             )
@@ -110,6 +119,24 @@ fun ShrineNavGraph(
         composable(route = ShrineAppDestinations.LearnMore.name) {
             LearnMoreScreen(
                 onBackButtonClicked = { navController.popBackStack() },
+            )
+        }
+
+        composable(route = ShrineAppDestinations.OtherOptionsSignInRoute.name) {
+            OtherOptionsSignInScreen(
+                onSignUpWithPasswordClicked = {
+                    navController.navigate(ShrineAppDestinations.RegisterPasswordRoute.name)
+                },
+                onBackClicked = { navController.popBackStack() },
+            )
+        }
+
+        composable(route = ShrineAppDestinations.RegisterPasswordRoute.name) {
+            RegisterPasswordScreen(
+                navigateToHome = navigateToHome,
+                viewModel = hiltViewModel(),
+                onBackClicked = { navController.popBackStack() },
+                credentialManagerUtils = credentialManagerUtils,
             )
         }
 

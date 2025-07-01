@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  */
 package com.authentication.shrine.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,12 +25,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -48,28 +48,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.ShrineButton
-import com.authentication.shrine.ui.common.ShrineClickableText
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.common.ShrineToolbar
-import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.RegisterUiState
 import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
-import com.authentication.shrine.ui.viewmodel.SettingsUiState
 
 /**
  * Stateful composable function that displays the registration screen.
@@ -78,18 +72,17 @@ import com.authentication.shrine.ui.viewmodel.SettingsUiState
  * @param viewModel The AuthenticationViewModel that provides the UI state.
  */
 @Composable
-fun RegisterScreen(
+fun RegisterPasswordScreen(
     navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit,
-    onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
-    onBackClicked: () -> Unit,
     viewModel: RegistrationViewModel,
+    onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val createRestoreKey = {
@@ -103,32 +96,40 @@ fun RegisterScreen(
         )
     }
 
-    val onPasskeyRegister = { emailAddress: String ->
-        viewModel.onPasskeyRegister(
+    val onRegister = { emailAddress: String, registrationPassword: String ->
+        viewModel.onPasswordRegister(
             username = emailAddress,
+            password = registrationPassword,
             onSuccess = { flag ->
                 createRestoreKey()
                 navigateToHome(flag)
             },
-            createPasskeyCallback = { data ->
-                credentialManagerUtils.createPasskey(
-                    requestResult = data,
+            createPassword = { username: String, password: String ->
+                credentialManagerUtils.createPassword(
+                    username = username,
+                    password = password,
                     context = context,
+                )
+            },
+            createRestoreCredential = { createRestoreCredObject ->
+                credentialManagerUtils.createRestoreKey(
+                    createRestoreCredObject,
+                    context,
                 )
             },
         )
     }
 
-    RegisterScreen(
-        onPasskeyRegister = onPasskeyRegister,
+    RegisterPasswordScreen(
+        onRegister = onRegister,
         uiState = uiState,
-        fullName = fullName,
-        onFullNameChanged = { fullName = it},
-        onLearnMoreClicked = onLearnMoreClicked,
-        onOtherWaysToSignInClicked = onOtherWaysToSignInClicked,
-        onBackClicked = onBackClicked,
         email = email,
         onEmailChanged = { email = it },
+        password = password,
+        onPasswordChange = { password = it },
+        passwordVisible = passwordVisible,
+        onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+        onBackClicked = onBackClicked,
         modifier = modifier,
     )
 }
@@ -136,26 +137,30 @@ fun RegisterScreen(
 /**
  * Stateless composable function that displays the registration screen.
  *
- * This screen allows users to create a new account by creating a passkey.
+ * This screen allows users to create a new account by providing their email and password.
+ * It also supports signing in with passkeys.
  *
- * @param onPasskeyRegister Callback for logging in with passkey.
+ * @param onRegister Callback for logging in with email and password.
  * @param uiState The UI state of the authentication process.
- * @param fullName The user's name.
  * @param email The user's email address.
  * @param onEmailChanged Callback for when the email address changes.
+ * @param password The user's password.
+ * @param onPasswordChange Callback for when the password changes.
+ * @param passwordVisible Whether the password is currently visible.
+ * @param onPasswordVisibilityToggle Callback for toggling the visibility of the password.
  * @param modifier The modifier to be applied to the composable.
  */
 @Composable
-fun RegisterScreen(
-    onPasskeyRegister: (String) -> Unit,
+fun RegisterPasswordScreen(
+    onRegister: (String, String) -> Unit,
     uiState: RegisterUiState,
-    fullName: String,
-    onFullNameChanged: (String) -> Unit,
-    onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
-    onBackClicked: () -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityToggle: () -> Unit,
+    onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember {
@@ -169,8 +174,8 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(dimensionResource(R.dimen.padding_small))
                 .fillMaxSize()
+                .padding(dimensionResource(R.dimen.padding_medium))
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -180,18 +185,19 @@ fun RegisterScreen(
                 onBackClicked = onBackClicked,
             )
             ShrineTextHeader(
-                text = stringResource(R.string.sign_up),
+                text = stringResource(R.string.create_account),
             )
+
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large)))
 
             RegisterScreenInputSection(
-                fullName = fullName,
-                onFullNameChanged = onFullNameChanged,
-                onLearnMoreClicked = onLearnMoreClicked,
-                onOtherWaysToSignInClicked = onOtherWaysToSignInClicked,
                 email = email,
                 onEmailChanged = onEmailChanged,
-                onPasskeyRegister = onPasskeyRegister,
+                password = password,
+                passwordVisible = passwordVisible,
+                onPasswordChange = onPasswordChange,
+                onPasswordVisibilityToggle = onPasswordVisibilityToggle,
+                onRegister = onRegister,
                 isPageLoading = uiState.isLoading,
             )
         }
@@ -213,13 +219,13 @@ fun RegisterScreen(
 
 @Composable
 private fun RegisterScreenInputSection(
-    fullName: String,
-    onFullNameChanged: (String) -> Unit,
-    onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
-    onPasskeyRegister: (String) -> Unit,
+    password: String,
+    passwordVisible: Boolean,
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityToggle: () -> Unit,
+    onRegister: (String, String) -> Unit,
     isPageLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -230,30 +236,9 @@ private fun RegisterScreenInputSection(
             )
             .fillMaxWidth()
             .padding(dimensionResource(R.dimen.dimen_standard)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small)),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(R.string.full_name),
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-        )
-        TextField(
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-            value = fullName,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = stringResource(R.string.email_icon),
-                )
-            },
-            singleLine = true,
-            onValueChange = onFullNameChanged,
-            label = { Text(stringResource(R.string.full_name)) },
-            placeholder = { Text(stringResource(R.string.full_name)) },
-        )
-        Text(
-            text = stringResource(R.string.username),
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-        )
         TextField(
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
             value = email,
@@ -269,15 +254,40 @@ private fun RegisterScreenInputSection(
             label = { Text(stringResource(R.string.email_address)) },
             placeholder = { Text(stringResource(R.string.email_address)) },
         )
-        Text(
-            text = stringResource(R.string.signing_in),
+
+        TextField(
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
+            value = password,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Password,
+                    contentDescription = stringResource(R.string.password_icon),
+                )
+            },
+            singleLine = true,
+            visualTransformation = if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            onValueChange = onPasswordChange,
+            label = { Text(stringResource(R.string.password)) },
+            trailingIcon = {
+                val image = if (passwordVisible) {
+                    Icons.Filled.Visibility
+                } else {
+                    Icons.Filled.VisibilityOff
+                }
+                IconButton(onClick = onPasswordVisibilityToggle) {
+                    Icon(imageVector = image, stringResource(R.string.password))
+                }
+            },
         )
 
-        PasskeyInformationTab(onLearnMoreClicked, onOtherWaysToSignInClicked)
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large)))
 
         ShrineButton(
-            onClick = { onPasskeyRegister(email) },
+            onClick = { onRegister(email, password) },
             buttonText = stringResource(R.string.sign_up),
             isButtonEnabled = !isPageLoading,
             modifier = Modifier.widthIn(min = 280.dp),
@@ -286,72 +296,20 @@ private fun RegisterScreenInputSection(
 }
 
 /**
- * Composable for the Passkeys Information Tab UI Element
- *
- * @param onLearnMoreClicked lambda for more information, navigates to an informational screen
- * @param onOtherWaysToSignInClicked lambda for other sign in methods, navigates to
- * @OtherOptionsSignInScreen
- * */
-@Composable
-private fun PasskeyInformationTab(
-    onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(R.dimen.size_standard)))
-            .background(grayBackground)
-            .padding(dimensionResource(R.dimen.padding_large)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
-        ) {
-            Column(
-                modifier = Modifier.weight(0.6F),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
-            ) {
-                ShrineClickableText(
-                    text = stringResource(R.string.signing_in_description),
-                    clickableText = stringResource(R.string.how_passkeys_work),
-                    onTextClick = onLearnMoreClicked,
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                )
-                ShrineClickableText(
-                    text = "",
-                    clickableText = stringResource(R.string.other_ways_to_sign_in),
-                    onTextClick = onOtherWaysToSignInClicked,
-                    textStyle = TextStyle(color = Color(0xFF006B5F)),
-                )
-            }
-
-            Image(
-                modifier = Modifier.weight(0.2F),
-                painter = painterResource(R.drawable.ic_passkeys_info),
-                contentDescription = stringResource(R.string.passkey_icon),
-            )
-        }
-    }
-}
-
-/**
- * Generates a preview of the RegisterScreen composable function.
+ * Generates a preview of the RegisterPasswordScreen composable function.
  */
 @Preview(showSystemUi = true)
 @Composable
-fun RegisterScreenPreview() {
-    ShrineTheme {
-        RegisterScreen(
-            onPasskeyRegister = { _ -> },
-            onLearnMoreClicked = { },
-            onOtherWaysToSignInClicked = { },
-            onBackClicked = { },
-            uiState = RegisterUiState(),
-            fullName = "",
-            onFullNameChanged = { },
-            email = "",
-            onEmailChanged = { },
-        )
-    }
+fun RegisterPasswordScreenPreview() {
+    RegisterPasswordScreen(
+        onRegister = { _, _ -> },
+        uiState = RegisterUiState(),
+        email = "",
+        onEmailChanged = { },
+        password = "",
+        onPasswordChange = { },
+        passwordVisible = true,
+        onPasswordVisibilityToggle = { },
+        onBackClicked = { },
+    )
 }

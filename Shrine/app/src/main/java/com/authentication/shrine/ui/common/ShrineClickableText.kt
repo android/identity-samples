@@ -32,7 +32,7 @@ import androidx.compose.ui.text.withLink
  * @param text Displayed text
  * @param clickableText Part of the text that needs to be clickable
  * @param onTextClick onclick lambda for the clickable text
- * @param textStyle Text style for the test
+ * @param textStyle Text style for the text
  * @param modifier The [Modifier] to be applied to the ClickableText
  * */
 @Composable
