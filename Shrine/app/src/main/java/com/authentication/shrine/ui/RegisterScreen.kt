@@ -208,6 +208,15 @@ fun RegisterScreen(
                 )
             }
         }
+
+        val snackbarErrorMessage = uiState.errorMessage
+        if (!snackbarErrorMessage.isNullOrBlank()) {
+            LaunchedEffect(uiState) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarErrorMessage,
+                )
+            }
+        }
     }
 }
 

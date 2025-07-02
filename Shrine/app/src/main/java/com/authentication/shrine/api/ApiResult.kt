@@ -18,7 +18,7 @@ package com.authentication.shrine.api
 /**
  * Represents the result of an API call.
  *
- * This sealed class has three subclasses:
+ * This sealed class has two subclasses:
  * - [Success]: The API call returned successfully with data.
  * - [SignedOutFromServer]: The API call returned unsuccessfully with code 401, and the user should be signed out.
  */
