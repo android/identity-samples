@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,6 @@ import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.authentication.shrinewear.Graph
 import com.authentication.shrinewear.R
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
-
-private const val TAG = "LegacyLoginScreen"
-private const val WARNING_LEGACY_SIWG_UNAVAILABLE =
-    "Legacy Google Sign in not available on devices running SDK 35+ with Credential Manager. Use Sign in with Google via Credential Manager to sign in."
 
 /**
  * Composable for the header of the legacy login options list.

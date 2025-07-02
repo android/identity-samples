@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,14 +330,55 @@ class AuthenticationServer {
             return false
         }
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-        return authorizeGoogleTokenWithServer(googleIdTokenCredential.idToken)
+
+        return when (
+            val authorizationResult =
+                authorizeGoogleTokenWithServer(googleIdTokenCredential.idToken)
+        ) {
+            is ApiResult.Success -> {
+                sessionId = authorizationResult.sessionId
+                return true
+            }
+
+            is ApiResult.SignedOutFromServer -> {
+                signOut()
+                Log.e(TAG, "Sign in With Google failed.")
+                false
+            }
+        }
     }
 
-    // Todo(johnnzoeller): Implement in next PR
-    suspend fun authorizeGoogleTokenWithServer(token: String): Boolean {
-        return true
+    /**
+     * Authorizes a Google ID token with the backend server.
+     *
+     * This function sends a POST request to the server's `/federation/verifyIdToken` endpoint,
+     * passing the Google ID token and Google's accounts URL for verification.
+     *
+     * @param token The Google ID token obtained from Google Sign-In.
+     * @return [ApiResult]<[Unit]> indicating the success or failure of the authorization.
+     * A [Unit] type for success implies no specific data is returned on successful authorization.
+     */
+    suspend fun authorizeGoogleTokenWithServer(token: String): ApiResult<Unit> {
+        val httpResponse = httpClient.newCall(
+            Builder().url("$BASE_URL/federation/verifyIdToken")
+                .method(
+                    "POST",
+                    createJSONRequestBody {
+                        name("token").value(token)
+                        name("url").value("https://accounts.google.com")
+                    },
+                ).build(),
+        ).await()
+
+        return httpResponse.result(errorMessage = "Error setting password") { }
     }
 
+    /**
+     * Signs out the current user by updating the `signedInState`.
+     *
+     * This function sets the internal `signedInState` to `false`, which should trigger
+     * UI updates or other logic dependent on the user's sign-in status.
+     */
     fun signOut() {
         signedInState.update { false }
     }

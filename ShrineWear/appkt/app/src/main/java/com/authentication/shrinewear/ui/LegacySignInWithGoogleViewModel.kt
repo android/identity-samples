@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ val LegacySignInWithGoogleViewModelFactory: ViewModelProvider.Factory = viewMode
 
         val gsiOptions = GoogleSignInOptions
             .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestServerAuthCode(SERVER_CLIENT_ID)
+            .requestIdToken(SERVER_CLIENT_ID)
             .build()
 
         val googleSignInClient = GoogleSignIn.getClient(application, gsiOptions)
