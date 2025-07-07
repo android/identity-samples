@@ -16,32 +16,12 @@
 package com.authentication.shrinewear.extensions
 
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import kotlinx.coroutines.flow.first
 
-/**
- * Suspends the coroutine until the Lifecycle reaches a desired state.
- *
- * @param state The target state to wait for.
- */
-suspend fun Lifecycle.awaitState(state: Lifecycle.State) {
-    if (currentState.isAtLeast(state)) {
+suspend fun Lifecycle.awaitState(required: Lifecycle.State) {
+    if (currentState.isAtLeast(required)) {
         return
     }
 
-    suspendCancellableCoroutine { continuation ->
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.upTo(state)) {
-                continuation.resume(Unit)
-            } else if (event == Lifecycle.Event.ON_DESTROY) {
-                continuation.cancel()
-            }
-        }
-
-        addObserver(observer)
-        continuation.invokeOnCancellation {
-            removeObserver(observer)
-        }
-    }
+    currentStateFlow.first { it.isAtLeast(required) }
 }
