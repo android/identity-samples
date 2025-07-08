@@ -145,6 +145,8 @@ class RegistrationViewModel @Inject constructor(
                 _uiState.update {
                     RegisterUiState(errorMessage = e.message)
                 }
+                onSuccess(false)
+                repository.setSignedInState(false)
             }
         }
     }

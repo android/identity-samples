@@ -202,7 +202,7 @@ fun RegisterScreen(
 
         val snackbarMessage = stringResource(uiState.messageResourceId)
         if (snackbarMessage.isNotBlank()) {
-            LaunchedEffect(uiState) {
+            LaunchedEffect(snackbarMessage) {
                 snackbarHostState.showSnackbar(
                     message = snackbarMessage,
                 )
@@ -211,7 +211,7 @@ fun RegisterScreen(
 
         val snackbarErrorMessage = uiState.errorMessage
         if (!snackbarErrorMessage.isNullOrBlank()) {
-            LaunchedEffect(uiState) {
+            LaunchedEffect(snackbarErrorMessage) {
                 snackbarHostState.showSnackbar(
                     message = snackbarErrorMessage,
                 )
