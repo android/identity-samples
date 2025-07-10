@@ -55,6 +55,11 @@ class AuthApi @Inject constructor(
         /**
          * The base URL of the authentication server.
          */
+        private const val BASE_DOMAIN = BuildConfig.API_BASE_DOMAIN
+
+        /**
+         * The base URL of the authentication server.
+         */
         private const val BASE_URL = BuildConfig.API_BASE_URL
 
         /**
@@ -329,7 +334,7 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val httpUrl =
-            HttpUrl.Builder().scheme("https").host("project-sesame-426206.appspot.com")
+            HttpUrl.Builder().scheme("https").host(BASE_DOMAIN)
                 .addPathSegment("webauthn").addPathSegment("removeKey")
                 .addQueryParameter("credId", credentialId).build()
         val call = client.newCall(
