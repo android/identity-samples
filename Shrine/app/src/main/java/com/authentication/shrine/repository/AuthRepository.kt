@@ -505,7 +505,7 @@ class AuthRepository @Inject constructor(
                 }
             }
         } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call deletePasskey")
+            Log.e(TAG, "Cannot call deletePasskey", e)
         }
         return false*/
     }

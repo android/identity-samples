@@ -53,7 +53,7 @@ class PasskeyManagementViewModel @Inject constructor(
      */
     fun getPasskeysList() {
         _uiState.update {
-            PasskeyManagementUiState(isLoading = true)
+            it.copy(isLoading = true)
         }
 
         viewModelScope.launch {
@@ -61,7 +61,7 @@ class PasskeyManagementViewModel @Inject constructor(
                 val data = authRepository.getListOfPasskeys()
                 if (data != null) {
                     _uiState.update {
-                        PasskeyManagementUiState(
+                        it.copy(
                             isLoading = false,
                             userHasPasskeys = data.credentials.isNotEmpty(),
                             passkeysList = data.credentials,
@@ -69,14 +69,14 @@ class PasskeyManagementViewModel @Inject constructor(
                     }
                 } else {
                     _uiState.update {
-                        PasskeyManagementUiState(
+                        it.copy(
                             messageResourceId = R.string.get_keys_error,
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    PasskeyManagementUiState(
+                    it.copy(
                         errorMessage = e.message,
                     )
                 }
@@ -92,29 +92,34 @@ class PasskeyManagementViewModel @Inject constructor(
      */
     fun deletePasskey(credentialId: String) {
         _uiState.update {
-            PasskeyManagementUiState(isLoading = true)
+            it.copy(isLoading = true)
         }
 
         viewModelScope.launch {
             try {
                 if (authRepository.deletePasskey(credentialId)) {
                     // Refresh passkeys list after deleting a passkey
-                    getPasskeysList()
+                    val data = authRepository.getListOfPasskeys()
                     _uiState.update {
-                        PasskeyManagementUiState(
-                            deleteStatus = R.string.delete_passkey_successful,
+                        it.copy(
+                            isLoading = false,
+                            userHasPasskeys = data?.credentials?.isNotEmpty() ?: false,
+                            passkeysList = data?.credentials ?: emptyList(),
+                            deleteStatus = R.string.delete_passkey_successful
                         )
                     }
                 } else {
                     _uiState.update {
-                        PasskeyManagementUiState(
+                        it.copy(
+                            isLoading = false,
                             deleteStatus = R.string.delete_passkey_error,
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    PasskeyManagementUiState(
+                    it.copy(
+                        isLoading = false,
                         errorMessage = e.message,
                     )
                 }
