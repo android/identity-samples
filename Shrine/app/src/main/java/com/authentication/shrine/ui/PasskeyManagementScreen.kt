@@ -30,11 +30,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -52,11 +54,13 @@ import coil.request.ImageRequest
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.ui.common.ShrineClickableText
+import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.common.ShrineToolbar
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.grayBackground
-import com.authentication.shrine.ui.viewmodel.SettingsViewModel
+import com.authentication.shrine.ui.viewmodel.PasskeyManagementUiState
+import com.authentication.shrine.ui.viewmodel.PasskeyManagementViewModel
 import com.authentication.shrine.utility.toReadableDate
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -66,26 +70,32 @@ import java.io.InputStreamReader
  * Stateful composable of the Passkeys Management Screen
  *
  * @param onLearnMoreClicked onclick lambda invoked when clicked on learn more about passkeys
- * @param viewModel [SettingsViewModel] passed with the same data from the Settings Screen
+ * @param viewModel [PasskeyManagementViewModel]
  * @param modifier Modifier to modify the UI of the screen
  * */
 @Composable
 fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
     onBackClicked: () -> Unit,
-    viewModel: SettingsViewModel,
+    viewModel: PasskeyManagementViewModel,
     modifier: Modifier = Modifier,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
 
     val gson = Gson()
-    val am = LocalContext.current.assets.open("aaguids.json")
-    val reader = InputStreamReader(am)
-    val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(reader, object : TypeToken<Map<String, Map<String, String>>>() {}.type)
+    val aaguidInputStream = LocalContext.current.assets.open("aaguids.json")
+    val reader = InputStreamReader(aaguidInputStream)
+    val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(
+        reader,
+        object : TypeToken<Map<String, Map<String, String>>>() {}.type
+    )
+    val onDeleteClicked = { credentialId: String -> viewModel.deletePasskey(credentialId) }
 
     PasskeyManagementScreen(
         onLearnMoreClicked = onLearnMoreClicked,
         onBackClicked = onBackClicked,
+        onDeleteClicked = onDeleteClicked,
+        uiState = uiState,
         passkeysList = uiState.passkeysList,
         aaguidData = aaguidJsonData,
         modifier = modifier,
@@ -96,13 +106,15 @@ fun PasskeyManagementScreen(
  * Stateless composable of the Passkey Management Screen
  *
  * @param onLearnMoreClicked onclick lambda invoked when clicked on learn more about passkeys
- * @param passkeysList List of [PasskeyCredential] from the [SettingsViewModel]
+ * @param passkeysList List of [PasskeyCredential] from the [PasskeyManagementViewModel]
  * @param modifier Modifier to modify the UI of the screen
  * */
 @Composable
 fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
     onBackClicked: () -> Unit,
+    onDeleteClicked: (credentialId: String) -> Unit,
+    uiState: PasskeyManagementUiState,
     passkeysList: List<PasskeyCredential>,
     aaguidData: Map<String, Map<String, String>>,
     modifier: Modifier = Modifier,
@@ -136,9 +148,41 @@ fun PasskeyManagementScreen(
             )
 
             PasskeysListColumn(
+                onDeleteClicked = onDeleteClicked,
                 passkeysList = passkeysList,
                 aaguidData = aaguidData,
             )
+        }
+        if (uiState.isLoading) {
+            ShrineLoader()
+        }
+
+        val snackbarMessage = stringResource(uiState.messageResourceId)
+        if (snackbarMessage.isNotBlank()) {
+            LaunchedEffect(snackbarMessage) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarMessage,
+                )
+            }
+        }
+
+        val snackbarErrorMessage = uiState.errorMessage
+        if (!snackbarErrorMessage.isNullOrBlank()) {
+            LaunchedEffect(snackbarErrorMessage) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarErrorMessage,
+                )
+            }
+        }
+        
+        val deleteStatus = stringResource(uiState.deleteStatus)
+        if(deleteStatus.isNotBlank()) {
+            LaunchedEffect(deleteStatus) {
+                snackbarHostState.showSnackbar(
+                    message = deleteStatus,
+                    duration = SnackbarDuration.Indefinite
+                )
+            }
         }
     }
 }
@@ -150,6 +194,7 @@ fun PasskeyManagementScreen(
  * */
 @Composable
 fun PasskeysListColumn(
+    onDeleteClicked: (credentialId: String) -> Unit,
     passkeysList: List<PasskeyCredential>,
     aaguidData: Map<String, Map<String, String>>,
 ) {
@@ -165,6 +210,8 @@ fun PasskeysListColumn(
             items = passkeysList,
             itemContent = { index, item ->
                 PasskeysDetailsRow(
+                    onDeleteClicked = onDeleteClicked,
+                    credentialId = item.id,
                     iconSvgString = aaguidData[item.aaguid]?.get("icon_light"),
                     credentialProviderName = item.name,
                     passkeyCreationDate = item.registeredAt.toReadableDate(),
@@ -172,7 +219,10 @@ fun PasskeysListColumn(
 
                 if (index < passkeysList.lastIndex) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_extra_small), horizontal = dimensionResource(R.dimen.dimen_standard)),
+                        modifier = Modifier.padding(
+                            vertical = dimensionResource(R.dimen.padding_extra_small),
+                            horizontal = dimensionResource(R.dimen.dimen_standard)
+                        ),
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -191,6 +241,8 @@ fun PasskeysListColumn(
  * */
 @Composable
 fun PasskeysDetailsRow(
+    onDeleteClicked: (credentialId: String) -> Unit,
+    credentialId: String,
     iconSvgString: String?,
     credentialProviderName: String,
     passkeyCreationDate: String,
@@ -233,7 +285,7 @@ fun PasskeysDetailsRow(
 
         TextButton(
             onClick = {
-                // TODO: Add the delete passkeys functionality and integrate Signal API
+                onDeleteClicked(credentialId)
             },
         ) {
             Text(
@@ -255,7 +307,19 @@ fun PasskeyManagementScreenPreview() {
         PasskeyManagementScreen(
             onLearnMoreClicked = { },
             onBackClicked = { },
-            passkeysList = listOf(),
+            onDeleteClicked = { },
+            uiState = PasskeyManagementUiState(),
+            passkeysList = listOf(
+                PasskeyCredential(
+                    "123",
+                    "234",
+                    "name",
+                    "passkey",
+                    "aaguid",
+                    1L,
+                    "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4"
+                )
+            ),
             aaguidData = mapOf(),
         )
     }

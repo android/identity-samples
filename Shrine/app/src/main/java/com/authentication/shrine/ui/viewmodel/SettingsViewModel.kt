@@ -41,26 +41,34 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun getPasskeysList() {
+    fun getPasskeysList() {
         _uiState.update {
             SettingsUiState(isLoading = true)
         }
 
         viewModelScope.launch {
-            val data = authRepository.getListOfPasskeys()
-            if (data != null) {
-                _uiState.update {
-                    SettingsUiState(
-                        isLoading = false,
-                        userHasPasskeys = data.credentials.isNotEmpty(),
-                        username = authRepository.getUsername(),
-                        passkeysList = data.credentials,
-                    )
+            try {
+                val data = authRepository.getListOfPasskeys()
+                if (data != null) {
+                    _uiState.update {
+                        SettingsUiState(
+                            isLoading = false,
+                            userHasPasskeys = data.credentials.isNotEmpty(),
+                            username = authRepository.getUsername(),
+                            passkeysList = data.credentials,
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        SettingsUiState(
+                            messageResourceId = R.string.get_keys_error,
+                        )
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
                 _uiState.update {
                     SettingsUiState(
-                        errorMessage = R.string.get_keys_error,
+                        errorMessage = e.message,
                     )
                 }
             }
@@ -74,5 +82,6 @@ data class SettingsUiState(
     val username: String = "",
     val passkeysList: List<PasskeyCredential> = listOf(),
     val passwordChanged: String = "",
-    @StringRes val errorMessage: Int = -1,
+    @StringRes val messageResourceId: Int = R.string.empty_string,
+    val errorMessage: String? = null,
 )

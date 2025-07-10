@@ -35,7 +35,6 @@ import com.authentication.shrine.ui.RegisterPasswordScreen
 import com.authentication.shrine.ui.RegisterScreen
 import com.authentication.shrine.ui.SettingsScreen
 import com.authentication.shrine.ui.ShrineAppScreen
-import com.authentication.shrine.ui.viewmodel.SettingsViewModel
 
 /**
  * The navigation graph for the Shrine app.
@@ -164,18 +163,12 @@ fun ShrineNavGraph(
         }
 
         composable(route = ShrineAppDestinations.PasskeyManagementTab.name) { backStackEntry ->
-            val viewModel: SettingsViewModel = if (navController.previousBackStackEntry != null) {
-                hiltViewModel(navController.previousBackStackEntry!!)
-            } else {
-                hiltViewModel()
-            }
-
             PasskeyManagementScreen(
                 onLearnMoreClicked = {
                     navController.navigate(ShrineAppDestinations.LearnMore.name)
                 },
                 onBackClicked = { navController.popBackStack() },
-                viewModel = viewModel,
+                viewModel = hiltViewModel(),
             )
         }
 

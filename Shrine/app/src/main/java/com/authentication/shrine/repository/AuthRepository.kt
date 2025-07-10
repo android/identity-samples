@@ -396,4 +396,33 @@ class AuthRepository @Inject constructor(
         }
         return null
     }
+
+    /**
+     * Deletes a passkey from the Backend
+     * @param credentialId The ID of the credential to be deleted
+     * @return True if the deletion was successful, false otherwise
+     */
+    suspend fun deletePasskey(credentialId: String): Boolean {
+        try {
+            val sessionId = dataStore.read(SESSION_ID)
+            if (!sessionId.isNullOrBlank()) {
+                when (val apiResult = authApi.deletePasskey(sessionId, credentialId)) {
+                    is ApiResult.SignedOutFromServer -> {
+                        signOut()
+                    }
+
+                    is ApiResult.Success -> {
+                        dataStore.edit { prefs ->
+                            apiResult.sessionId?.let { prefs[SESSION_ID] = it }
+                        }
+                        return true
+                    }
+                }
+            }
+        } catch (e: ApiException) {
+            Log.e(TAG, "Cannot call deletePasskey")
+        }
+        return false
+    }
+
 }

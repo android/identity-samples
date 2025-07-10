@@ -27,6 +27,7 @@ import com.authentication.shrine.model.PasskeysList
 import com.google.android.gms.fido.fido2.api.common.Attachment
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType.PUBLIC_KEY
 import com.google.gson.Gson
+import okhttp3.HttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request.Builder
@@ -143,7 +144,8 @@ class AuthApi @Inject constructor(
      */
     suspend fun registerPasskeyCreationRequest(sessionId: String): ApiResult<JSONObject> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/webauthn/registerRequest").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerRequest")
+                .addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -180,7 +182,8 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/webauthn/registerResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/registerResponse")
+                .addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -241,7 +244,8 @@ class AuthApi @Inject constructor(
         credentialId: String,
     ): ApiResult<Unit> {
         val call = client.newCall(
-            Builder().url("$BASE_URL/webauthn/signinResponse").addHeader("Cookie", formatCookie(sessionId))
+            Builder().url("$BASE_URL/webauthn/signinResponse")
+                .addHeader("Cookie", formatCookie(sessionId))
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -314,6 +318,35 @@ class AuthApi @Inject constructor(
     }
 
     /**
+     * Deletes a passkey from the authentication server. The server returns an empty response if
+     * successful, so only the usual status code is checked.
+     *
+     * @param sessionId The session ID used for authentication.
+     * @param credentialId The ID of the credential to be deleted.
+     */
+    suspend fun deletePasskey(
+        sessionId: String,
+        credentialId: String,
+    ): ApiResult<Unit> {
+        val httpUrl =
+            HttpUrl.Builder().scheme("https").host("project-sesame-426206.appspot.com")
+                .addPathSegment("webauthn").addPathSegment("removeKey")
+                .addQueryParameter("credId", credentialId).build()
+        val call = client.newCall(
+            Builder().url(httpUrl)
+                .addHeader("Cookie", formatCookie(sessionId))
+                .method(
+                    "POST",
+                    createJSONRequestBody {}
+                )
+                .build(),
+        )
+
+        val apiResponse = call.await()
+        return apiResponse.result(errorMessage = "Error in deleting passkey") { }
+    }
+
+    /**
      * Parses a public key credential request options object from a JSON response.
      *
      * @param responseBody The JSON response body.
@@ -327,7 +360,11 @@ class AuthApi @Inject constructor(
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
                 when (jsonReader.nextName()) {
-                    "challenge" -> credentialRequestOptions.put("challenge", jsonReader.nextString())
+                    "challenge" -> credentialRequestOptions.put(
+                        "challenge",
+                        jsonReader.nextString()
+                    )
+
                     "userVerification" -> jsonReader.skipValue()
                     "allowCredentials" -> credentialRequestOptions.put(
                         "allowCredentials",
