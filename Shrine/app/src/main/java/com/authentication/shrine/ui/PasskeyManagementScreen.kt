@@ -179,8 +179,7 @@ fun PasskeyManagementScreen(
         if(deleteStatus.isNotBlank()) {
             LaunchedEffect(deleteStatus) {
                 snackbarHostState.showSnackbar(
-                    message = deleteStatus,
-                    duration = SnackbarDuration.Indefinite
+                    message = deleteStatus
                 )
             }
         }
