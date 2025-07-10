@@ -27,6 +27,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.authentication.shrine.BuildConfig
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.CredmanResponse
@@ -43,6 +44,7 @@ import com.authentication.shrine.utility.getSessionId
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import okhttp3.HttpUrl
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -432,18 +434,80 @@ class AuthRepository @Inject constructor(
                 cookie = sessionId.createCookieHeader(),
             )
             if (apiResult.isSuccessful) {
-                dataStore.edit { prefs ->
-                    apiResult.getSessionId()?.also {
+                apiResult.getSessionId()?.also {
+                    dataStore.edit { prefs ->
                         prefs[SESSION_ID] = it
-                    } ?: run {
-                        signOut()
                     }
+                } ?: run {
+                    signOut()
+                    return null
                 }
                 return apiResult.body()
             } else if (apiResult.code() == 401) {
                 signOut()
+                return null
             }
         }
+        signOut()
         return null
     }
+
+    /**
+     * Deletes a passkey from the Backend
+     * @param credentialId The ID of the credential to be deleted
+     * @return True if the deletion was successful, false otherwise
+     */
+    suspend fun deletePasskey(credentialId: String): Boolean {
+        val sessionId = dataStore.read(SESSION_ID)
+        // Construct endpoint for deleting passkeys.
+        val deleteUrl = HttpUrl.Builder().scheme("https").host(BuildConfig.API_BASE_DOMAIN)
+            .addPathSegment("webauthn").addPathSegment("removeKey")
+            .addQueryParameter("credId", credentialId).build()
+        try {
+            if (!sessionId.isNullOrEmpty()) {
+                val response = authApiService.deletePasskey(
+                    url = deleteUrl,
+                    cookie = sessionId.createCookieHeader(),
+                )
+                if (response.isSuccessful) {
+                    dataStore.edit { prefs ->
+                        prefs[USERNAME] = response.body()?.username.orEmpty()
+                        response.getSessionId()?.also {
+                            prefs[SESSION_ID] = it
+                        } ?: run {
+                            signOut()
+                        }
+                    }
+                    return true
+                } else if (response.code() == 401) {
+                    signOut()
+                }
+            }
+        }catch (e: Exception) {
+            Log.e(TAG, "Cannot call deletePasskey", e)
+        }
+        return false
+
+        /*try {
+            val sessionId = dataStore.read(SESSION_ID)
+            if (!sessionId.isNullOrBlank()) {
+                when (val apiResult = authApi.deletePasskey(sessionId, credentialId)) {
+                    is ApiResult.SignedOutFromServer -> {
+                        signOut()
+                    }
+
+                    is ApiResult.Success -> {
+                        dataStore.edit { prefs ->
+                            apiResult.sessionId?.let { prefs[SESSION_ID] = it }
+                        }
+                        return true
+                    }
+                }
+            }
+        } catch (e: ApiException) {
+            Log.e(TAG, "Cannot call deletePasskey")
+        }
+        return false*/
+    }
+
 }

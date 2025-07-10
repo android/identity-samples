@@ -48,12 +48,6 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            getPasskeysList()
-        }
-    }
-
     /**
      * Fetches the list of passkeys for the authenticated user and updates the UI state.
      *
@@ -62,26 +56,36 @@ class SettingsViewModel @Inject constructor(
      * On successful retrieval, it updates the state with the fetched data.
      * If retrieval fails, it updates the state with an error message.
      */
-    private fun getPasskeysList() {
+    fun getPasskeysList() {
         _uiState.update {
             SettingsUiState(isLoading = true)
         }
 
         viewModelScope.launch {
-            val data = authRepository.getListOfPasskeys()
-            if (data != null) {
+            try {
+                val data = authRepository.getListOfPasskeys()
+                if (data != null) {
+                    _uiState.update {
+                        SettingsUiState(
+                            isLoading = false,
+                            userHasPasskeys = data.credentials.isNotEmpty(),
+                            username = authRepository.getUsername(),
+                            passkeysList = data.credentials,
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        SettingsUiState(
+                            isLoading = false,
+                            messageResourceId = R.string.get_keys_error,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
                 _uiState.update {
                     SettingsUiState(
                         isLoading = false,
-                        userHasPasskeys = data.credentials.isNotEmpty(),
-                        username = authRepository.getUsername(),
-                        passkeysList = data.credentials,
-                    )
-                }
-            } else {
-                _uiState.update {
-                    SettingsUiState(
-                        errorMessage = R.string.get_keys_error,
+                        errorMessage = e.message,
                     )
                 }
             }
@@ -102,6 +106,7 @@ class SettingsViewModel @Inject constructor(
  * @property passkeysList A list of {@link PasskeyCredential} objects representing the user's passkeys.
  * @property passwordChanged A string indicating when the password was last changed (e.g., "2 days ago").
  *                         This property is not updated by the provided ViewModel snippet.
+ * @property messageResourceId A string resource ID for a message to be displayed.
  * @property errorMessage A string resource ID for an error message to be displayed.
  *                      Defaults to -1, indicating no error.
  */
@@ -111,5 +116,6 @@ data class SettingsUiState(
     val username: String = "",
     val passkeysList: List<PasskeyCredential> = listOf(),
     val passwordChanged: String = "",
-    @StringRes val errorMessage: Int = -1,
+    @StringRes val messageResourceId: Int = R.string.empty_string,
+    val errorMessage: String? = null,
 )
