@@ -84,7 +84,11 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
                 prefs[USERNAME] = username
-                response.getSessionId()?.let { prefs[SESSION_ID] = it }
+                response.getSessionId()?.also {
+                    prefs[SESSION_ID] = it
+                } ?: run {
+                    signOut()
+                }
             }
             return true
         } else if (response.code() == 401) {
@@ -105,7 +109,11 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
                 prefs[USERNAME] = username
-                response.getSessionId()?.let { prefs[SESSION_ID] = it }
+                response.getSessionId()?.also {
+                    prefs[SESSION_ID] = it
+                } ?: run {
+                    signOut()
+                }
             }
             setSessionWithPassword(password)
             return true
@@ -133,7 +141,11 @@ class AuthRepository @Inject constructor(
                 if (response.isSuccessful) {
                     dataStore.edit { prefs ->
                         prefs[USERNAME] = response.body()?.username.orEmpty()
-                        response.getSessionId()?.let { prefs[SESSION_ID] = it }
+                        response.getSessionId()?.also {
+                            prefs[SESSION_ID] = it
+                        } ?: run {
+                            signOut()
+                        }
                     }
                     return true
                 } else if (response.code() == 401) {
@@ -180,7 +192,11 @@ class AuthRepository @Inject constructor(
                 )
                 if (response.isSuccessful) {
                     dataStore.edit { prefs ->
-                        response.getSessionId()?.let { prefs[SESSION_ID] = it }
+                        response.getSessionId()?.also {
+                            prefs[SESSION_ID] = it
+                        } ?: run {
+                            signOut()
+                        }
                     }
                     return response.getJsonObject()
                 } else if (response.code() == 401) {
@@ -236,7 +252,11 @@ class AuthRepository @Inject constructor(
                 )
                 if (apiResult.isSuccessful) {
                     dataStore.edit { prefs ->
-                        apiResult.getSessionId()?.let { prefs[SESSION_ID] = it }
+                        apiResult.getSessionId()?.also {
+                            prefs[SESSION_ID] = it
+                        } ?: run {
+                            signOut()
+                        }
                     }
                     return true
                 } else if (apiResult.code() == 401) {
@@ -258,7 +278,11 @@ class AuthRepository @Inject constructor(
         val response = authApiService.signInRequest()
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
-                response.getSessionId()?.let { prefs[SESSION_ID] = it }
+                response.getSessionId()?.also {
+                    prefs[SESSION_ID] = it
+                } ?: run {
+                    signOut()
+                }
             }
             return response.getJsonObject()
         } else if (response.code() == 401) {
@@ -307,7 +331,11 @@ class AuthRepository @Inject constructor(
                     )
                     if (apiResult.isSuccessful) {
                         dataStore.edit { prefs ->
-                            apiResult.getSessionId()?.let { prefs[SESSION_ID] = it }
+                            apiResult.getSessionId()?.also {
+                                prefs[SESSION_ID] = it
+                            } ?: run {
+                                signOut()
+                            }
                         }
                         return true
                     } else if (apiResult.code() == 401) {
@@ -405,7 +433,11 @@ class AuthRepository @Inject constructor(
             )
             if (apiResult.isSuccessful) {
                 dataStore.edit { prefs ->
-                    apiResult.getSessionId()?.let { prefs[SESSION_ID] = it }
+                    apiResult.getSessionId()?.also {
+                        prefs[SESSION_ID] = it
+                    } ?: run {
+                        signOut()
+                    }
                 }
                 return apiResult.body()
             } else if (apiResult.code() == 401) {
