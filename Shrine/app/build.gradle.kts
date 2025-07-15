@@ -90,7 +90,7 @@ android {
         kotlinCompilerExtensionVersion = "1.5.2"
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -174,7 +174,7 @@ dependencies {
 
     // Other Dependencies
     implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
+    implementation(libs.okhttp.logging.interceptor)
     implementation(libs.kotlin.coroutines)
     implementation(libs.datastore.pref)
     implementation(libs.hilt.navigation.compose)

@@ -4,7 +4,6 @@ buildscript {
         // Make sure that you have the following two repositories
         google()  // Google's Maven repository
         mavenCentral()  // Maven Central repository
-
     }
 
     dependencies {
@@ -12,7 +11,6 @@ buildscript {
         classpath(libs.google.services.plugin)
         classpath(libs.hilt.android.plugin)
         //classpath for kotlin may introduce different version jars
-
     }
 }
 
@@ -22,6 +20,7 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
 }
 
 tasks.register("clean", Delete::class) {
