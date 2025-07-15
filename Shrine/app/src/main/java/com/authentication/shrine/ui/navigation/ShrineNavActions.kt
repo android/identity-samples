@@ -37,7 +37,7 @@ enum class ShrineAppDestinations(@StringRes val title: Int) {
     ShrineApp(title = R.string.app_name),
     NavHostRoute(title = R.string.nav_host_route),
     PasskeyManagementTab(title = R.string.passkey_management),
-    OtherOptionsSignInRoute(title = R.string.other_ways_to_sign_in)
+    OtherOptionsSignInRoute(title = R.string.other_ways_to_sign_in),
 }
 
 /**

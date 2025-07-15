@@ -51,6 +51,7 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "playServicesFido" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 system-ui-controller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "sysUiController" }
 google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }

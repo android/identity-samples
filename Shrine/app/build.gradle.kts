@@ -47,7 +47,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        buildConfigField("String", "API_BASE_URL", "\"https://project-sesame-426206.appspot.com\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://project-sesame-426206.appspot.com/\"")
     }
 
     signingConfigs {
@@ -153,6 +153,9 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
     implementation(libs.browser)
+
+    // Retrofit
+    implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
     // Testing
