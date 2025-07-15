@@ -49,7 +49,7 @@ object LegacySignInWithGoogleEventListener : GoogleSignInEventListener {
     override suspend fun onSignedIn(account: GoogleSignInAccount) {
         Log.i(TAG, INFO_ACCOUNT_RECEIVED.format(account.displayName))
         account.idToken?.takeIf { it.isNotEmpty() }?.let { token ->
-            Graph.authenticationServer.authorizeGoogleTokenWithServer(token)
+            Graph.authenticationServer.loginWithFederatedToken(token)
         } ?: run {
             Log.e(TAG, ERROR_MISSING_ID_TOKEN)
         }

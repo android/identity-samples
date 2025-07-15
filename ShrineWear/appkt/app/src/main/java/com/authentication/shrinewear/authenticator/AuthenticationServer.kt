@@ -99,7 +99,7 @@ class AuthenticationServer {
 
     init {
         val userAgent = "${BuildConfig.APPLICATION_ID}/${BuildConfig.VERSION_NAME} " +
-            "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
+                "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
         httpClient = OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
             .addInterceptor(
@@ -318,49 +318,104 @@ class AuthenticationServer {
     }
 
     /**
-     * Processes a custom credential, specifically handling Google ID Token credentials.
-     * Authorizes the extracted Google ID token with the authentication server.
+     * Processes a custom credential, works with google id tokens and can be expanded as a router
+     * to handle other federated identity credential types.
      *
      * @param credential The custom credential received from the Credential Manager.
-     * @return {@code true} if the Google ID token was successfully authorized; {@code false} otherwise.
+     * @return {@code true} if the credential was successfully authorized; {@code false} otherwise.
      */
     suspend fun loginWithCustomCredential(credential: CustomCredential): Boolean {
-        if (credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+        val federatedToken: String
+
+        if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            federatedToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
+        } else {
             Log.e(TAG, "Unrecognized custom credential: ${credential.type}")
             return false
         }
-        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
 
-        return when (
-            val authorizationResult =
-                authorizeGoogleTokenWithServer(googleIdTokenCredential.idToken)
-        ) {
+        return loginWithFederatedToken(federatedToken)
+    }
+
+    /**
+     * Logs in with a federated Id Token.
+     *
+     * This function first performs a network request to retrieve a session ID. Upon successful
+     * retrieval, it then sends the provided federated ID token to the backend's verification
+     * endpoint, including the obtained session ID in the request headers.
+     *
+     * @param federatedToken The federated ID token string obtained from Sign-In.
+     * @return `true` if both federated options retrieval and token authorization are successful;
+     * `false` otherwise. Failures are typically logged within the function.
+     */
+    suspend fun loginWithFederatedToken(federatedToken: String): Boolean {
+        val federatedSessionId: String?
+
+        when (val federationOptions = retrieveFederationOptions()) {
             is ApiResult.Success -> {
-                sessionId = authorizationResult.sessionId
+                federatedSessionId = federationOptions.sessionId
+                    ?: throw IllegalStateException("Session ID was null in server response")
+            }
+
+            is ApiResult.SignedOutFromServer -> {
+                signOut()
+                Log.e(TAG, "Failed to get federation options from server: $federationOptions")
+                return false
+            }
+        }
+
+        return when (val authorizationResult =
+            authorizeFederatedTokenWithServer(federatedToken, federatedSessionId)) {
+            is ApiResult.Success -> {
+                this.sessionId = authorizationResult.sessionId
                 return true
             }
 
             is ApiResult.SignedOutFromServer -> {
                 signOut()
-                Log.e(TAG, "Sign in With Google failed.")
+                Log.e(TAG, "Federated Sign in failed.")
                 false
             }
         }
     }
 
     /**
-     * Authorizes a Google ID token with the backend server.
+     * Fetches a session ID from the backend server to enable ID token validation.
+     *
+     * @return [ApiResult.Success] with the session ID, or an [ApiResult.Error]/[ApiResult.SignedOutFromServer] on failure.
+     */
+    private suspend fun retrieveFederationOptions(): ApiResult<Unit> {
+        val httpResponse = httpClient.newCall(
+            Builder().url("$BASE_URL/federation/options").method(
+                "POST",
+                createJSONRequestBody {
+                    name("urls").beginArray().value("https://accounts.google.com").endArray()
+                }).build(),
+        ).await()
+
+        return httpResponse.result(errorMessage = "Error creating federation options") {}
+    }
+
+    /**
+     * Authorizes a federated identity token with the backend server.
      *
      * This function sends a POST request to the server's `/federation/verifyIdToken` endpoint,
-     * passing the Google ID token and Google's accounts URL for verification.
+     * passing the federated ID token and desired accounts URLs for verification.
      *
-     * @param token The Google ID token obtained from Google Sign-In.
+     * @param token The ID token obtained from the Sign-In.
      * @return [ApiResult]<[Unit]> indicating the success or failure of the authorization.
      * A [Unit] type for success implies no specific data is returned on successful authorization.
      */
-    suspend fun authorizeGoogleTokenWithServer(token: String): ApiResult<Unit> {
+    private suspend fun authorizeFederatedTokenWithServer(
+        token: String, sessionId: String
+    ): ApiResult<Unit> {
+        val requestHeaders = okhttp3.Headers.Builder().add(
+            "Cookie", "$SESSION_ID_KEY$sessionId"
+        ).build()
+
         val httpResponse = httpClient.newCall(
             Builder().url("$BASE_URL/federation/verifyIdToken")
+                .headers(requestHeaders)
                 .method(
                     "POST",
                     createJSONRequestBody {
@@ -370,7 +425,7 @@ class AuthenticationServer {
                 ).build(),
         ).await()
 
-        return httpResponse.result(errorMessage = "Error setting password") { }
+        return httpResponse.result(errorMessage = "Error signing in with the federated token") { }
     }
 
     /**
@@ -381,6 +436,7 @@ class AuthenticationServer {
      */
     fun signOut() {
         signedInState.update { false }
+        sessionId = null
     }
 
     /**
