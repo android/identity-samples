@@ -24,6 +24,7 @@ import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
 import com.authentication.shrine.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -46,6 +47,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(
     private val repository: AuthRepository,
+    private val coroutineScope: CoroutineScope,
 ) : ViewModel() {
 
     /**
@@ -170,7 +172,7 @@ class AuthenticationViewModel @Inject constructor(
     fun createRestoreKey(
         createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        viewModelScope.launch {
+        coroutineScope.launch {
             repository.registerPasskeyCreationRequest()?.let { data ->
                 val createRestoreKeyResponse = createRestoreKeyOnCredMan(data)
                 if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {

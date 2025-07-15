@@ -68,6 +68,7 @@ hilt-android-plugin = { group = "com.google.dagger", name = "hilt-android-gradle
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "playServicesFido" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 system-ui-controller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "sysUiController" }
 
 # Firebase

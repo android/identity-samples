@@ -41,7 +41,7 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 fun OtherOptionsSignInScreen(
     onSignUpWithPasswordClicked: () -> Unit,
     onBackClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -57,12 +57,12 @@ fun OtherOptionsSignInScreen(
                 onBackClicked = onBackClicked,
             )
             ShrineTextHeader(
-                text = stringResource(R.string.other_options)
+                text = stringResource(R.string.other_options),
             )
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large))) // Spacer like in RegisterScreen
             ShrineButton(
                 onClick = onSignUpWithPasswordClicked,
-                buttonText = stringResource(R.string.sign_up_with_password)
+                buttonText = stringResource(R.string.sign_up_with_password),
             )
         }
     }
@@ -74,7 +74,7 @@ fun OtherOptionsSignInScreenPreview() {
     ShrineTheme {
         OtherOptionsSignInScreen(
             onBackClicked = {},
-            onSignUpWithPasswordClicked = {}
+            onSignUpWithPasswordClicked = {},
         )
     }
 }

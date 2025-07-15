@@ -111,12 +111,6 @@ fun RegisterPasswordScreen(
                     context = context,
                 )
             },
-            createRestoreCredential = { createRestoreCredObject ->
-                credentialManagerUtils.createRestoreKey(
-                    createRestoreCredObject,
-                    context,
-                )
-            },
         )
     }
 

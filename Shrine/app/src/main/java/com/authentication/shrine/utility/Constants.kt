@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrine
+package com.authentication.shrine.utility
 
-import android.util.Base64
-
-private const val BASE64_FLAG = Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE
-
-/**
- * Extension function that decodes a Base64-encoded string into a byte array.
- *
- * @return The decoded byte array.
- */
-fun String.decodeBase64(): ByteArray {
-    return Base64.decode(this, BASE64_FLAG)
+object Constants {
+    const val SESSION_ID_KEY = "SESAME_SESSION_COOKIE="
 }
