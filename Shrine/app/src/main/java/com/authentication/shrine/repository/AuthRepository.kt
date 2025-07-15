@@ -16,6 +16,7 @@
 package com.authentication.shrine.repository
 
 import android.util.Log
+import androidx.core.content.ContextCompat.getString
 import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CreateRestoreCredentialResponse
@@ -27,6 +28,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.authentication.shrine.R
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.ApiResult
 import com.authentication.shrine.api.AuthApi
@@ -420,7 +422,7 @@ class AuthRepository @Inject constructor(
                 }
             }
         } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call deletePasskey", e)
+            Log.e(TAG, R.string.cannot_call_delete_passkey.toString(), e)
         }
         return false
     }
