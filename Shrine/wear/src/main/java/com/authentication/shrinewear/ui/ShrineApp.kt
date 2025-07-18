@@ -16,18 +16,10 @@
 package com.authentication.shrinewear.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.wear.compose.material3.AlertDialog
-import androidx.wear.compose.material3.AlertDialogDefaults
-import androidx.wear.compose.material3.Text
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.authentication.shrinewear.R
+import com.authentication.shrinewear.ui.navigation.ShrineNavActions
+import com.authentication.shrinewear.ui.navigation.ShrineNavGraph
 
 /**
  * The main entry point composable for the Shrine Wear OS application.
@@ -40,48 +32,5 @@ fun ShrineApp() {
     val navController = rememberSwipeDismissableNavController()
     val navigationActions = remember(navController) { ShrineNavActions(navController) }
 
-    // Todo(johnzoeller): This is behaving unpredictably with Credential Manager UI. Fix before
-    // final PR.
-    DemoInstructions()
     ShrineNavGraph(navController = navController, navigationActions = navigationActions)
-}
-
-/**
- * Displays an [AlertDialog] containing introductory demo instructions for the user.
- *
- * This dialog is shown upon the initial launch of the application and can be dismissed
- * by the user.
- *
- * Note: The `AlertDialog` API used here (`edgeButton` and `visible`) might be from an
- * older or specific alpha version of `androidx.wear.compose.material3`. For newer
- * versions, consider using `confirmButton` and `dismissButton` for actions, and
- * conditionally rendering the dialog using an `if` statement.
- */
-@Composable
-fun DemoInstructions() {
-    var showDialog by remember { mutableStateOf(true) }
-
-    AlertDialog(
-        visible = showDialog,
-        onDismissRequest = { showDialog = false },
-        edgeButton = { AlertDialogDefaults.EdgeButton(onClick = { showDialog = false }) },
-        title = {
-            Text(
-                text = stringResource(R.string.shrine_sample),
-                textAlign = TextAlign.Center,
-            )
-        },
-        text = { Text(stringResource(R.string.see_readme_md_for_usage_directions)) },
-    )
-}
-
-/**
- * Preview for the [DemoInstructions] composable.
- *
- * This preview renders the dialog with the demo instructions as it would appear on Wear OS devices.
- */
-@WearPreviewDevices
-@Composable
-fun DemoInstructionsPreview() {
-    DemoInstructions()
 }

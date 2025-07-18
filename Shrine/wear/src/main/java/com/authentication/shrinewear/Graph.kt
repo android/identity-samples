@@ -18,6 +18,23 @@ package com.authentication.shrinewear
 import android.content.Context
 import com.authentication.shrinewear.authenticator.AuthenticationServer
 import com.authentication.shrinewear.authenticator.CredentialManagerAuthenticator
+import com.authentication.shrinewear.network.AuthNetworkClient
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+
+/**
+ * Represents the possible authentication states of the application.
+ */
+enum class AuthenticationState {
+    LOGGED_OUT,
+    LOGGED_IN,
+    DISMISSED_BY_USER,
+    MISSING_CREDENTIALS,
+    FAILED,
+    UNKNOWN_ERROR,
+}
 
 /**
  * A simple, manual dependency injection container for application-wide singletons.
@@ -29,6 +46,14 @@ import com.authentication.shrinewear.authenticator.CredentialManagerAuthenticato
  * to initialize its dependencies.
  */
 object Graph {
+
+    private val authNetworkClient: AuthNetworkClient by lazy {
+        AuthNetworkClient()
+    }
+    val authenticationServer: AuthenticationServer by lazy {
+        AuthenticationServer(authNetworkClient)
+    }
+
     /**
      * The authenticated instance of [CredentialManagerAuthenticator].
      * This property is initialized once via the [provide] method and
@@ -39,16 +64,13 @@ object Graph {
      */
     lateinit var credentialManagerAuthenticator: CredentialManagerAuthenticator
         private set
-    lateinit var authenticationServer: AuthenticationServer
-        private set
 
+
+    private val _authenticationState = MutableStateFlow(AuthenticationState.LOGGED_OUT)
     /**
-     * Stores the current authentication status code as an Android string resource ID.
-     * This can be used to reflect the authentication state across different parts of the UI.
-     *
-     * Defaults to [R.string.credman_status_logged_out].
+     * Stores the current authentication status code.  Defaults to [AuthenticationState.LOGGED_OUT].
      */
-    var authenticationStatusCode: Int = R.string.credman_status_logged_out
+    val authenticationState: StateFlow<AuthenticationState> = _authenticationState.asStateFlow()
 
     /**
      * Provides and initializes the core dependencies for the application's [Graph].
@@ -59,7 +81,12 @@ object Graph {
      * @param context The application [Context] required to initialize services like [CredentialManagerAuthenticator].
      */
     fun provide(context: Context) {
-        credentialManagerAuthenticator = CredentialManagerAuthenticator(context)
-        authenticationServer = AuthenticationServer()
+        credentialManagerAuthenticator = CredentialManagerAuthenticator(
+            context,
+            authenticationServer)
+    }
+
+    fun updateAuthenticationState(newState: AuthenticationState) {
+        _authenticationState.value = newState
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.ui
+package com.authentication.shrinewear.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +32,10 @@ import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import com.authentication.shrinewear.AuthenticationState
 import com.authentication.shrinewear.Graph
 import com.authentication.shrinewear.R
-//import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
+import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
 /**
  * Composable for the header of the legacy login options list.
@@ -119,7 +120,7 @@ fun CancelLoginButton(navigateToHome: () -> Unit) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
-            Graph.authenticationStatusCode = R.string.credman_status_logged_out
+            Graph.updateAuthenticationState(AuthenticationState.LOGGED_OUT)
             navigateToHome()
         },
         label = {
@@ -161,7 +162,7 @@ fun LegacyLoginScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             state = columnState,
-//            contentPadding = rememberResponsiveColumnPadding(),
+            contentPadding = rememberResponsiveColumnPadding(),
         ) {
             item { LegacyLoginHeader() }
             item { OAuthLoginButton(navigateToOAuth = navigateToOAuth) }

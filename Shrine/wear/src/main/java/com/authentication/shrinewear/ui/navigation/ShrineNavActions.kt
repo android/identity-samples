@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.ui
+package com.authentication.shrinewear.ui.navigation
 
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder

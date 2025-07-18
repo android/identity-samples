@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.ui
+package com.authentication.shrinewear.ui.screens
 
 import android.app.Application
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +32,8 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.authentication.shrinewear.R
-
-// TODO(johnzoeller): Re-add this when I update mobiles version discrepancies.
-// import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
+import com.authentication.shrinewear.ui.viewmodel.OAuthViewModel
+import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
 /**
  * Composable that displays the header for the OAuth login screen.
@@ -113,7 +112,7 @@ fun OAuthScreen(
     ScreenScaffold {
         TransformingLazyColumn(
             state = columnState,
-//            contentPadding = rememberResponsiveColumnPadding(),
+            contentPadding = rememberResponsiveColumnPadding(),
         ) {
             item { OAuthLoginHeader() }
             item { SignInWithOAuthButton(oAuthViewModel = oAuthViewModel) }

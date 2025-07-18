@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.api
+package com.authentication.shrinewear.network
 
 /**
  * Represents the result of an API call.
@@ -22,7 +22,7 @@ package com.authentication.shrinewear.api
  * - [Success]: The API call returned successfully with data.
  * - [SignedOutFromServer]: The API call returned unsuccessfully with code 401, and the user should be signed out.
  */
-sealed class ApiResult<out R> {
+sealed class NetworkResult<out R> {
 
     /**
      * API returned successfully with data.
@@ -34,10 +34,10 @@ sealed class ApiResult<out R> {
     class Success<T>(
         val sessionId: String?,
         val data: T,
-    ) : ApiResult<T>()
+    ) : NetworkResult<T>()
 
     /**
      * API returned unsuccessfully with code 401, and the user should be considered signed out.
      */
-    data object SignedOutFromServer : ApiResult<Nothing>()
+    data object SignedOutFromServer : NetworkResult<Nothing>()
 }

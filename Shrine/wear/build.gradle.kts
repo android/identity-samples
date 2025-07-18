@@ -2,34 +2,28 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-}
-
-configurations.all {
-    resolutionStrategy {
-        // Force kotlin dependencies to use the versions needed for Wear so that I don't need to
-        // modify mobile dependency versions in this change.
-        // TODO(johnzoeller): Update mobile dependencies and remove this
-        force("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
-        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0")
-        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0")
-        force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        force("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    }
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.authentication.shrinewear"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.authentication.shrinewear"
+        applicationId = "com.authentication.shrine"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "API_BASE_URL", "\"https://project-sesame-426206.appspot.com\"")
+        buildConfigField(
+            "String", "API_BASE_URL",
+            "\"https://project-sesame-426206.appspot.com\""
+        )
+        buildConfigField(
+            "String", "GOOGLE_SIGN_IN_SERVER_CLIENT_ID",
+             "\"PASTE_YOUR_SERVER_CLIENT_ID_HERE\""
+        )
     }
 
     signingConfigs {
@@ -51,15 +45,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        }
     }
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.2"
     }
     packaging {
         resources {
@@ -97,8 +91,8 @@ android {
         implementation(libs.kotlinx.serialization.json) // New
 
         // Wear Horologist SIWG composables
-        implementation(libs.horologist.auth.ui)         // New
-        implementation(libs.horologist.compose.layout)  // New
+        implementation(libs.horologist.auth.ui)
+        implementation(libs.horologist.compose.layout)
 
         // GMS
         implementation(libs.google.id)                  // NO CHANGE

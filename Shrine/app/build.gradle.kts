@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("dagger.hilt.android.plugin")
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose)
 }
 
 repositories {
@@ -85,10 +86,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.2"
     }
 
     packaging {

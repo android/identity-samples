@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.api
+package com.authentication.shrinewear.network
 
 /**
  * An exception class for API errors.
  *
  * @param message The error message.
  */
-class ApiException(message: String) : RuntimeException(message)
+class NetworkException(message: String) : RuntimeException(message)

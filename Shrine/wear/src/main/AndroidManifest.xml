@@ -6,7 +6,8 @@
 
     <application
         android:name=".ShrineApplication"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/shrine"
+        android:roundIcon="@drawable/shrine"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
