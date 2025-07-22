@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -157,29 +156,17 @@ fun PasskeyManagementScreen(
             ShrineLoader()
         }
 
-        val snackbarMessage = stringResource(uiState.messageResourceId)
-        if (snackbarMessage.isNotBlank()) {
-            LaunchedEffect(snackbarMessage) {
-                snackbarHostState.showSnackbar(
-                    message = snackbarMessage,
-                )
-            }
+        val snackbarMessage = when {
+            !uiState.errorMessage.isNullOrBlank() -> uiState.errorMessage
+            uiState.deleteStatus != R.string.empty_string -> stringResource(uiState.deleteStatus)
+            uiState.messageResourceId != R.string.empty_string -> stringResource(uiState.messageResourceId)
+            else -> null
         }
 
-        val snackbarErrorMessage = uiState.errorMessage
-        if (!snackbarErrorMessage.isNullOrBlank()) {
-            LaunchedEffect(snackbarErrorMessage) {
+        if (snackbarMessage != null) {
+            LaunchedEffect(snackbarMessage) {
                 snackbarHostState.showSnackbar(
-                    message = snackbarErrorMessage,
-                )
-            }
-        }
-        
-        val deleteStatus = stringResource(uiState.deleteStatus)
-        if(deleteStatus.isNotBlank()) {
-            LaunchedEffect(deleteStatus) {
-                snackbarHostState.showSnackbar(
-                    message = deleteStatus
+                    message = snackbarMessage
                 )
             }
         }

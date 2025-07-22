@@ -24,13 +24,11 @@ import com.authentication.shrine.model.RegisterResponseRequestBody
 import com.authentication.shrine.model.SignInRequestResponse
 import com.authentication.shrine.model.SignInResponseRequest
 import com.authentication.shrine.model.UsernameRequest
-import okhttp3.HttpUrl
-import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Url
+import retrofit2.http.Query
 
 /**
  * Interface defining the API endpoints for authentication and WebAuthn operations.
@@ -151,7 +149,7 @@ interface AuthApiService {
      */
     @POST("webauthn/removeKey")
     suspend fun deletePasskey(
-        @Url url: HttpUrl,
         @Header("Cookie") cookie: String,
+        @Query("credId") credentialId: String,
     ): Response<GenericAuthResponse>
 }

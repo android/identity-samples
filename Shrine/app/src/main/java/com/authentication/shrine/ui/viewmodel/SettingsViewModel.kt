@@ -66,7 +66,7 @@ class SettingsViewModel @Inject constructor(
                 val data = authRepository.getListOfPasskeys()
                 if (data != null) {
                     _uiState.update {
-                        SettingsUiState(
+                        it.copy(
                             isLoading = false,
                             userHasPasskeys = data.credentials.isNotEmpty(),
                             username = authRepository.getUsername(),
@@ -75,7 +75,7 @@ class SettingsViewModel @Inject constructor(
                     }
                 } else {
                     _uiState.update {
-                        SettingsUiState(
+                        it.copy(
                             isLoading = false,
                             messageResourceId = R.string.get_keys_error,
                         )
@@ -83,7 +83,7 @@ class SettingsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    SettingsUiState(
+                    it.copy(
                         isLoading = false,
                         errorMessage = e.message,
                     )

@@ -160,18 +160,17 @@ fun SettingsScreen(
             ShrineLoader()
         }
 
-        val snackbarMessage = stringResource(uiState.messageResourceId)
-        if (snackbarMessage.isNotBlank()) {
-            LaunchedEffect(snackbarMessage) {
-                snackbarHostState.showSnackbar(
-                    message = snackbarMessage,
-                )
-            }
+        val snackbarMessage = when {
+            !uiState.errorMessage.isNullOrBlank() -> uiState.errorMessage
+            uiState.messageResourceId != R.string.empty_string -> stringResource(uiState.messageResourceId)
+            else -> null
         }
 
-        if (!uiState.errorMessage.isNullOrBlank()) {
-            LaunchedEffect(uiState) {
-                snackbarHostState.showSnackbar(message = uiState.errorMessage)
+        if (snackbarMessage != null) {
+            LaunchedEffect(snackbarMessage) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarMessage
+                )
             }
         }
     }
