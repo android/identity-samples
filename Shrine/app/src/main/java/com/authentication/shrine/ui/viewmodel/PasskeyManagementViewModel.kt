@@ -70,6 +70,7 @@ class PasskeyManagementViewModel @Inject constructor(
                 } else {
                     _uiState.update {
                         it.copy(
+                            isLoading = false,
                             messageResourceId = R.string.get_keys_error,
                         )
                     }
@@ -77,6 +78,7 @@ class PasskeyManagementViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
+                        isLoading = false,
                         errorMessage = e.message,
                     )
                 }

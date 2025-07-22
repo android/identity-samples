@@ -27,8 +27,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.authentication.shrine.R
-import com.authentication.shrine.BuildConfig
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.CredmanResponse
@@ -435,14 +433,6 @@ class AuthRepository @Inject constructor(
                 cookie = sessionId.createCookieHeader(),
             )
             if (apiResult.isSuccessful) {
-                apiResult.getSessionId()?.also {
-                    dataStore.edit { prefs ->
-                        prefs[SESSION_ID] = it
-                    }
-                } ?: run {
-                    signOut()
-                    return null
-                }
                 return apiResult.body()
             } else if (apiResult.code() == 401) {
                 signOut()
@@ -461,24 +451,13 @@ class AuthRepository @Inject constructor(
     suspend fun deletePasskey(credentialId: String): Boolean {
         val sessionId = dataStore.read(SESSION_ID)
         // Construct endpoint for deleting passkeys.
-        val deleteUrl = HttpUrl.Builder().scheme("https").host(BuildConfig.API_BASE_DOMAIN)
-            .addPathSegment("webauthn").addPathSegment("removeKey")
-            .addQueryParameter("credId", credentialId).build()
         try {
             if (!sessionId.isNullOrEmpty()) {
                 val response = authApiService.deletePasskey(
-                    url = deleteUrl,
                     cookie = sessionId.createCookieHeader(),
+                    credentialId = credentialId,
                 )
                 if (response.isSuccessful) {
-                    dataStore.edit { prefs ->
-                        prefs[USERNAME] = response.body()?.username.orEmpty()
-                        response.getSessionId()?.also {
-                            prefs[SESSION_ID] = it
-                        } ?: run {
-                            signOut()
-                        }
-                    }
                     return true
                 } else if (response.code() == 401) {
                     signOut()
