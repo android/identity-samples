@@ -15,17 +15,25 @@
  */
 package com.authentication.shrine.ui.viewmodel
 
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.authentication.shrine.CredentialManagerUtils
+import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.repository.AuthRepository
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.io.InputStreamReader
 import javax.inject.Inject
 
 /**
@@ -37,13 +45,38 @@ import javax.inject.Inject
 @HiltViewModel
 class PasskeyManagementViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val application: Application
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PasskeyManagementUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
+            loadAaguidData()
             getPasskeysList()
+        }
+    }
+
+    private fun loadAaguidData() {
+        // Use viewModelScope for coroutine
+        viewModelScope.launch(Dispatchers.IO) { // Use IO dispatcher for file reading
+            try {
+                val gson = Gson()
+                val aaguidInputStream = application.assets.open("aaguids.json")
+                val reader = InputStreamReader(aaguidInputStream)
+                val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(
+                    reader,
+                    object : TypeToken<Map<String, Map<String, String>>>() {}.type
+                )
+                _uiState.update { it.copy(aaguidData = aaguidJsonData) }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        messageResourceId = R.string.get_aaguid_error,
+                    )
+                }
+            }
         }
     }
 
@@ -87,6 +120,74 @@ class PasskeyManagementViewModel @Inject constructor(
     }
 
     /**
+     * Creates a passkey. This is similar to the function in [CreatePasskeyViewModel].
+     *
+     * @param onSuccess Callback to be invoked when the passkey creation is successful.
+     * @param createPasskey Reference to [CredentialManagerUtils.createPasskey]
+     * The boolean parameter indicates whether the user should be navigated to the home screen.
+     */
+    fun createPasskey(
+        createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
+    ) {
+        _uiState.update {
+            it.copy(isLoading = true)
+        }
+
+        viewModelScope.launch {
+            try {
+                val data = authRepository.registerPasskeyCreationRequest()
+                if (data != null) {
+                    val createPasskeyResponse = createPasskey(data)
+                    if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                        val isRegisterResponse =
+                            authRepository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
+                        if (isRegisterResponse) {
+                            val passkeysList = authRepository.getListOfPasskeys()
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    passkeysList = passkeysList?.credentials ?: emptyList(),
+                                    messageResourceId = R.string.passkey_created
+                                )
+                            }
+                        } else {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    messageResourceId = R.string.some_error_occurred_please_check_logs
+                                )
+                            }
+                        }
+                    } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = createPasskeyResponse.errorMessage
+                            )
+                        }
+                        authRepository.setSignedInState(false)
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            messageResourceId = R.string.oops_an_internal_server_error_occurred
+                        )
+                    }
+                }
+            } catch(e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = e.message
+                    )
+                }
+                authRepository.setSignedInState(false)
+            }
+        }
+    }
+
+    /**
      * Makes a request to delete a passkey from the server. Refreshes the passkey list upon
      * successful deletion.
      *
@@ -107,14 +208,14 @@ class PasskeyManagementViewModel @Inject constructor(
                             isLoading = false,
                             userHasPasskeys = data?.credentials?.isNotEmpty() ?: false,
                             passkeysList = data?.credentials ?: emptyList(),
-                            deleteStatus = R.string.delete_passkey_successful
+                            messageResourceId = R.string.delete_passkey_successful
                         )
                     }
                 } else {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            deleteStatus = R.string.delete_passkey_error,
+                            messageResourceId = R.string.delete_passkey_error,
                         )
                     }
                 }
@@ -138,14 +239,13 @@ class PasskeyManagementViewModel @Inject constructor(
  * @param passkeysList A list of passkeys for the user returned from the server.
  * @param messageResourceId The resource ID of a message to display to the user.
  * @param errorMessage An error message returned from the server.
- * @param deleteStatus The resource ID of a message to display to the user on successful passkey
  * deletion.
  */
 data class PasskeyManagementUiState(
+    val aaguidData: Map<String, Map<String, String>> = emptyMap(),
     val isLoading: Boolean = false,
     val userHasPasskeys: Boolean = true,
     val passkeysList: List<PasskeyCredential> = listOf(),
     @StringRes val messageResourceId: Int = R.string.empty_string,
     val errorMessage: String? = null,
-    @StringRes val deleteStatus: Int = R.string.empty_string,
 )
