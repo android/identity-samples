@@ -44,6 +44,7 @@
     <string name="some_error_occurred_please_check_logs">Some error occurred, please check logs!</string>
     <string name="empty_string" />
     <string name="oops_an_internal_server_error_occurred">Oops, An internal server error occurred.</string>
+    <string name="passkey_created">Passkey created.</string>
     <string name="passkey_created_try_signin_with_passkeys">Passkey created. Try signin with passkeys</string>
     <string name="email_icon">Email Icon</string>
     <string name="email_address">Email address</string>
@@ -84,6 +85,7 @@
     <string name="credential_provider_logo">Credential Provider Logo</string>
     <string name="created">Created: %1$s</string>
     <string name="get_keys_error">Some error occurred while getting the list of passkeys. Please log out and try again.</string>
+    <string name="get_aaguid_error">Some error occurred while getting the list of aaguids.</string>
     <string name="delete">Delete</string>
     <string name="back_arrow_on_toolbar">Back Arrow on Toolbar</string>
     <string name="sign_up_with_password">Sign up with password</string>

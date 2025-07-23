@@ -50,8 +50,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
+import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineClickableText
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
@@ -61,9 +63,6 @@ import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.PasskeyManagementUiState
 import com.authentication.shrine.ui.viewmodel.PasskeyManagementViewModel
 import com.authentication.shrine.utility.toReadableDate
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.io.InputStreamReader
 
 /**
  * Stateful composable of the Passkeys Management Screen
@@ -78,25 +77,29 @@ fun PasskeyManagementScreen(
     onBackClicked: () -> Unit,
     viewModel: PasskeyManagementViewModel,
     modifier: Modifier = Modifier,
+    credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-
-    val gson = Gson()
-    val aaguidInputStream = LocalContext.current.assets.open("aaguids.json")
-    val reader = InputStreamReader(aaguidInputStream)
-    val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(
-        reader,
-        object : TypeToken<Map<String, Map<String, String>>>() {}.type
-    )
     val onDeleteClicked = { credentialId: String -> viewModel.deletePasskey(credentialId) }
+    val context = LocalContext.current
+    val onCreatePasskeyClicked = {
+        viewModel.createPasskey(
+            { data ->
+                credentialManagerUtils.createPasskey(
+                    requestResult = data,
+                    context = context,
+                )
+            })
+    }
 
     PasskeyManagementScreen(
         onLearnMoreClicked = onLearnMoreClicked,
         onBackClicked = onBackClicked,
+        onCreatePasskeyClicked = onCreatePasskeyClicked,
         onDeleteClicked = onDeleteClicked,
         uiState = uiState,
         passkeysList = uiState.passkeysList,
-        aaguidData = aaguidJsonData,
+        aaguidData = uiState.aaguidData,
         modifier = modifier,
     )
 }
@@ -112,6 +115,7 @@ fun PasskeyManagementScreen(
 fun PasskeyManagementScreen(
     onLearnMoreClicked: () -> Unit,
     onBackClicked: () -> Unit,
+    onCreatePasskeyClicked: () -> Unit,
     onDeleteClicked: (credentialId: String) -> Unit,
     uiState: PasskeyManagementUiState,
     passkeysList: List<PasskeyCredential>,
@@ -146,11 +150,23 @@ fun PasskeyManagementScreen(
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
             )
 
-            PasskeysListColumn(
-                onDeleteClicked = onDeleteClicked,
-                passkeysList = passkeysList,
-                aaguidData = aaguidData,
-            )
+            if (!passkeysList.isEmpty()) {
+                PasskeysListColumn(
+                    onDeleteClicked = onDeleteClicked,
+                    passkeysList = passkeysList,
+                    aaguidData = aaguidData,
+                )
+            }
+
+            if (passkeysList.isEmpty()) {
+                ShrineButton(
+                    onClick = onCreatePasskeyClicked,
+                    buttonText = stringResource(R.string.create_passkey),
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
+                    isButtonDark = false,
+                    isButtonEnabled = !uiState.isLoading,
+                )
+            }
         }
         if (uiState.isLoading) {
             ShrineLoader()
@@ -158,7 +174,6 @@ fun PasskeyManagementScreen(
 
         val snackbarMessage = when {
             !uiState.errorMessage.isNullOrBlank() -> uiState.errorMessage
-            uiState.deleteStatus != R.string.empty_string -> stringResource(uiState.deleteStatus)
             uiState.messageResourceId != R.string.empty_string -> stringResource(uiState.messageResourceId)
             else -> null
         }
@@ -293,6 +308,7 @@ fun PasskeyManagementScreenPreview() {
         PasskeyManagementScreen(
             onLearnMoreClicked = { },
             onBackClicked = { },
+            onCreatePasskeyClicked = { },
             onDeleteClicked = { },
             uiState = PasskeyManagementUiState(),
             passkeysList = listOf(

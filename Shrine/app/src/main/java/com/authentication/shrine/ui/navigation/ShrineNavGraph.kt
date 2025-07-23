@@ -169,6 +169,7 @@ fun ShrineNavGraph(
                 },
                 onBackClicked = { navController.popBackStack() },
                 viewModel = hiltViewModel(),
+                credentialManagerUtils = credentialManagerUtils,
             )
         }
 
