@@ -150,15 +150,13 @@ fun PasskeyManagementScreen(
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
             )
 
-            if (!passkeysList.isEmpty()) {
+            if (passkeysList.isNotEmpty()) {
                 PasskeysListColumn(
                     onDeleteClicked = onDeleteClicked,
                     passkeysList = passkeysList,
                     aaguidData = aaguidData,
                 )
-            }
-
-            if (passkeysList.isEmpty()) {
+            } else {
                 ShrineButton(
                     onClick = onCreatePasskeyClicked,
                     buttonText = stringResource(R.string.create_passkey),

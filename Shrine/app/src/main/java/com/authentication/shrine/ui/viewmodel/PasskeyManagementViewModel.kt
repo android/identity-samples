@@ -40,7 +40,8 @@ import javax.inject.Inject
  * ViewModel for user passkey and password registration. Uses [AuthRepository] to interact with the
  * authentication backend
  *
- * @param repository The authentication repository.
+ * @param authRepository The authentication repository.
+ * @param application The application.
  */
 @HiltViewModel
 class PasskeyManagementViewModel @Inject constructor(
@@ -122,9 +123,7 @@ class PasskeyManagementViewModel @Inject constructor(
     /**
      * Creates a passkey. This is similar to the function in [CreatePasskeyViewModel].
      *
-     * @param onSuccess Callback to be invoked when the passkey creation is successful.
      * @param createPasskey Reference to [CredentialManagerUtils.createPasskey]
-     * The boolean parameter indicates whether the user should be navigated to the home screen.
      */
     fun createPasskey(
         createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
@@ -175,7 +174,7 @@ class PasskeyManagementViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -239,7 +238,6 @@ class PasskeyManagementViewModel @Inject constructor(
  * @param passkeysList A list of passkeys for the user returned from the server.
  * @param messageResourceId The resource ID of a message to display to the user.
  * @param errorMessage An error message returned from the server.
- * deletion.
  */
 data class PasskeyManagementUiState(
     val aaguidData: Map<String, Map<String, String>> = emptyMap(),
