@@ -90,6 +90,6 @@
     <string name="other_options">Other options</string>
     <string name="register_password">Register with password</string>
     <string name="delete_passkey_successful">Passkey deleted successfully.</string>
-    <string name="delete_passkey_error">"Error in deleting passkey, please check logs"</string>
+    <string name="delete_passkey_error">Error in deleting passkey, please check logs</string>
     <string name="cannot_call_delete_passkey">Cannot call deletePasskey</string>
 </resources>
