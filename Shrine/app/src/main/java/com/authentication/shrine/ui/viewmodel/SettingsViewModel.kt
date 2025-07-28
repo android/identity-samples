@@ -21,7 +21,7 @@ import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.repository.AuthRepository
-import com.authentication.shrine.ui.viewmodel.PasskeyManagementViewModel.Companion.RESTORE_CREDENTIAL_AAGUID
+import com.authentication.shrine.repository.AuthRepository.Companion.RESTORE_CREDENTIAL_AAGUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
