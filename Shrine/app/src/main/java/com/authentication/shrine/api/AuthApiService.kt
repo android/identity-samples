@@ -83,6 +83,8 @@ interface AuthApiService {
      * to complete the passkey registration.
      *
      * @param cookie The session cookie for authentication.
+     * @param type The type of credential. Only used to specify Restore Credential passkeys to the
+     * server.
      * @param requestBody The request body containing the client's attestation response
      *                    to the registration challenge.
      * @return A Retrofit {@link Response} wrapping a {@link GenericAuthResponse},
@@ -91,6 +93,7 @@ interface AuthApiService {
     @POST("webauthn/registerResponse")
     suspend fun registerResponse(
         @Header("Cookie") cookie: String,
+        @Query("type") type: String?,
         @Body requestBody: RegisterResponseRequestBody,
     ): Response<GenericAuthResponse>
 

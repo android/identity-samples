@@ -80,16 +80,20 @@ fun PasskeyManagementScreen(
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    val onDeleteClicked = { credentialId: String -> viewModel.deletePasskey(credentialId) }
+    // remember is added to callbacks so LazyColumn doesn't recompose when each one loads
+    val onDeleteClicked =
+        remember { { credentialId: String -> viewModel.deletePasskey(credentialId) } }
     val context = LocalContext.current
-    val onCreatePasskeyClicked = {
-        viewModel.createPasskey(
-            { data ->
-                credentialManagerUtils.createPasskey(
-                    requestResult = data,
-                    context = context,
-                )
-            })
+    val onCreatePasskeyClicked = remember {
+        {
+            viewModel.createPasskey(
+                { data ->
+                    credentialManagerUtils.createPasskey(
+                        requestResult = data,
+                        context = context,
+                    )
+                })
+        }
     }
 
     PasskeyManagementScreen(

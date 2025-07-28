@@ -43,7 +43,6 @@ import com.authentication.shrine.utility.getSessionId
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import okhttp3.HttpUrl
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -68,6 +67,10 @@ class AuthRepository @Inject constructor(
         val USERNAME = stringPreferencesKey("username")
         val IS_SIGNED_IN_THROUGH_PASSKEYS = booleanPreferencesKey("is_signed_passkeys")
         val SESSION_ID = stringPreferencesKey("session_id")
+        val RESTORE_KEY_CREDENTIAL_ID = stringPreferencesKey("restore_key_credential_id")
+
+        // Value for restore credential AuthApiService parameter
+        const val RESTORE_KEY_TYPE_PARAMETER = "rc"
 
         suspend fun <T> DataStore<Preferences>.read(key: Preferences.Key<T>): T? {
             return data.map { it[key] }.first()
@@ -175,6 +178,7 @@ class AuthRepository @Inject constructor(
             prefs.remove(USERNAME)
             prefs.remove(SESSION_ID)
             prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
+            prefs.remove(RESTORE_KEY_CREDENTIAL_ID)
         }
     }
 
@@ -221,12 +225,16 @@ class AuthRepository @Inject constructor(
         credentialResponse: CreateCredentialResponse,
     ): Boolean {
         try {
+            // Field to pass as query parameter to authApiService.
+            val typeParam: String?
             val registrationResponseJson = when (credentialResponse) {
                 is CreatePublicKeyCredentialResponse -> {
+                    typeParam = null
                     JSONObject(credentialResponse.registrationResponseJson)
                 }
 
                 is CreateRestoreCredentialResponse -> {
+                    typeParam = RESTORE_KEY_TYPE_PARAMETER
                     JSONObject(credentialResponse.responseJson)
                 }
 
@@ -241,6 +249,7 @@ class AuthRepository @Inject constructor(
             if (!sessionId.isNullOrBlank()) {
                 val apiResult = authApiService.registerResponse(
                     cookie = sessionId.createCookieHeader(),
+                    type = typeParam,
                     requestBody = RegisterResponseRequestBody(
                         id = rawId,
                         type = PublicKeyCredentialType.PUBLIC_KEY.toString(),
@@ -253,10 +262,16 @@ class AuthRepository @Inject constructor(
                 )
                 if (apiResult.isSuccessful) {
                     dataStore.edit { prefs ->
+                        if (credentialResponse is CreateRestoreCredentialResponse) {
+                            val responseData = credentialResponse.data.getString(
+                                "androidx.credentials.BUNDLE_KEY_CREATE_RESTORE_CREDENTIAL_RESPONSE"
+                            )
+                            val responseJSON = JSONObject(responseData!!)
+                            val credentialId = responseJSON.getString("rawId")
+                            prefs[RESTORE_KEY_CREDENTIAL_ID] = credentialId
+                        }
                         apiResult.getSessionId()?.also {
                             prefs[SESSION_ID] = it
-                        } ?: run {
-                            signOut()
                         }
                     }
                     return true
@@ -465,6 +480,26 @@ class AuthRepository @Inject constructor(
             }
         }catch (e: Exception) {
             Log.e(TAG, "Cannot call deletePasskey", e)
+        }
+        return false
+    }
+
+    suspend fun deleteRestoreKeyFromServer(): Boolean {
+        val sessionId = dataStore.read(SESSION_ID)
+        val credentialId = dataStore.read(RESTORE_KEY_CREDENTIAL_ID)
+        // Construct endpoint for deleting passkeys.
+        try {
+            if (!sessionId.isNullOrEmpty() && !credentialId.isNullOrEmpty()) {
+                val response = authApiService.deletePasskey(
+                    cookie = sessionId.createCookieHeader(),
+                    credentialId = credentialId,
+                )
+                if (response.isSuccessful) {
+                    return true
+                }
+            }
+        }catch (e: Exception) {
+            Log.e(TAG, "Cannot call deleteRestoreKey", e)
         }
         return false
     }
