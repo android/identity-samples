@@ -94,11 +94,13 @@ class PasskeyManagementViewModel @Inject constructor(
             try {
                 val data = authRepository.getListOfPasskeys()
                 if (data != null) {
+                    val filteredPasskeysList =
+                        data.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            userHasPasskeys = data.credentials.isNotEmpty(),
-                            passkeysList = data.credentials,
+                            userHasPasskeys = filteredPasskeysList.isNotEmpty(),
+                            passkeysList = filteredPasskeysList,
                         )
                     }
                 } else {
@@ -142,12 +144,23 @@ class PasskeyManagementViewModel @Inject constructor(
                             authRepository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
                         if (isRegisterResponse) {
                             val passkeysList = authRepository.getListOfPasskeys()
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    passkeysList = passkeysList?.credentials ?: emptyList(),
-                                    messageResourceId = R.string.passkey_created
-                                )
+                            if (passkeysList != null) {
+                                val filteredPasskeysList =
+                                    passkeysList.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        passkeysList = filteredPasskeysList,
+                                        messageResourceId = R.string.passkey_created
+                                    )
+                                }
+                            } else {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        messageResourceId = R.string.get_keys_error,
+                                    )
+                                }
                             }
                         } else {
                             _uiState.update {
@@ -202,13 +215,24 @@ class PasskeyManagementViewModel @Inject constructor(
                 if (authRepository.deletePasskey(credentialId)) {
                     // Refresh passkeys list after deleting a passkey
                     val data = authRepository.getListOfPasskeys()
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            userHasPasskeys = data?.credentials?.isNotEmpty() ?: false,
-                            passkeysList = data?.credentials ?: emptyList(),
-                            messageResourceId = R.string.delete_passkey_successful
-                        )
+                    if (data != null) {
+                        val filteredPasskeysList =
+                            data.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                userHasPasskeys = filteredPasskeysList.isNotEmpty(),
+                                passkeysList = filteredPasskeysList,
+                                messageResourceId = R.string.delete_passkey_successful
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                messageResourceId = R.string.get_keys_error,
+                            )
+                        }
                     }
                 } else {
                     _uiState.update {
@@ -227,6 +251,10 @@ class PasskeyManagementViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        const val RESTORE_CREDENTIAL_AAGUID = "restore-credential"
     }
 }
 

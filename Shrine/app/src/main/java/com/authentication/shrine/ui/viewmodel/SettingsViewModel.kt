@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.ui.viewmodel.PasskeyManagementViewModel.Companion.RESTORE_CREDENTIAL_AAGUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,12 +66,14 @@ class SettingsViewModel @Inject constructor(
             try {
                 val data = authRepository.getListOfPasskeys()
                 if (data != null) {
+                    val filteredPasskeysList =
+                        data.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            userHasPasskeys = data.credentials.isNotEmpty(),
+                            userHasPasskeys = filteredPasskeysList.isNotEmpty(),
                             username = authRepository.getUsername(),
-                            passkeysList = data.credentials,
+                            passkeysList = filteredPasskeysList,
                         )
                     }
                 } else {
