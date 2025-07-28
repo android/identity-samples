@@ -24,6 +24,7 @@ import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.repository.AuthRepository.Companion.RESTORE_CREDENTIAL_AAGUID
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -251,10 +252,6 @@ class PasskeyManagementViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        const val RESTORE_CREDENTIAL_AAGUID = "restore-credential"
     }
 }
 

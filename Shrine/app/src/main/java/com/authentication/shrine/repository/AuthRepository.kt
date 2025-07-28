@@ -60,7 +60,7 @@ class AuthRepository @Inject constructor(
 ) {
 
     // Companion object for constants and helper methods
-    private companion object {
+    companion object {
         const val TAG = "AuthRepository"
 
         // Keys for SharedPreferences
@@ -71,6 +71,7 @@ class AuthRepository @Inject constructor(
 
         // Value for restore credential AuthApiService parameter
         const val RESTORE_KEY_TYPE_PARAMETER = "rc"
+        const val RESTORE_CREDENTIAL_AAGUID = "restore-credential"
 
         suspend fun <T> DataStore<Preferences>.read(key: Preferences.Key<T>): T? {
             return data.map { it[key] }.first()
@@ -263,12 +264,7 @@ class AuthRepository @Inject constructor(
                 if (apiResult.isSuccessful) {
                     dataStore.edit { prefs ->
                         if (credentialResponse is CreateRestoreCredentialResponse) {
-                            val responseData = credentialResponse.data.getString(
-                                "androidx.credentials.BUNDLE_KEY_CREATE_RESTORE_CREDENTIAL_RESPONSE"
-                            )
-                            val responseJSON = JSONObject(responseData!!)
-                            val credentialId = responseJSON.getString("rawId")
-                            prefs[RESTORE_KEY_CREDENTIAL_ID] = credentialId
+                            prefs[RESTORE_KEY_CREDENTIAL_ID] = rawId
                         }
                         apiResult.getSessionId()?.also {
                             prefs[SESSION_ID] = it
@@ -496,6 +492,8 @@ class AuthRepository @Inject constructor(
                 )
                 if (response.isSuccessful) {
                     return true
+                } else if (response.code() == 401) {
+                    signOut()
                 }
             }
         }catch (e: Exception) {
