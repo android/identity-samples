@@ -18,6 +18,7 @@
         xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
             android:name="com.example.android.authentication.myvault.MyVaultApplication"
             android:icon="@drawable/android_secure"
@@ -105,5 +106,16 @@
                     android:name="android.credentials.provider"
                     android:resource="@xml/provider" />
         </service>
+
+        <service android:name=".data.CredentialProviderService"
+            android:enabled="true"
+            android:exported="true"
+            android:label="My Credential Provider"
+            android:icon="@drawable/android_secure">
+            <intent-filter>
+                <action android:name="android.credentials.EVENTS_SERVICE_ACTION"/>
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>
