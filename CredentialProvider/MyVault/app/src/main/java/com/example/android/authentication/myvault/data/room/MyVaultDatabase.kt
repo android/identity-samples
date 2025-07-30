@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.Flow
         PasswordItem::class,
         PasskeyItem::class,
     ],
-    version = 7,
+    version = 8,
 )
 abstract class MyVaultDatabase : RoomDatabase() {
     abstract fun myVaultDao(): MyVaultDao
@@ -88,4 +88,7 @@ interface MyVaultDao {
 
     @Query("SELECT * from passkeys WHERE credId = :credId")
     fun getPasskey(credId: String): PasskeyItem?
+
+    @Query("SELECT * from passkeys WHERE uid = :userId and hidden = false")
+    fun getPasskeysForUser(userId: String): List<PasskeyItem>?
 }

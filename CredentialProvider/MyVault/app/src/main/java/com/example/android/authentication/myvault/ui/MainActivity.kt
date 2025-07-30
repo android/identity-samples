@@ -20,12 +20,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
+import com.example.android.authentication.myvault.createNotificationChannel
 import com.example.android.authentication.myvault.ui.theme.MyVaultTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        createNotificationChannel(
+            "Signal API notification channel",
+            "Notification channel used for testing Signal APIs. Apps pushes a notification if a Signal from RP is received"
+        )
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MyVaultTheme {

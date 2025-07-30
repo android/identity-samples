@@ -126,6 +126,18 @@ class CredentialsDataSource(
     fun getPasskey(credId: String): PasskeyItem? {
         return myVaultDao.getPasskey(credId)
     }
+
+    fun getPasskeyForUser(userId: String): List<PasskeyItem>? {
+        return myVaultDao.getPasskeysForUser(userId)
+    }
+
+    suspend fun hidePasskey(passkey: PasskeyItem) {
+        myVaultDao.updatePasskey(passkey.copy(hidden = true))
+    }
+
+    suspend fun unhidePasskey(passkey: PasskeyItem) {
+        myVaultDao.updatePasskey(passkey.copy(hidden = false))
+    }
 }
 
 data class PasswordMetaData(

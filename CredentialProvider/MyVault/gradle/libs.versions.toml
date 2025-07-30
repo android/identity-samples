@@ -1,7 +1,7 @@
 [versions]
 agp = "8.8.1"
-ksp = "1.9.22-1.0.17"
-kotlin = "1.9.22"
+ksp = "2.1.20-2.0.1"
+kotlin = "2.1.20"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -9,11 +9,12 @@ espressoCore = "3.6.1"
 lifecycleRuntime = "2.8.7"
 activityCompose = "1.10.0"
 composeBom = "2025.02.00"
-credentials = "1.5.0-rc01"
-room = "2.6.1"
+credentials = "1.6.0-alpha04"
+room = "2.7.2"
 biometrics = "1.2.0-alpha05"
 accompanist = "0.28.0"
 navigation = "2.8.7"
+providerevents = "1.0.0-alpha02"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-biometrics = { group = "androidx.biometric", name = "biometric", version.ref = "biometrics" }
 androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 google-accompanist = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
+provider-events = { group = "androidx.credentials.providerevents", name = "providerevents", version.ref = "providerevents" }
+provider-events-ps = { group = "androidx.credentials.providerevents", name = "providerevents-play-services", version.ref = "providerevents" }
 
 
 
@@ -45,6 +48,7 @@ google-accompanist = { group = "com.google.accompanist", name = "accompanist-sys
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 
 
