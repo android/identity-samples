@@ -328,7 +328,7 @@ private fun PasskeyInformationTab(
                 )
                 ShrineClickableText(
                     text = "",
-                    clickableText = stringResource(R.string.other_ways_to_sign_in),
+                    clickableText = stringResource(R.string.other_ways_to_sign_up),
                     onTextClick = onOtherWaysToSignInClicked,
                     textStyle = TextStyle(color = Color(0xFF006B5F)),
                 )
