@@ -51,12 +51,13 @@ class CredentialManagerUtils @Inject constructor(
     /**
      * Retrieves a passkey or password from the credential manager.
      *
-     * @param creationResult The result of the passkey creation operation.
+     * @param publicKeyCredentialRequestOptions The public key credential request options.
      * @param context The activity context from the Composable, to be used in Credential Manager APIs
-     * @return The [GetCredentialResponse] object containing the passkey, or null if an error occurred.
+     * @return The [GetCredentialResponse] object containing the passkey or password, or null if an
+     * error occurred.
      */
     suspend fun getPasskeyOrPassword(
-        creationResult: JSONObject,
+        publicKeyCredentialRequestOptions: JSONObject,
         context: Context,
     ): GenericCredentialManagerResponse {
         val passkeysEligibility = PasskeysEligibility.isPasskeySupported(context)
@@ -69,7 +70,7 @@ class CredentialManagerUtils @Inject constructor(
             val credentialRequest = GetCredentialRequest(
                 listOf(
                     GetPublicKeyCredentialOption(
-                        creationResult.toString(),
+                        publicKeyCredentialRequestOptions.toString(),
                         null,
                     ),
                     GetPasswordOption(),
