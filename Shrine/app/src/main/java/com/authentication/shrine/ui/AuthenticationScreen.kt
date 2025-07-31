@@ -84,14 +84,14 @@ fun AuthenticationScreen(
         )
     }
 
-    val onSignInWithPasskeysRequest = {
+    val onSignInRequest = {
         viewModel.signInWithPasskeysRequest(
             onSuccess = { flag ->
                 createRestoreKey()
                 navigateToHome(flag)
             },
             getPasskey = { jsonObject ->
-                credentialManagerUtils.getPasskey(
+                credentialManagerUtils.getPasskeyOrPassword(
                     context = context,
                     creationResult = jsonObject,
                 )
@@ -112,7 +112,7 @@ fun AuthenticationScreen(
     }
 
     AuthenticationScreen(
-        onSignInWithPasskeysRequest = onSignInWithPasskeysRequest,
+        onSignInRequest = onSignInRequest,
         navigateToRegister = navigateToRegister,
         showErrorDialog = errorDialogViewModel::showErrorDialog,
         uiState = uiState,
@@ -126,14 +126,14 @@ fun AuthenticationScreen(
  * This screen allows the user to authenticate using a username and password, or through passkeys.
  *
  * @param modifier Modifier to be applied to the composable.
- * @param onSignInWithPasskeysRequest Callback to initiate the sign-in with passkeys request.
+ * @param onSignInRequest Callback to initiate the sign-in with passkeys or password request.
  * @param showErrorDialog Method that resets the UI state of the Error Dialog
  * @param navigateToRegister Callback to navigate to the registration screen.
  * @param uiState The current UI state of the authentication screen.
 */
 @Composable
 fun AuthenticationScreen(
-    onSignInWithPasskeysRequest: () -> Unit,
+    onSignInRequest: () -> Unit,
     navigateToRegister: () -> Unit,
     showErrorDialog: () -> Unit,
     uiState: AuthenticationUiState,
@@ -159,7 +159,7 @@ fun AuthenticationScreen(
 
             // Sign In Button
             ShrineButton(
-                onClick = onSignInWithPasskeysRequest,
+                onClick = onSignInRequest,
                 buttonText = stringResource(id = R.string.sign_in),
                 isButtonEnabled = !uiState.isLoading,
             )
@@ -209,7 +209,7 @@ fun AuthenticationScreen(
 fun AuthenticationScreenPreview() {
     ShrineTheme {
         AuthenticationScreen(
-            onSignInWithPasskeysRequest = { },
+            onSignInRequest = { },
             navigateToRegister = { },
             showErrorDialog = { },
             uiState = AuthenticationUiState(),

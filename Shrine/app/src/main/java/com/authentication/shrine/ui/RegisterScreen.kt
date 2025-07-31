@@ -80,7 +80,7 @@ import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
 fun RegisterScreen(
     navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit,
     onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
+    onOtherWaysToSignUpClicked: () -> Unit,
     onBackClicked: () -> Unit,
     viewModel: RegistrationViewModel,
     modifier: Modifier = Modifier,
@@ -124,7 +124,7 @@ fun RegisterScreen(
         fullName = fullName,
         onFullNameChanged = { fullName = it },
         onLearnMoreClicked = onLearnMoreClicked,
-        onOtherWaysToSignInClicked = onOtherWaysToSignInClicked,
+        onOtherWaysToSignUpClicked = onOtherWaysToSignUpClicked,
         onBackClicked = onBackClicked,
         email = email,
         onEmailChanged = { email = it },
@@ -151,7 +151,7 @@ fun RegisterScreen(
     fullName: String,
     onFullNameChanged: (String) -> Unit,
     onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
+    onOtherWaysToSignUpClicked: () -> Unit,
     onBackClicked: () -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
@@ -187,7 +187,7 @@ fun RegisterScreen(
                 fullName = fullName,
                 onFullNameChanged = onFullNameChanged,
                 onLearnMoreClicked = onLearnMoreClicked,
-                onOtherWaysToSignInClicked = onOtherWaysToSignInClicked,
+                onOtherWaysToSignUpClicked = onOtherWaysToSignUpClicked,
                 email = email,
                 onEmailChanged = onEmailChanged,
                 onPasskeyRegister = onPasskeyRegister,
@@ -224,7 +224,7 @@ private fun RegisterScreenInputSection(
     fullName: String,
     onFullNameChanged: (String) -> Unit,
     onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
+    onOtherWaysToSignUpClicked: () -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
     onPasskeyRegister: (String) -> Unit,
@@ -282,7 +282,7 @@ private fun RegisterScreenInputSection(
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
         )
 
-        PasskeyInformationTab(onLearnMoreClicked, onOtherWaysToSignInClicked)
+        PasskeyInformationTab(onLearnMoreClicked, onOtherWaysToSignUpClicked)
 
         ShrineButton(
             onClick = { onPasskeyRegister(email) },
@@ -297,13 +297,13 @@ private fun RegisterScreenInputSection(
  * Composable for the Passkeys Information Tab UI Element
  *
  * @param onLearnMoreClicked lambda for more information, navigates to an informational screen
- * @param onOtherWaysToSignInClicked lambda for other sign in methods, navigates to
+ * @param onOtherWaysToSignUpClicked lambda for other sign in methods, navigates to
  * @OtherOptionsSignInScreen
  * */
 @Composable
 private fun PasskeyInformationTab(
     onLearnMoreClicked: () -> Unit,
-    onOtherWaysToSignInClicked: () -> Unit,
+    onOtherWaysToSignUpClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -328,8 +328,8 @@ private fun PasskeyInformationTab(
                 )
                 ShrineClickableText(
                     text = "",
-                    clickableText = stringResource(R.string.other_ways_to_sign_in),
-                    onTextClick = onOtherWaysToSignInClicked,
+                    clickableText = stringResource(R.string.other_ways_to_sign_up),
+                    onTextClick = onOtherWaysToSignUpClicked,
                     textStyle = TextStyle(color = Color(0xFF006B5F)),
                 )
             }
@@ -353,7 +353,7 @@ fun RegisterScreenPreview() {
         RegisterScreen(
             onPasskeyRegister = { _ -> },
             onLearnMoreClicked = { },
-            onOtherWaysToSignInClicked = { },
+            onOtherWaysToSignUpClicked = { },
             onBackClicked = { },
             uiState = RegisterUiState(),
             fullName = "",

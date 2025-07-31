@@ -68,6 +68,7 @@
     <string name="error">Error</string>
     <string name="nav_host_route">Nav Host Route</string>
     <string name="other_ways_to_sign_in">Other ways to sign in</string>
+    <string name="other_ways_to_sign_up">Other ways to sign up</string>
     <string name="enter_valid_username">Enter valid username</string>
     <string name="asset_statements">[{
         \"include\": \"https://project-sesame-426206.appspot.com/.well-known/assetlinks.json\"
