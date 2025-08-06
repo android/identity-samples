@@ -67,7 +67,7 @@ class AuthRepository @Inject constructor(
     private val authApiService: AuthApiService,
 ) {
 
-    // Companion object for constants and helper methods``
+    // Companion object for constants and helper methods
     companion object {
         const val TAG = "AuthRepository"
 
@@ -398,7 +398,7 @@ class AuthRepository @Inject constructor(
                 Log.e(TAG, "Invalid federated token credential")
             }
         } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call registerResponse")
+            Log.e(TAG, "Cannot authorize federated token")
         }
         return false
     }
@@ -548,12 +548,12 @@ class AuthRepository @Inject constructor(
         )
 
         if (apiResult.isSuccessful) {
-            dataStore.edit { prefs ->
-                apiResult.getSessionId()?.also {
-                    prefs[SESSION_ID] = it
+            apiResult.getSessionId()?.let { newSessionId ->
+                dataStore.edit { prefs ->
+                    prefs[SESSION_ID] = newSessionId
                 }
+                return true
             }
-            return true
         }
 
         return false
