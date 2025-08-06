@@ -10,4 +10,7 @@
     <dimen name="size_medium">52dp</dimen>
     <dimen name="size_large">64dp</dimen>
     <dimen name="size_extra_large">172dp</dimen>
+    <dimen name="passkey_info_tab_max_width">600dp</dimen>
+    <dimen name="card_internal_padding">8dp</dimen>
+    <dimen name="product_image_width">120dp</dimen>
 </resources>

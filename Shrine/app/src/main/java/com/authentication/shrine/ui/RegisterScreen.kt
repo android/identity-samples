@@ -307,7 +307,7 @@ private fun PasskeyInformationTab(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .widthIn(max = dimensionResource(id = R.dimen.passkey_info_tab_max_width)) // MODIFIED HERE
             .clip(RoundedCornerShape(dimensionResource(R.dimen.size_standard)))
             .background(grayBackground)
             .padding(dimensionResource(R.dimen.padding_large)),
