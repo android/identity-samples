@@ -125,6 +125,70 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
+    fun signInWithGoogleRequest(
+        onSuccess: (Boolean) -> Unit,
+        getCredential: suspend () -> GenericCredentialManagerResponse,
+    ) {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val credentialResponse = getCredential()
+            if (credentialResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
+                logInWithFederatedToken(
+                    credentialResponse.getCredentialResponse,
+                    onSuccess,
+                )
+            } else if (credentialResponse is GenericCredentialManagerResponse.Error) {
+                repository.clearSessionIdFromDataStore()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        signInWithGoogleRequestErrorMessage = credentialResponse.errorMessage,
+                    )
+                }
+            } else if (credentialResponse is GenericCredentialManagerResponse.CancellationError) {
+                repository.clearSessionIdFromDataStore()
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun logInWithFederatedToken(
+        response: GetCredentialResponse,
+        onSuccess: (navigateToHome: Boolean) -> Unit,
+    ) {
+        viewModelScope.launch {
+            // Get federation options from the server first.
+            val sessionId = repository.getFederationOptions()
+            if (sessionId == null) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        logInWithFederatedTokenFailure = true,
+                    )
+                }
+            } else {
+                // Log in to server with retrieved ID token.
+                val isSuccess = repository.signInWithFederatedTokenResponse(sessionId, response)
+                if (isSuccess) {
+                    repository.setSignedInState(flag = false)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                        )
+                    }
+                    onSuccess(true)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            logInWithFederatedTokenFailure = true,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Launches the Sign in with Google authentication flow.
      * @param onSuccess Lambda that handles actions on successful Google sign in

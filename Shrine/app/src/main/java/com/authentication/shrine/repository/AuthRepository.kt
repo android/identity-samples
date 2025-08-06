@@ -531,7 +531,7 @@ class AuthRepository @Inject constructor(
                     signOut()
                 }
             }
-        } catch (e: Exception) {
+        }catch (e: Exception) {
             Log.e(TAG, "Cannot call deleteRestoreKey", e)
         }
         return false
