@@ -15,6 +15,7 @@
  */
 package com.authentication.shrine.api
 
+import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.GenericAuthResponse
 import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.model.PasswordRequest
@@ -23,6 +24,7 @@ import com.authentication.shrine.model.RegisterRequestResponse
 import com.authentication.shrine.model.RegisterResponseRequestBody
 import com.authentication.shrine.model.SignInRequestResponse
 import com.authentication.shrine.model.SignInResponseRequest
+import com.authentication.shrine.model.SignInWithGoogleRequest
 import com.authentication.shrine.model.UsernameRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -154,5 +156,26 @@ interface AuthApiService {
     suspend fun deletePasskey(
         @Header("Cookie") cookie: String,
         @Query("credId") credentialId: String,
+    ): Response<GenericAuthResponse>
+
+    /**
+     * Get federation options from the server. This will return an ID token to be used as session
+     * ID.
+     * @param urls a list of urls to send for federated requests.
+     */
+    @POST("federation/options")
+    suspend fun getFederationOptions(
+        @Body urls: FederationOptionsRequest
+    ): Response<GenericAuthResponse>
+
+    /**
+     * Authorizes a federated identity token with the backend server.
+     * @param cookie The session cookie for authentication.
+     * @param requestParams The parameters to send to the server, including the session ID.
+     */
+    @POST("federation/verifyIdToken")
+    suspend fun authorizeFederatedToken(
+        @Header("Cookie") cookie: String,
+        @Body requestParams: SignInWithGoogleRequest,
     ): Response<GenericAuthResponse>
 }

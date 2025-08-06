@@ -46,6 +46,7 @@ extJUnit = "1.1.5"
 jUnit = "4.13.2"
 composeMaterial = "1.2.1"
 wearToolingPreview = "1.0.0"
+foundation = "1.8.3"
 
 
 [libraries]
@@ -133,6 +134,7 @@ ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "extJUn
 junit = { group = "junit", name = "junit", version.ref = "jUnit"}
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 
 [plugins]
