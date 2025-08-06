@@ -93,7 +93,7 @@ fun AuthenticationScreen(
             getPasskey = { jsonObject ->
                 credentialManagerUtils.getPasskeyOrPassword(
                     context = context,
-                    creationResult = jsonObject,
+                    publicKeyCredentialRequestOptions = jsonObject,
                 )
             },
         )
