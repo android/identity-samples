@@ -1,7 +1,7 @@
 [versions]
 activity = "1.9.0"
 androidxAppcompat = "1.7.0"
-androidPlugin = "8.11.1"
+androidPlugin = "8.12.0"
 browser = "1.8.0"
 coil = "2.7.0"
 coilSvg = "2.6.0"
