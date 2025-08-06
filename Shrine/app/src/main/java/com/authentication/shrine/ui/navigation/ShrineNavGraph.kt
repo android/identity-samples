@@ -102,7 +102,7 @@ fun ShrineNavGraph(
                 onLearnMoreClicked = {
                     navController.navigate(ShrineAppDestinations.LearnMore.name)
                 },
-                onOtherWaysToSignInClicked = {
+                onOtherWaysToSignUpClicked = {
                     navController.navigate(ShrineAppDestinations.OtherOptionsSignInRoute.name)
                 },
                 onBackClicked = { navController.popBackStack() },
