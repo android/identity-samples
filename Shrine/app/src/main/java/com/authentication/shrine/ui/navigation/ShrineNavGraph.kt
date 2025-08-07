@@ -35,6 +35,7 @@ import com.authentication.shrine.ui.RegisterPasswordScreen
 import com.authentication.shrine.ui.RegisterScreen
 import com.authentication.shrine.ui.SettingsScreen
 import com.authentication.shrine.ui.ShrineAppScreen
+import com.authentication.shrine.ui.UpdateProfileScreen
 
 /**
  * The navigation graph for the Shrine app.
@@ -93,6 +94,7 @@ fun ShrineNavGraph(
                 navigateToLogin = navigateToLogin,
                 viewModel = hiltViewModel(),
                 credentialManagerUtils = credentialManagerUtils,
+                navigateToUpdateProfile = { navController.navigate(ShrineAppDestinations.UpdateProfileRoute.name) },
             )
         }
 
@@ -175,6 +177,12 @@ fun ShrineNavGraph(
 
         composable(route = ShrineAppDestinations.ShrineApp.name) {
             ShrineAppScreen()
+        }
+
+        composable(route = ShrineAppDestinations.UpdateProfileRoute.name) {
+            UpdateProfileScreen(
+                viewModel = hiltViewModel(),
+            )
         }
     }
 }

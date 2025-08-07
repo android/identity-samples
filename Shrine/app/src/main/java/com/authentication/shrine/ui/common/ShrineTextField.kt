@@ -32,6 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
 
+/**
+ * A custom TextField composable for the Shrine app.
+ *
+ * @param modifier The modifier to be applied to the TextField.
+ * @param value The current value of the TextField.
+ * @param onValueChange The callback to be invoked when the TextField value changes.
+ */
 @Composable
 fun ShrineTextField(
     title: String,
@@ -62,6 +69,9 @@ fun ShrineTextField(
     }
 }
 
+/**
+ * A preview of the ShrineTextField composable.
+ */
 @Preview(showSystemUi = true, name = "ShrineTextField Light")
 @Composable
 fun ShrineTextFieldPreviewLight() {

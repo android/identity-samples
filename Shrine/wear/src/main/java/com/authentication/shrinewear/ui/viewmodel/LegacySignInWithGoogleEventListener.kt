@@ -34,7 +34,7 @@ object LegacySignInWithGoogleEventListener : GoogleSignInEventListener {
         "Legacy Google Account received: %s. Registering to application credential repository"
     private const val ERROR_MISSING_ID_TOKEN =
         "Signed in, but failed to register Legacy Google sign in account to application repository due to missing Google Sign in idToken. " +
-                "Verify OAuthClient type is 'web' and that GoogleSignInOptionsBuilder.requestIdToken is passed the correct client id."
+            "Verify OAuthClient type is 'web' and that GoogleSignInOptionsBuilder.requestIdToken is passed the correct client id."
 
     /**
      * Called when a Google Sign-In is successful and a [GoogleSignInAccount] is obtained.

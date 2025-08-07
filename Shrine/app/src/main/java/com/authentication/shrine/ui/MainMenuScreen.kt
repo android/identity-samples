@@ -55,6 +55,7 @@ fun MainMenuScreen(
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToUpdateProfile: () -> Unit,
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
     credentialManagerUtils: CredentialManagerUtils,
@@ -71,6 +72,7 @@ fun MainMenuScreen(
         onHelpButtonClicked = onHelpButtonClicked,
         navigateToLogin = navigateToLogin,
         onSignOut = onSignOut,
+        navigateToUpdateProfile = navigateToUpdateProfile,
         modifier = modifier,
     )
 }
@@ -93,6 +95,7 @@ fun MainMenuScreen(
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToUpdateProfile: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -121,6 +124,7 @@ fun MainMenuScreen(
                 onHelpButtonClicked,
                 onSignOut,
                 navigateToLogin,
+                navigateToUpdateProfile,
             )
         }
     }
@@ -142,6 +146,7 @@ private fun MainMenuButtonsList(
     onHelpButtonClicked: () -> Unit,
     onSignOut: () -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToUpdateProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -172,6 +177,11 @@ private fun MainMenuButtonsList(
             buttonText = stringResource(R.string.sign_out),
             usePrimaryColor = false,
         )
+
+        ShrineButton(
+            onClick = navigateToUpdateProfile,
+            buttonText = "Update Profile",
+        )
     }
 }
 
@@ -188,6 +198,7 @@ fun PasskeysSignedPreview() {
             onHelpButtonClicked = { },
             navigateToLogin = { },
             onSignOut = { },
+            navigateToUpdateProfile = { },
         )
     }
 }

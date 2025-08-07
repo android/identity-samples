@@ -102,4 +102,6 @@
     <string name="error_server">An unexpected server error occurred.</string>
     <string name="error_unknown">An unknown error occurred.</string>
     <string name="error_invalid_credentials">Invalid credentials. Please check your username and password.</string>
+    <string name="update_user_info">Update User Info</string>
+    <string name="update_profile">Update Profile</string>
 </resources>
