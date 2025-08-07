@@ -382,6 +382,11 @@ class AuthRepository @Inject constructor(
         return false
     }
 
+    /**
+     * Sends the session ID to the server to sign in the user.
+     * @param sessionId The session ID retrieved from the server via federation options request.
+     * @param credentialResponse The credential retrieved from Credential Manager.
+     */
     suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
         credentialResponse: GetCredentialResponse
@@ -389,7 +394,7 @@ class AuthRepository @Inject constructor(
         val credential = credentialResponse.credential
         try {
             if (credential is CustomCredential) {
-                return authorizeFederatedToken(
+                return verifyIdToken(
                     sessionId,
                     GoogleIdTokenCredential
                         .createFrom(credential.data).idToken
@@ -532,6 +537,13 @@ class AuthRepository @Inject constructor(
         return false
     }
 
+    /**
+     * Send a request to the server with urls parameter that contains a list of IdPs in an array.
+     * e.g. url=["https://accounts.google.com"]. The response will contain a client ID to be used
+     * for subsequent server verification to complete login. Note this sequence may vary depending
+     * on your server implementation.
+     * @return The client ID stored as the session ID as a [String].
+     */
     suspend fun getFederationOptions(): String? {
         val apiResult = authApiService.getFederationOptions(FederationOptionsRequest())
         if (apiResult.isSuccessful) {
@@ -541,8 +553,14 @@ class AuthRepository @Inject constructor(
         return null
     }
 
-    suspend fun authorizeFederatedToken(sessionId: String, token: String): Boolean {
-        val apiResult = authApiService.authorizeFederatedToken(
+    /**
+     * Verifies the ID token with the server to complete sign in.
+     * @param sessionId The ID token retrieved from the server via federation options request. This
+     * is treated as a session ID for this server implementation.
+     * @param token The ID token to be authorized.
+     */
+    suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
+        val apiResult = authApiService.verifyIdToken(
             cookie = sessionId.createCookieHeader(),
             requestParams = SignInWithGoogleRequest(token = token)
         )

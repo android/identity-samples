@@ -55,8 +55,8 @@ class CredentialManagerUtils @Inject constructor(
      *
      * @param publicKeyCredentialRequestOptions The public key credential request options.
      * @param context The activity context from the Composable, to be used in Credential Manager APIs
-     * @return The [GetCredentialResponse] object containing the passkey or password, or null if an
-     * error occurred.
+     * @return The [GenericCredentialManagerResponse] object containing the passkey or password, or
+     * null if an error occurred.
      */
     suspend fun getPasskeyOrPasswordCredential(
         publicKeyCredentialRequestOptions: JSONObject,
@@ -90,7 +90,15 @@ class CredentialManagerUtils @Inject constructor(
         }
         return GenericCredentialManagerResponse.GetCredentialSuccess(getCredentialResponse = result)
     }
-    
+
+    /**
+     * Retrieves a Sign in with Google credential from the credential manager.
+     *
+     * @param context The activity context from the Composable, to be used in Credential Manager
+     * APIs
+     * @return The [GenericCredentialManagerResponse] object containing the passkey or password, or
+     * null if an error occurred.
+     */
     suspend fun getSignInWithGoogleCredential(context: Context): GenericCredentialManagerResponse {
         val result: GetCredentialResponse?
         try {

@@ -159,8 +159,8 @@ interface AuthApiService {
     ): Response<GenericAuthResponse>
 
     /**
-     * Get federation options from the server. This will return an ID token to be used as session
-     * ID.
+     * Send a request to the server with urls parameter that contains a list of IdPs in an array.
+     * e.g. urls=["https://accounts.google.com"]. The response will contain a nonce and IdP details.
      * @param urls a list of urls to send for federated requests.
      */
     @POST("federation/options")
@@ -169,12 +169,13 @@ interface AuthApiService {
     ): Response<GenericAuthResponse>
 
     /**
-     * Authorizes a federated identity token with the backend server.
-     * @param cookie The session cookie for authentication.
-     * @param requestParams The parameters to send to the server, including the session ID.
+     * Verifies a session ID token and Credential Manager credentials with the backend server.
+     * @param cookie The session cookie for authentication containing the session ID.
+     * @param requestParams The parameters to send to the server, including Credential Manager
+     * credentials.
      */
     @POST("federation/verifyIdToken")
-    suspend fun authorizeFederatedToken(
+    suspend fun verifyIdToken(
         @Header("Cookie") cookie: String,
         @Body requestParams: SignInWithGoogleRequest,
     ): Response<GenericAuthResponse>

@@ -93,7 +93,7 @@ class AuthenticationViewModel @Inject constructor(
     /**
      * Handles the response to a sign-in challenge.
      *
-     * @param response The response from the server.
+     * @param response The response from the server
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
      */
     private fun signInWithPasskeyOrPasswordResponse(
@@ -125,6 +125,11 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Launches the Sign in with Google authentication flow.
+     * @param onSuccess Lambda that handles actions on successful Google sign in
+     * @param getCredential Lambda that retrieves the credential from the Credential Manager
+     */
     fun signInWithGoogleRequest(
         onSuccess: (Boolean) -> Unit,
         getCredential: suspend () -> GenericCredentialManagerResponse,
@@ -152,12 +157,17 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Logs in the user with federated credentials received from Credential Manager.
+     * @response Credentials received from Credential Manager
+     * @onSuccess Lambda that handles actions on successful Google sign in
+     */
     fun logInWithFederatedToken(
         response: GetCredentialResponse,
         onSuccess: (navigateToHome: Boolean) -> Unit,
     ) {
         viewModelScope.launch {
-            // Get federation options from the server first.
+            // Get sessionId from the server first.
             val sessionId = repository.getFederationOptions()
             if (sessionId == null) {
                 _uiState.update {
@@ -167,7 +177,7 @@ class AuthenticationViewModel @Inject constructor(
                     )
                 }
             } else {
-                // Log in to server with retrieved ID token.
+                // Log in to server with retrieved session ID and CredMan credentials.
                 val isSuccess = repository.signInWithFederatedTokenResponse(sessionId, response)
                 if (isSuccess) {
                     repository.setSignedInState(flag = false)
