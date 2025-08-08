@@ -60,7 +60,7 @@ class CredentialManagerAuthenticator(applicationContext: Context) {
         return authenticate(getCredentialResponse)
     }
 
-    /**signInWithPasskeysRequest
+    /**signInRequest
      * Creates a [GetCredentialRequest] with standard Wear Credential types.
      *
      * @return A configured [GetCredentialRequest] ready to be used with [CredentialManager.getCredential].

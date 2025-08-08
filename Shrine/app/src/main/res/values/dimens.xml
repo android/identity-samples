@@ -10,4 +10,5 @@
     <dimen name="size_medium">52dp</dimen>
     <dimen name="size_large">64dp</dimen>
     <dimen name="size_extra_large">172dp</dimen>
+    <dimen name="siwg_button_height">30dp</dimen>
 </resources>

@@ -19,8 +19,10 @@ import android.util.Log
 import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CreateRestoreCredentialResponse
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
 import androidx.credentials.RestoreCredential
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -30,22 +32,28 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.CredmanResponse
+import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
 import com.authentication.shrine.model.RegisterResponseRequestBody
 import com.authentication.shrine.model.ResponseObject
 import com.authentication.shrine.model.SignInResponseRequest
+import com.authentication.shrine.model.SignInWithGoogleRequest
 import com.authentication.shrine.model.UsernameRequest
 import com.authentication.shrine.utility.createCookieHeader
 import com.authentication.shrine.utility.getJsonObject
 import com.authentication.shrine.utility.getSessionId
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
+
+const val SERVER_CLIENT_ID =
+    "493201854729-bposa1duevdn4nspp28cmn6anucu60pf.apps.googleusercontent.com"
 
 /**
  * Repository class that handles authentication-related operations.
@@ -286,7 +294,7 @@ class AuthRepository @Inject constructor(
      *
      * @return The public key credential request options, or null if there was an error.
      */
-    suspend fun signInWithPasskeysRequest(): JSONObject? {
+    suspend fun signInWithPasskeyOrPasswordRequest(): JSONObject? {
         val response = authApiService.signInRequest()
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
@@ -305,60 +313,61 @@ class AuthRepository @Inject constructor(
 
     /**
      * Finishes to signing in with a credential. This should only be called after a call to
-     * [signInWithPasskeysRequest] and a local API for key assertion.
+     * [signInWithPasskeyOrPasswordRequest] and a local API for key assertion.
      *
      * @param credentialResponse The credential response.
      * @return True if the sign-in was successful, false otherwise.
      */
-    suspend fun signInWithPasskeysResponse(credentialResponse: GetCredentialResponse): Boolean {
+    suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): Boolean {
+        val credential = credentialResponse.credential
         try {
-            val signInResponse =
-                credentialResponse.credential.data.getString(
-                    if (credentialResponse.credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
-                        "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
-                    } else {
-                        "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
-                    },
-                )
-            if (signInResponse != null) {
-                val signInResponseJSON = JSONObject(signInResponse)
-                val response = signInResponseJSON.getJSONObject("response")
-                val sessionId = dataStore.read(SESSION_ID)
-                val credentialId = signInResponseJSON.getString("rawId")
-
-                if (!sessionId.isNullOrBlank()) {
-                    val apiResult = authApiService.signInResponse(
-                        cookie = sessionId.createCookieHeader(),
-                        requestBody = SignInResponseRequest(
-                            id = credentialId,
-                            type = PublicKeyCredentialType.PUBLIC_KEY.toString(),
-                            rawId = credentialId,
-                            response = ResponseObject(
-                                clientDataJSON = response.getString("clientDataJSON"),
-                                authenticatorData = response.getString("authenticatorData"),
-                                signature = response.getString("signature"),
-                                userHandle = response.getString("userHandle"),
-                            ),
-                        ),
+            if (credential is PublicKeyCredential) {
+                val signInResponse =
+                    credential.data.getString(
+                        if (credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
+                            "androidx.credentials.BUNDLE_KEY_GET_RESTORE_CREDENTIAL_RESPONSE"
+                        } else {
+                            "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
+                        },
                     )
-                    if (apiResult.isSuccessful) {
-                        dataStore.edit { prefs ->
-                            apiResult.getSessionId()?.also {
-                                prefs[SESSION_ID] = it
-                            } ?: run {
-                                signOut()
+                if (signInResponse != null) {
+                    val signInResponseJSON = JSONObject(signInResponse)
+                    val response = signInResponseJSON.getJSONObject("response")
+                    val sessionId = dataStore.read(SESSION_ID)
+                    val credentialId = signInResponseJSON.getString("rawId")
+
+                    if (!sessionId.isNullOrBlank()) {
+                        val apiResult = authApiService.signInResponse(
+                            cookie = sessionId.createCookieHeader(),
+                            requestBody = SignInResponseRequest(
+                                id = credentialId,
+                                type = PublicKeyCredentialType.PUBLIC_KEY.toString(),
+                                rawId = credentialId,
+                                response = ResponseObject(
+                                    clientDataJSON = response.getString("clientDataJSON"),
+                                    authenticatorData = response.getString("authenticatorData"),
+                                    signature = response.getString("signature"),
+                                    userHandle = response.getString("userHandle"),
+                                ),
+                            ),
+                        )
+                        if (apiResult.isSuccessful) {
+                            dataStore.edit { prefs ->
+                                apiResult.getSessionId()?.also {
+                                    prefs[SESSION_ID] = it
+                                }
                             }
+                            return true
+                        } else if (apiResult.code() == 401) {
+                            signOut()
                         }
-                        return true
-                    } else if (apiResult.code() == 401) {
-                        signOut()
                     }
                 }
-            } else if (credentialResponse.credential.type == PasswordCredential.TYPE_PASSWORD_CREDENTIAL) {
+            } else if (credential is PasswordCredential) {
                 val email =
-                    credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_ID")
+                    credential.data.getString("androidx.credentials.BUNDLE_KEY_ID")
                 val password =
-                    credentialResponse.credential.data.getString("androidx.credentials.BUNDLE_KEY_PASSWORD")
+                    credential.data.getString("androidx.credentials.BUNDLE_KEY_PASSWORD")
                 if (email != null && password != null) {
                     return login(email, password)
                 } else {
@@ -369,6 +378,32 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse")
+        }
+        return false
+    }
+
+    /**
+     * Sends the session ID to the server to sign in the user.
+     * @param sessionId The session ID retrieved from the server via federation options request.
+     * @param credentialResponse The credential retrieved from Credential Manager.
+     */
+    suspend fun signInWithFederatedTokenResponse(
+        sessionId: String,
+        credentialResponse: GetCredentialResponse
+    ): Boolean {
+        val credential = credentialResponse.credential
+        try {
+            if (credential is CustomCredential) {
+                return verifyIdToken(
+                    sessionId,
+                    GoogleIdTokenCredential
+                        .createFrom(credential.data).idToken
+                )
+            } else {
+                Log.e(TAG, "Invalid federated token credential")
+            }
+        } catch (e: ApiException) {
+            Log.e(TAG, "Cannot authorize federated token")
         }
         return false
     }
@@ -474,7 +509,7 @@ class AuthRepository @Inject constructor(
                     signOut()
                 }
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Cannot call deletePasskey", e)
         }
         return false
@@ -502,4 +537,43 @@ class AuthRepository @Inject constructor(
         return false
     }
 
+    /**
+     * Send a request to the server with urls parameter that contains a list of IdPs in an array.
+     * e.g. url=["https://accounts.google.com"]. The response will contain a client ID to be used
+     * for subsequent server verification to complete login. Note this sequence may vary depending
+     * on your server implementation.
+     * @return The client ID stored as the session ID as a [String].
+     */
+    suspend fun getFederationOptions(): String? {
+        val apiResult = authApiService.getFederationOptions(FederationOptionsRequest())
+        if (apiResult.isSuccessful) {
+            return apiResult.getSessionId()
+        }
+
+        return null
+    }
+
+    /**
+     * Verifies the ID token with the server to complete sign in.
+     * @param sessionId The ID token retrieved from the server via federation options request. This
+     * is treated as a session ID for this server implementation.
+     * @param token The ID token to be authorized.
+     */
+    suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
+        val apiResult = authApiService.verifyIdToken(
+            cookie = sessionId.createCookieHeader(),
+            requestParams = SignInWithGoogleRequest(token = token)
+        )
+
+        if (apiResult.isSuccessful) {
+            apiResult.getSessionId()?.let { newSessionId ->
+                dataStore.edit { prefs ->
+                    prefs[SESSION_ID] = newSessionId
+                }
+                return true
+            }
+        }
+
+        return false
+    }
 }

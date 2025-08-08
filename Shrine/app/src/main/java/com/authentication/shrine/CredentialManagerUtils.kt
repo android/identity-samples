@@ -36,6 +36,8 @@ import androidx.credentials.GetRestoreCredentialOption
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
+import com.authentication.shrine.repository.SERVER_CLIENT_ID
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -49,14 +51,14 @@ class CredentialManagerUtils @Inject constructor(
 ) {
 
     /**
-     * Retrieves a passkey or password from the credential manager.
+     * Retrieves a passkey or password credential from the credential manager.
      *
      * @param publicKeyCredentialRequestOptions The public key credential request options.
      * @param context The activity context from the Composable, to be used in Credential Manager APIs
-     * @return The [GetCredentialResponse] object containing the passkey or password, or null if an
-     * error occurred.
+     * @return The [GenericCredentialManagerResponse] object containing the passkey or password, or
+     * null if an error occurred.
      */
-    suspend fun getPasskeyOrPassword(
+    suspend fun getPasskeyOrPasswordCredential(
         publicKeyCredentialRequestOptions: JSONObject,
         context: Context,
     ): GenericCredentialManagerResponse {
@@ -86,7 +88,39 @@ class CredentialManagerUtils @Inject constructor(
         } catch (e: Exception) {
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
-        return GenericCredentialManagerResponse.GetPasskeySuccess(getPasskeyResponse = result)
+        return GenericCredentialManagerResponse.GetCredentialSuccess(getCredentialResponse = result)
+    }
+
+    /**
+     * Retrieves a Sign in with Google credential from the credential manager.
+     *
+     * @param context The activity context from the Composable, to be used in Credential Manager
+     * APIs
+     * @return The [GenericCredentialManagerResponse] object containing the passkey or password, or
+     * null if an error occurred.
+     */
+    suspend fun getSignInWithGoogleCredential(context: Context): GenericCredentialManagerResponse {
+        val result: GetCredentialResponse?
+        try {
+            val credentialRequest = GetCredentialRequest(
+                listOf(
+                    GetGoogleIdOption.Builder()
+                        .setServerClientId(SERVER_CLIENT_ID)
+                        .setFilterByAuthorizedAccounts(false)
+                        .build(),
+                )
+            )
+            result = credentialManager.getCredential(context, credentialRequest)
+        } catch (e: GetCredentialCancellationException) {
+            // When credential selector bottom-sheet is cancelled
+            return GenericCredentialManagerResponse.CancellationError
+        } catch (e: GetPublicKeyCredentialDomException) {
+            // When the user verification / biometric bottom sheet is cancelled
+            return GenericCredentialManagerResponse.CancellationError
+        } catch (e: Exception) {
+            return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
+        }
+        return GenericCredentialManagerResponse.GetCredentialSuccess(getCredentialResponse = result)
     }
 
     /**
@@ -205,7 +239,7 @@ class CredentialManagerUtils @Inject constructor(
         } catch (e: Exception) {
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
-        return GenericCredentialManagerResponse.GetPasskeySuccess(result)
+        return GenericCredentialManagerResponse.GetCredentialSuccess(result)
     }
 
     /**
@@ -218,8 +252,8 @@ class CredentialManagerUtils @Inject constructor(
 }
 
 sealed class GenericCredentialManagerResponse {
-    data class GetPasskeySuccess(
-        val getPasskeyResponse: GetCredentialResponse,
+    data class GetCredentialSuccess(
+        val getCredentialResponse: GetCredentialResponse,
     ) : GenericCredentialManagerResponse()
 
     data class CreatePasskeySuccess(

@@ -15,10 +15,13 @@
  */
 package com.authentication.shrine.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -35,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,16 +88,30 @@ fun AuthenticationScreen(
         )
     }
 
-    val onSignInRequest = {
-        viewModel.signInWithPasskeysRequest(
+    val onSignInWithPasskeyOrPasswordRequest = {
+        viewModel.signInWithPasskeyOrPasswordRequest(
             onSuccess = { flag ->
                 createRestoreKey()
                 navigateToHome(flag)
             },
-            getPasskey = { jsonObject ->
-                credentialManagerUtils.getPasskeyOrPassword(
+            getCredential = { jsonObject ->
+                credentialManagerUtils.getPasskeyOrPasswordCredential(
                     context = context,
                     publicKeyCredentialRequestOptions = jsonObject,
+                )
+            },
+        )
+    }
+
+    val onSignInWithSignInWithGoogleRequest = {
+        viewModel.signInWithGoogleRequest(
+            onSuccess = { flag ->
+                createRestoreKey()
+                navigateToHome(flag)
+            },
+            getCredential = {
+                credentialManagerUtils.getSignInWithGoogleCredential(
+                    context = context,
                 )
             },
         )
@@ -112,7 +130,8 @@ fun AuthenticationScreen(
     }
 
     AuthenticationScreen(
-        onSignInRequest = onSignInRequest,
+        onSignInWithPasskeyOrPasswordRequest = onSignInWithPasskeyOrPasswordRequest,
+        onSignInWithSignInWithGoogleRequest = onSignInWithSignInWithGoogleRequest,
         navigateToRegister = navigateToRegister,
         showErrorDialog = errorDialogViewModel::showErrorDialog,
         uiState = uiState,
@@ -126,14 +145,15 @@ fun AuthenticationScreen(
  * This screen allows the user to authenticate using a username and password, or through passkeys.
  *
  * @param modifier Modifier to be applied to the composable.
- * @param onSignInRequest Callback to initiate the sign-in with passkeys or password request.
+ * @param onSignInWithPasskeyOrPasswordRequest Callback to initiate the sign-in with passkeys or password request.
  * @param showErrorDialog Method that resets the UI state of the Error Dialog
  * @param navigateToRegister Callback to navigate to the registration screen.
  * @param uiState The current UI state of the authentication screen.
 */
 @Composable
 fun AuthenticationScreen(
-    onSignInRequest: () -> Unit,
+    onSignInWithPasskeyOrPasswordRequest: () -> Unit,
+    onSignInWithSignInWithGoogleRequest: () -> Unit,
     navigateToRegister: () -> Unit,
     showErrorDialog: () -> Unit,
     uiState: AuthenticationUiState,
@@ -157,14 +177,12 @@ fun AuthenticationScreen(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large)))
 
-            // Sign In Button
+            // Sign In with passkey or password Button
             ShrineButton(
-                onClick = onSignInRequest,
+                onClick = onSignInWithPasskeyOrPasswordRequest,
                 buttonText = stringResource(id = R.string.sign_in),
                 isButtonEnabled = !uiState.isLoading,
             )
-
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_large)))
 
             // Sign Up Button
             ShrineButton(
@@ -172,6 +190,17 @@ fun AuthenticationScreen(
                 buttonText = stringResource(id = R.string.sign_up),
                 isButtonDark = false,
                 isButtonEnabled = !uiState.isLoading,
+            )
+
+            // Sign in with Google image
+            Image(
+                painter = painterResource(id = R.drawable.siwg_button_light),
+                contentDescription = stringResource(R.string.sign_in_with_google_button),
+                modifier = Modifier
+                    .height(dimensionResource(R.dimen.siwg_button_height))
+                    .clickable(
+                        enabled = !uiState.isLoading,
+                        onClick = onSignInWithSignInWithGoogleRequest)
             )
         }
 
@@ -197,6 +226,20 @@ fun AuthenticationScreen(
             }
         }
     }
+
+    val snackbarMessage = when {
+        !uiState.signInWithGoogleRequestErrorMessage.isNullOrBlank() -> uiState.signInWithGoogleRequestErrorMessage
+        uiState.logInWithFederatedTokenFailure -> stringResource(R.string.sign_in_with_google_response_error_message)
+        else -> null
+    }
+
+    if (snackbarMessage != null) {
+        LaunchedEffect(snackbarMessage) {
+            snackbarHostState.showSnackbar(
+                message = snackbarMessage
+            )
+        }
+    }
 }
 
 /**
@@ -209,7 +252,8 @@ fun AuthenticationScreen(
 fun AuthenticationScreenPreview() {
     ShrineTheme {
         AuthenticationScreen(
-            onSignInRequest = { },
+            onSignInWithPasskeyOrPasswordRequest = { },
+            onSignInWithSignInWithGoogleRequest = { },
             navigateToRegister = { },
             showErrorDialog = { },
             uiState = AuthenticationUiState(),
