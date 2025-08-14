@@ -169,7 +169,7 @@ fun SettingsScreen(
         if (snackbarMessage != null) {
             LaunchedEffect(snackbarMessage) {
                 snackbarHostState.showSnackbar(
-                    message = snackbarMessage
+                    message = snackbarMessage,
                 )
             }
         }

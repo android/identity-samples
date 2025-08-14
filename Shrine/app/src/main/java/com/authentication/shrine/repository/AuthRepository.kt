@@ -63,7 +63,7 @@ const val SERVER_CLIENT_ID =
 class AuthRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val authApiService: AuthApiService,
-): AuthenticationRepository {
+) : AuthenticationRepository {
 
     // Companion object for constants and helper methods
     companion object {
@@ -387,7 +387,7 @@ class AuthRepository @Inject constructor(
      */
     override suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
-        credentialResponse: GetCredentialResponse
+        credentialResponse: GetCredentialResponse,
     ): Boolean {
         val credential = credentialResponse.credential
         try {
@@ -395,7 +395,7 @@ class AuthRepository @Inject constructor(
                 return verifyIdToken(
                     sessionId,
                     GoogleIdTokenCredential
-                        .createFrom(credential.data).idToken
+                        .createFrom(credential.data).idToken,
                 )
             } else {
                 Log.e(TAG, "Invalid federated token credential")
@@ -529,7 +529,8 @@ class AuthRepository @Inject constructor(
                     signOut()
                 }
             }
-        }catch (e: Exception) {
+        }
+        catch (e: Exception) {
             Log.e(TAG, "Cannot call deleteRestoreKey", e)
         }
         return false
@@ -560,7 +561,7 @@ class AuthRepository @Inject constructor(
     private suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
         val apiResult = authApiService.verifyIdToken(
             cookie = sessionId.createCookieHeader(),
-            requestParams = SignInWithGoogleRequest(token = token)
+            requestParams = SignInWithGoogleRequest(token = token),
         )
 
         if (apiResult.isSuccessful) {

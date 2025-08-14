@@ -99,7 +99,7 @@ class AuthenticationServer {
 
     init {
         val userAgent = "${BuildConfig.APPLICATION_ID}/${BuildConfig.VERSION_NAME} " +
-                "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
+            "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
         httpClient = OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
             .addInterceptor(
@@ -364,8 +364,10 @@ class AuthenticationServer {
             }
         }
 
-        return when (val authorizationResult =
-            authorizeFederatedTokenWithServer(federatedToken, federatedSessionId)) {
+        return when (
+            val authorizationResult =
+                authorizeFederatedTokenWithServer(federatedToken, federatedSessionId)
+        ) {
             is ApiResult.Success -> {
                 this.sessionId = authorizationResult.sessionId
                 return true
@@ -390,7 +392,8 @@ class AuthenticationServer {
                 "POST",
                 createJSONRequestBody {
                     name("urls").beginArray().value("https://accounts.google.com").endArray()
-                }).build(),
+                },
+            ).build(),
         ).await()
 
         return httpResponse.result(errorMessage = "Error creating federation options") {}
@@ -407,10 +410,12 @@ class AuthenticationServer {
      * A [Unit] type for success implies no specific data is returned on successful authorization.
      */
     private suspend fun authorizeFederatedTokenWithServer(
-        token: String, sessionId: String
+        token: String,
+        sessionId: String,
     ): ApiResult<Unit> {
         val requestHeaders = okhttp3.Headers.Builder().add(
-            "Cookie", "$SESSION_ID_KEY$sessionId"
+            "Cookie",
+            "$SESSION_ID_KEY$sessionId",
         ).build()
 
         val httpResponse = httpClient.newCall(

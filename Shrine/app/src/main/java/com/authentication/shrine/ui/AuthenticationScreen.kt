@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -200,7 +199,8 @@ fun AuthenticationScreen(
                     .height(dimensionResource(R.dimen.siwg_button_height))
                     .clickable(
                         enabled = !uiState.isLoading,
-                        onClick = onSignInWithSignInWithGoogleRequest)
+                        onClick = onSignInWithSignInWithGoogleRequest,
+                    ),
             )
         }
 
@@ -236,7 +236,7 @@ fun AuthenticationScreen(
     if (snackbarMessage != null) {
         LaunchedEffect(snackbarMessage) {
             snackbarHostState.showSnackbar(
-                message = snackbarMessage
+                message = snackbarMessage,
             )
         }
     }

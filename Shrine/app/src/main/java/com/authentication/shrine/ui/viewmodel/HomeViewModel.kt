@@ -17,7 +17,6 @@ package com.authentication.shrine.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.authentication.shrine.repository.AuthRepository
 import com.authentication.shrine.repository.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

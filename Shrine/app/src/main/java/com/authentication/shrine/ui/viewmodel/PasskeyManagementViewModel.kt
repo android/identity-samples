@@ -47,7 +47,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PasskeyManagementViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val application: Application
+    private val application: Application,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PasskeyManagementUiState())
     val uiState = _uiState.asStateFlow()
@@ -68,7 +68,7 @@ class PasskeyManagementViewModel @Inject constructor(
                 val reader = InputStreamReader(aaguidInputStream)
                 val aaguidJsonData = gson.fromJson<Map<String, Map<String, String>>>(
                     reader,
-                    object : TypeToken<Map<String, Map<String, String>>>() {}.type
+                    object : TypeToken<Map<String, Map<String, String>>>() {}.type,
                 )
                 _uiState.update { it.copy(aaguidData = aaguidJsonData) }
             } catch (e: Exception) {
@@ -152,7 +152,7 @@ class PasskeyManagementViewModel @Inject constructor(
                                     it.copy(
                                         isLoading = false,
                                         passkeysList = filteredPasskeysList,
-                                        messageResourceId = R.string.passkey_created
+                                        messageResourceId = R.string.passkey_created,
                                     )
                                 }
                             } else {
@@ -167,7 +167,7 @@ class PasskeyManagementViewModel @Inject constructor(
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    messageResourceId = R.string.some_error_occurred_please_check_logs
+                                    messageResourceId = R.string.some_error_occurred_please_check_logs,
                                 )
                             }
                         }
@@ -175,7 +175,7 @@ class PasskeyManagementViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                errorMessage = createPasskeyResponse.errorMessage
+                                errorMessage = createPasskeyResponse.errorMessage,
                             )
                         }
                         authRepository.setSignedInState(false)
@@ -184,7 +184,7 @@ class PasskeyManagementViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            messageResourceId = R.string.oops_an_internal_server_error_occurred
+                            messageResourceId = R.string.oops_an_internal_server_error_occurred,
                         )
                     }
                 }
@@ -192,7 +192,7 @@ class PasskeyManagementViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message
+                        errorMessage = e.message,
                     )
                 }
                 authRepository.setSignedInState(false)
@@ -224,7 +224,7 @@ class PasskeyManagementViewModel @Inject constructor(
                                 isLoading = false,
                                 userHasPasskeys = filteredPasskeysList.isNotEmpty(),
                                 passkeysList = filteredPasskeysList,
-                                messageResourceId = R.string.delete_passkey_successful
+                                messageResourceId = R.string.delete_passkey_successful,
                             )
                         }
                     } else {

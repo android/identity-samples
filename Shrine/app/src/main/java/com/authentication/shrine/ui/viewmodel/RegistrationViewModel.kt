@@ -79,7 +79,7 @@ class RegistrationViewModel @Inject constructor(
                             )
                         }
                     }
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     _uiState.update {
                         RegisterUiState(errorMessage = e.message)
                     }
@@ -119,14 +119,14 @@ class RegistrationViewModel @Inject constructor(
                             _uiState.update {
                                 RegisterUiState(
                                     isSuccess = true,
-                                    messageResourceId = R.string.passkey_created_try_signin_with_passkeys
+                                    messageResourceId = R.string.passkey_created_try_signin_with_passkeys,
                                 )
                             }
                         } else {
                             _uiState.update {
                                 RegisterUiState(
                                     isSuccess = false,
-                                    messageResourceId = R.string.some_error_occurred_please_check_logs
+                                    messageResourceId = R.string.some_error_occurred_please_check_logs,
                                 )
                             }
                         }
@@ -143,7 +143,7 @@ class RegistrationViewModel @Inject constructor(
                     }
                     onSuccess(false)
                 }
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 _uiState.update {
                     RegisterUiState(errorMessage = e.message)
                 }
@@ -192,7 +192,7 @@ class RegistrationViewModel @Inject constructor(
                         }
                     }
                     repository.setSignedInState(false)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     _uiState.update {
                         RegisterUiState(errorMessage = e.message)
                     }
