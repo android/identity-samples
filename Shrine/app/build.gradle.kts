@@ -183,4 +183,8 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.gms.location)
     implementation(libs.androidx.core.splashscreen)
+
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.truth)
 }

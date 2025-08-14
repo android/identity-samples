@@ -18,7 +18,11 @@ package com.authentication.shrine.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.repository.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,8 +33,11 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: AuthRepository,
+    private val repository: AuthenticationRepository,
 ) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState = _uiState.asStateFlow()
 
     /**
      * Signs out the user.
@@ -46,5 +53,12 @@ class HomeViewModel @Inject constructor(
             repository.deleteRestoreKeyFromServer()
             repository.signOut()
         }
+        _uiState.update {
+            it.copy(isSignedIn = false)
+        }
     }
 }
+
+data class HomeUiState(
+    val isSignedIn: Boolean = true,
+)

@@ -50,7 +50,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
-import javax.inject.Singleton
 
 const val SERVER_CLIENT_ID =
     "493201854729-bposa1duevdn4nspp28cmn6anucu60pf.apps.googleusercontent.com"
@@ -61,11 +60,10 @@ const val SERVER_CLIENT_ID =
  * @param authApiService The API service for interacting with the server.
  * @param dataStore The data store for storing user data.
  */
-@Singleton
 class AuthRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val authApiService: AuthApiService,
-) {
+): AuthenticationRepository {
 
     // Companion object for constants and helper methods
     companion object {
@@ -92,7 +90,7 @@ class AuthRepository @Inject constructor(
      * @param username The username to send.
      * @return True if the login was successful, false otherwise.
      */
-    suspend fun registerUsername(username: String): Boolean {
+    override suspend fun registerUsername(username: String): Boolean {
         val response = authApiService.registerUsername(UsernameRequest(username))
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
@@ -117,7 +115,7 @@ class AuthRepository @Inject constructor(
      * @param password The password to send.
      * @return True if the login was successful, false otherwise.
      */
-    suspend fun login(username: String, password: String): Boolean {
+    override suspend fun login(username: String, password: String): Boolean {
         val response = authApiService.setUsername(UsernameRequest(username = username))
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
@@ -182,7 +180,7 @@ class AuthRepository @Inject constructor(
     /**
      * Clears all the sign-in information.
      */
-    suspend fun signOut() {
+    override suspend fun signOut() {
         dataStore.edit { prefs ->
             prefs.remove(USERNAME)
             prefs.remove(SESSION_ID)
@@ -196,7 +194,7 @@ class AuthRepository @Inject constructor(
      *
      * @return The public key credential request options, or null if there was an error.
      */
-    suspend fun registerPasskeyCreationRequest(): JSONObject? {
+    override suspend fun registerPasskeyCreationRequest(): JSONObject? {
         try {
             val sessionId = dataStore.read(SESSION_ID)
             if (!sessionId.isNullOrEmpty()) {
@@ -230,7 +228,7 @@ class AuthRepository @Inject constructor(
      * @param credentialResponse The credential response.
      * @return True if the registration was successful, false otherwise.
      */
-    suspend fun registerPasskeyCreationResponse(
+    override suspend fun registerPasskeyCreationResponse(
         credentialResponse: CreateCredentialResponse,
     ): Boolean {
         try {
@@ -294,7 +292,7 @@ class AuthRepository @Inject constructor(
      *
      * @return The public key credential request options, or null if there was an error.
      */
-    suspend fun signInWithPasskeyOrPasswordRequest(): JSONObject? {
+    override suspend fun signInWithPasskeyOrPasswordRequest(): JSONObject? {
         val response = authApiService.signInRequest()
         if (response.isSuccessful) {
             dataStore.edit { prefs ->
@@ -318,7 +316,7 @@ class AuthRepository @Inject constructor(
      * @param credentialResponse The credential response.
      * @return True if the sign-in was successful, false otherwise.
      */
-    suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): Boolean {
+    override suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): Boolean {
         val credential = credentialResponse.credential
         try {
             if (credential is PublicKeyCredential) {
@@ -387,7 +385,7 @@ class AuthRepository @Inject constructor(
      * @param sessionId The session ID retrieved from the server via federation options request.
      * @param credentialResponse The credential retrieved from Credential Manager.
      */
-    suspend fun signInWithFederatedTokenResponse(
+    override suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
         credentialResponse: GetCredentialResponse
     ): Boolean {
@@ -413,7 +411,7 @@ class AuthRepository @Inject constructor(
      *
      * @return True if the user is signed in, false otherwise.
      */
-    suspend fun isSignedInThroughPassword(): Boolean {
+    override suspend fun isSignedInThroughPassword(): Boolean {
         val sessionId = dataStore.read(SESSION_ID)
         return when {
             sessionId.isNullOrBlank() -> false
@@ -426,7 +424,7 @@ class AuthRepository @Inject constructor(
      *
      * @return True if the user is signed in through passkeys, false otherwise.
      */
-    suspend fun isSignedInThroughPasskeys(): Boolean {
+    override suspend fun isSignedInThroughPasskeys(): Boolean {
         val isSignedInThroughPasskeys = dataStore.read(IS_SIGNED_IN_THROUGH_PASSKEYS)
         isSignedInThroughPasskeys?.let {
             return it
@@ -439,7 +437,7 @@ class AuthRepository @Inject constructor(
      *
      * @param flag True if the user is signed in through passkeys, false otherwise.
      */
-    suspend fun setSignedInState(flag: Boolean) {
+    override suspend fun setSignedInState(flag: Boolean) {
         dataStore.edit { prefs ->
             prefs[IS_SIGNED_IN_THROUGH_PASSKEYS] = flag
         }
@@ -450,7 +448,7 @@ class AuthRepository @Inject constructor(
      *
      * This is a suspend function that edits the data store to remove the session ID.
      */
-    suspend fun clearSessionIdFromDataStore() {
+    override suspend fun clearSessionIdFromDataStore() {
         dataStore.edit { prefs ->
             prefs.remove(SESSION_ID)
         }
@@ -463,7 +461,7 @@ class AuthRepository @Inject constructor(
      *
      * @return The stored username as a [String]. Returns an empty string if no username is found.
      */
-    suspend fun getUsername(): String {
+    override suspend fun getUsername(): String {
         return dataStore.read(USERNAME).orEmpty()
     }
 
@@ -472,7 +470,7 @@ class AuthRepository @Inject constructor(
      *
      * @return [PasskeysList] Object holding a list of Passkey details
      * */
-    suspend fun getListOfPasskeys(): PasskeysList? {
+    override suspend fun getListOfPasskeys(): PasskeysList? {
         val sessionId = dataStore.read(SESSION_ID)
         if (!sessionId.isNullOrBlank()) {
             val apiResult = authApiService.getKeys(
@@ -494,7 +492,7 @@ class AuthRepository @Inject constructor(
      * @param credentialId The ID of the credential to be deleted
      * @return True if the deletion was successful, false otherwise
      */
-    suspend fun deletePasskey(credentialId: String): Boolean {
+    override suspend fun deletePasskey(credentialId: String): Boolean {
         val sessionId = dataStore.read(SESSION_ID)
         // Construct endpoint for deleting passkeys.
         try {
@@ -515,7 +513,7 @@ class AuthRepository @Inject constructor(
         return false
     }
 
-    suspend fun deleteRestoreKeyFromServer(): Boolean {
+    override suspend fun deleteRestoreKeyFromServer(): Boolean {
         val sessionId = dataStore.read(SESSION_ID)
         val credentialId = dataStore.read(RESTORE_KEY_CREDENTIAL_ID)
         // Construct endpoint for deleting passkeys.
@@ -544,7 +542,7 @@ class AuthRepository @Inject constructor(
      * on your server implementation.
      * @return The client ID stored as the session ID as a [String].
      */
-    suspend fun getFederationOptions(): String? {
+    override suspend fun getFederationOptions(): String? {
         val apiResult = authApiService.getFederationOptions(FederationOptionsRequest())
         if (apiResult.isSuccessful) {
             return apiResult.getSessionId()
@@ -559,7 +557,7 @@ class AuthRepository @Inject constructor(
      * is treated as a session ID for this server implementation.
      * @param token The ID token to be authorized.
      */
-    suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
+    private suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
         val apiResult = authApiService.verifyIdToken(
             cookie = sessionId.createCookieHeader(),
             requestParams = SignInWithGoogleRequest(token = token)

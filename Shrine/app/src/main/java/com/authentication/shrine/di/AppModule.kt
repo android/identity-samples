@@ -1,0 +1,120 @@
+package com.authentication.shrine.di
+
+import android.app.Application
+import android.content.Context
+import android.os.Build
+import androidx.credentials.CredentialManager
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import com.authentication.shrine.BuildConfig
+import com.authentication.shrine.CredentialManagerUtils
+import com.authentication.shrine.api.AddHeaderInterceptor
+import com.authentication.shrine.api.AuthApiService
+import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.repository.AuthenticationRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
+
+/**
+ * A Dagger Hilt module that provides dependencies for the application.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    /**
+     * Creates and provides an OkHttpClient instance with interceptors and timeouts.
+     *
+     * @return The OkHttpClient instance.
+     */
+    @Singleton
+    @Provides
+    fun provideOkHttpClient(): OkHttpClient {
+        val userAgent = "${BuildConfig.APPLICATION_ID}/${BuildConfig.VERSION_NAME} " +
+            "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
+        return OkHttpClient.Builder()
+            .addInterceptor(AddHeaderInterceptor(userAgent))
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(40, TimeUnit.SECONDS)
+            .connectTimeout(40, TimeUnit.SECONDS)
+            .build()
+    }
+
+    /**
+     * Provides a singleton instance of the CoroutineScope.
+     *
+     * @return The CoroutineScope instance.
+     */
+    @Singleton
+    @Provides
+    fun provideAppCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob())
+
+    /**
+     * Provides a DataStore instance with the file name "auth".
+     *
+     * @param application The application context.
+     * @return The DataStore instance.
+     */
+    @Singleton
+    @Provides
+    fun provideDataStore(application: Application): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create {
+            application.preferencesDataStoreFile("auth")
+        }
+    }
+
+    @Singleton
+    @Provides
+    fun providesCredentialManager(@ApplicationContext context: Context): CredentialManager {
+        return CredentialManager.create(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providesCredentialManagerUtils(
+        credentialManager: CredentialManager,
+    ): CredentialManagerUtils {
+        return CredentialManagerUtils(
+            credentialManager = credentialManager,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideAuthApiService(okHttpClient: OkHttpClient): AuthApiService {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.API_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AuthApiService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAuthRepository(
+        dataStore: DataStore<Preferences>,
+        authApiService: AuthApiService,
+    ): AuthenticationRepository {
+        return AuthRepository(dataStore, authApiService)
+    }
+}

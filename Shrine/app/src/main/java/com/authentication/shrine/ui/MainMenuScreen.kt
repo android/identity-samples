@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,8 @@ fun MainMenuScreen(
     modifier: Modifier = Modifier,
     credentialManagerUtils: CredentialManagerUtils,
 ) {
+    val uiState = viewModel.uiState.collectAsState().value
+
     val onSignOut = {
         viewModel.signOut(
             deleteRestoreKey = credentialManagerUtils::deleteRestoreKey,
@@ -69,10 +72,13 @@ fun MainMenuScreen(
         onShrineButtonClicked = onShrineButtonClicked,
         onSettingsButtonClicked = onSettingsButtonClicked,
         onHelpButtonClicked = onHelpButtonClicked,
-        navigateToLogin = navigateToLogin,
         onSignOut = onSignOut,
         modifier = modifier,
     )
+
+    if (!uiState.isSignedIn) {
+        navigateToLogin()
+    }
 }
 
 /**
@@ -84,7 +90,6 @@ fun MainMenuScreen(
  * @param onShrineButtonClicked Callback to navigate to the Shrine app.
  * @param onSettingsButtonClicked Callback to navigate to the settings screen.
  * @param onHelpButtonClicked Callback to navigate to the help screen.
- * @param navigateToLogin Callback to navigate to the login screen.
  * @param onSignOut Callback to sign out the user.
  */
 @Composable
@@ -92,7 +97,6 @@ fun MainMenuScreen(
     onShrineButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
-    navigateToLogin: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -120,7 +124,6 @@ fun MainMenuScreen(
                 onSettingsButtonClicked,
                 onHelpButtonClicked,
                 onSignOut,
-                navigateToLogin,
             )
         }
     }
@@ -133,7 +136,6 @@ fun MainMenuScreen(
  * @param onSettingsButtonClicked Callback invoked when the "Settings" button is clicked.
  * @param onHelpButtonClicked Callback invoked when the "Help" button is clicked.
  * @param onSignOut Callback invoked when the "Sign Out" button is clicked.
- * @param navigateToLogin Callback invoked to navigate to the login screen after signing out.
  */
 @Composable
 private fun MainMenuButtonsList(
@@ -141,7 +143,6 @@ private fun MainMenuButtonsList(
     onSettingsButtonClicked: () -> Unit,
     onHelpButtonClicked: () -> Unit,
     onSignOut: () -> Unit,
-    navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -165,10 +166,7 @@ private fun MainMenuButtonsList(
         )
 
         ShrineButton(
-            onClick = {
-                onSignOut()
-                navigateToLogin()
-            },
+            onClick = onSignOut,
             buttonText = stringResource(R.string.sign_out),
             isButtonDark = false,
         )
@@ -186,7 +184,6 @@ fun PasskeysSignedPreview() {
             onShrineButtonClicked = { },
             onSettingsButtonClicked = { },
             onHelpButtonClicked = { },
-            navigateToLogin = { },
             onSignOut = { },
         )
     }

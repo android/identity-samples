@@ -1,11 +1,12 @@
 [versions]
 activity = "1.9.0"
 androidxAppcompat = "1.7.0"
-androidPlugin = "8.11.1"
+androidPlugin = "8.8.2"
 browser = "1.8.0"
 coil = "2.7.0"
 coilSvg = "2.6.0"
 coreSplashscreen = "1.0.1"
+coreTesting = "2.2.0"
 credentials = "1.5.0"
 datastorePrefs = "1.1.1"
 googleFonts = "1.6.8"
@@ -18,6 +19,7 @@ horologist = "0.6.23"
 kotlin = "1.9.0"
 kotlinCoroutines = "1.0"
 kotlinxCoroutines = "1.9.0"
+kotlinxCoroutinesTest = "1.5.1"
 kotlinxSerialization = "1.7.3"
 ksp = "1.9.0-1.0.13"
 ktlint = "0.50.0"
@@ -32,6 +34,7 @@ playServicesWearable = "19.0.0"
 retrofit = "2.9.0"
 spotless = "6.21.0"
 sysUiController = "0.28.0"
+truth = "1.1.3"
 wearComposeMaterial3 = "1.5.0-beta04"
 wearRemoteInteractions = "1.1.0"
 
@@ -44,14 +47,13 @@ kotlinBom = "1.8.0"
 espressoCore = "3.5.1"
 extJUnit = "1.1.5"
 jUnit = "4.13.2"
-composeMaterial = "1.2.1"
-wearToolingPreview = "1.0.0"
 foundation = "1.8.3"
 
 
 [libraries]
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppcompat" }
 browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
@@ -66,6 +68,7 @@ google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", v
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServicesPlugin" }
 hilt-android-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "playServicesFido" }
@@ -112,6 +115,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okHtt
 # For Wear Module
 horologist-auth-ui = { module = "com.google.android.horologist:horologist-auth-ui", version.ref = "horologist" }
 horologist-compose-layout = { module = "com.google.android.horologist:horologist-compose-layout", version.ref = "horologist" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
 wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearComposeMaterial3" }
 wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearComposeMaterial3" }
 wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "wearComposeMaterial3" }
@@ -132,8 +136,6 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "extJUnit" }
 junit = { group = "junit", name = "junit", version.ref = "jUnit"}
-androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
-androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 
@@ -144,4 +146,3 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

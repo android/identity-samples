@@ -60,7 +60,7 @@ class AuthenticationViewModel @Inject constructor(
      * Requests a sign-in challenge from the server.
      *
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
-     * @param getPasskey Lambda that calls CredManUtil's getPasskey method with Activity reference
+     * @param getCredential Lambda that calls CredManUtil's getPasskey method with Activity reference
      */
     fun signInWithPasskeyOrPasswordRequest(
         onSuccess: (Boolean) -> Unit,
