@@ -435,6 +435,25 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Checks if session id is valid with server. Currently makes a getKeys() request
+     *
+     * @return True if the session id is valid, false otherwise.
+     */
+    suspend fun isSessionIdValid(): Boolean {
+        val sessionId = dataStore.read(SESSION_ID)
+        if (!sessionId.isNullOrBlank()) {
+            val apiResult = authApiService.getKeys(
+                cookie = sessionId.createCookieHeader(),
+            )
+            if (apiResult.isSuccessful) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
      * Sets the sign-in state.
      *
      * @param flag True if the user is signed in through passkeys, false otherwise.
