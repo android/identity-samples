@@ -442,11 +442,15 @@ class AuthRepository @Inject constructor(
     suspend fun isSessionIdValid(): Boolean {
         val sessionId = dataStore.read(SESSION_ID)
         if (!sessionId.isNullOrBlank()) {
-            val apiResult = authApiService.getKeys(
-                cookie = sessionId.createCookieHeader(),
-            )
-            if (apiResult.isSuccessful) {
-                return true
+            try {
+                val apiResult = authApiService.getKeys(
+                    cookie = sessionId.createCookieHeader(),
+                )
+                if (apiResult.isSuccessful) {
+                    return true
+                }
+            } catch (e: ApiException) {
+                Log.e(TAG, "Cannot call getKeys for isSessionIdValid")
             }
         }
 
