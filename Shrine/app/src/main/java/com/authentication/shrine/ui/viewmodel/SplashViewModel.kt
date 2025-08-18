@@ -42,15 +42,13 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val startDestination = if (isSignedInThroughPassword()) {
-                if (isSignedInThroughPasskeys()) {
+            val startDestination =
+                if (isSessionIdValid()) {
                     ShrineAppDestinations.MainMenuRoute.name
                 } else {
-                    ShrineAppDestinations.CreatePasskeyRoute.name
+                    signOut()
+                    ShrineAppDestinations.AuthRoute.name
                 }
-            } else {
-                ShrineAppDestinations.AuthRoute.name
-            }
 
             _uiState.update {
                 SplashScreenState(
@@ -62,27 +60,21 @@ class SplashViewModel @Inject constructor(
     }
 
     /**
-     * Checks if the user is signed in using a password.
+     * Checks if the session ID is valid with the server.
      *
-     * This method checks if the user is signed in by calling the `isSignedIn()` method of the
-     * [AuthRepository].
-     *
-     * @return True if the user is signed in using a password, false otherwise.
+     * @return True if the session ID is valid, false otherwise.
      */
-    private suspend fun isSignedInThroughPassword(): Boolean {
-        return repository.isSignedInThroughPassword()
+    private suspend fun isSessionIdValid(): Boolean {
+        return repository.isSessionIdValid()
     }
 
     /**
-     * Checks if the user is signed in using passkeys.
-     *
-     * This method checks if the user is signed in through passkeys by calling the
-     * `isSignedInThroughPasskeys()` method of the [AuthRepository].
-     *
-     * @return True if the user is signed in using passkeys, false otherwise.
+     * Signs out the user.
      */
-    private suspend fun isSignedInThroughPasskeys(): Boolean {
-        return repository.isSignedInThroughPasskeys()
+    private fun signOut() {
+        viewModelScope.launch {
+            repository.signOut()
+        }
     }
 }
 
