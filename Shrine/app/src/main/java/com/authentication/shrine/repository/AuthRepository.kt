@@ -99,8 +99,6 @@ class AuthRepository @Inject constructor(
                 prefs[USERNAME] = username
                 response.getSessionId()?.also {
                     prefs[SESSION_ID] = it
-                } ?: run {
-                    signOut()
                 }
             }
             return true
@@ -124,8 +122,6 @@ class AuthRepository @Inject constructor(
                 prefs[USERNAME] = username
                 response.getSessionId()?.also {
                     prefs[SESSION_ID] = it
-                } ?: run {
-                    signOut()
                 }
             }
             setSessionWithPassword(password)
@@ -156,8 +152,6 @@ class AuthRepository @Inject constructor(
                         prefs[USERNAME] = response.body()?.username.orEmpty()
                         response.getSessionId()?.also {
                             prefs[SESSION_ID] = it
-                        } ?: run {
-                            signOut()
                         }
                     }
                     return true
@@ -168,10 +162,7 @@ class AuthRepository @Inject constructor(
                 Log.e(TAG, "Invalid login credentials", e)
 
                 // Remove previously stored credentials and start login over again
-                dataStore.edit { prefs ->
-                    prefs.remove(USERNAME)
-                    prefs.remove(SESSION_ID)
-                }
+                signOut()
             }
         } else {
             Log.e(TAG, "Please check if username and session id is present in your datastore")
@@ -208,8 +199,6 @@ class AuthRepository @Inject constructor(
                     dataStore.edit { prefs ->
                         response.getSessionId()?.also {
                             prefs[SESSION_ID] = it
-                        } ?: run {
-                            signOut()
                         }
                     }
                     return response.getJsonObject()
@@ -300,8 +289,6 @@ class AuthRepository @Inject constructor(
             dataStore.edit { prefs ->
                 response.getSessionId()?.also {
                     prefs[SESSION_ID] = it
-                } ?: run {
-                    signOut()
                 }
             }
             return response.getJsonObject()
