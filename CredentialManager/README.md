@@ -1,4 +1,4 @@
-![Credential Manager ]
+!BAM-[Credential Manager ]
 
 Credentials Manager Sample App
 ==================
