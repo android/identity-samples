@@ -15,20 +15,23 @@
  */
 package com.authentication.shrine.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -38,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,15 +51,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.ShrineButton
@@ -69,6 +78,10 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.RegisterUiState
 import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
+import androidx.tv.material3.Button as TvButton
+import androidx.tv.material3.Text as TvText
+import com.authentication.shrine.ui.common.FocusableTextField
+
 
 /**
  * Stateful composable function that displays the registration screen.
@@ -170,7 +183,7 @@ fun RegisterScreen(
                 .padding(contentPadding)
                 .padding(dimensionResource(R.dimen.padding_small))
                 .fillMaxSize()
-                .fillMaxHeight(),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -193,6 +206,7 @@ fun RegisterScreen(
                 onPasskeyRegister = onPasskeyRegister,
                 isPageLoading = uiState.isLoading,
             )
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_large))) // Spacer for bottom padding
         }
 
         if (uiState.isLoading) {
@@ -219,6 +233,7 @@ fun RegisterScreen(
     }
 }
 
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun RegisterScreenInputSection(
     fullName: String,
@@ -231,65 +246,162 @@ private fun RegisterScreenInputSection(
     isPageLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-            )
-            .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.dimen_standard)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small)),
-    ) {
-        Text(
-            text = stringResource(R.string.full_name),
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-        )
-        TextField(
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-            value = fullName,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = stringResource(R.string.email_icon),
-                )
-            },
-            singleLine = true,
-            onValueChange = onFullNameChanged,
-            label = { Text(stringResource(R.string.full_name)) },
-            placeholder = { Text(stringResource(R.string.full_name)) },
-        )
-        Text(
-            text = stringResource(R.string.username),
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-        )
-        TextField(
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
-            value = email,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Email,
-                    contentDescription = stringResource(R.string.email_icon),
-                )
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            onValueChange = onEmailChanged,
-            label = { Text(stringResource(R.string.email_address)) },
-            placeholder = { Text(stringResource(R.string.email_address)) },
-        )
+    val configuration = LocalConfiguration.current
+    val isTelevision =
+        (configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION
+    val emailFocusRequester = remember { FocusRequester() }
+    val tvSignUpButtonFocusRequester = remember { FocusRequester() } // New FocusRequester
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val passkeyInfoSection = @Composable {
         Text(
             text = stringResource(R.string.signing_in),
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
         )
-
         PasskeyInformationTab(onLearnMoreClicked, onOtherWaysToSignUpClicked)
+    }
 
-        ShrineButton(
-            onClick = { onPasskeyRegister(email) },
-            buttonText = stringResource(R.string.sign_up),
-            isButtonEnabled = !isPageLoading,
-            modifier = Modifier.widthIn(min = 280.dp),
+    val commonModifier = modifier
+        .background(
+            color = MaterialTheme.colorScheme.surfaceContainer,
         )
+        .fillMaxWidth()
+        .padding(dimensionResource(R.dimen.dimen_standard))
+
+    Column(
+        modifier = commonModifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small)),
+        horizontalAlignment = if (isTelevision) Alignment.CenterHorizontally else Alignment.Start
+    ) {
+        if (isTelevision) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_large))
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small))
+                ) {
+                    FocusableTextField(
+                        value = fullName,
+                        onValueChange = onFullNameChanged,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = dimensionResource(R.dimen.dimen_standard)),
+                        label = stringResource(R.string.full_name),
+                        placeholder = stringResource(R.string.full_name),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = stringResource(R.string.email_icon)
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() })
+                    )
+                    FocusableTextField(
+                        value = email,
+                        onValueChange = onEmailChanged,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(emailFocusRequester)
+                            .padding(top = dimensionResource(R.dimen.dimen_standard)),
+                        label = stringResource(R.string.email_address),
+                        placeholder = stringResource(R.string.email_address),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Email,
+                                contentDescription = stringResource(R.string.email_icon)
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            keyboardController?.hide()
+                            onPasskeyRegister(email)
+                            if (isTelevision) {
+                                tvSignUpButtonFocusRequester.requestFocus()
+                            }
+                        })
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small))
+                ) {
+                    passkeyInfoSection()
+                }
+            }
+        } else { // Mobile Layout
+            FocusableTextField(
+                value = fullName,
+                onValueChange = onFullNameChanged,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = dimensionResource(R.dimen.dimen_standard)),
+                label = stringResource(R.string.full_name),
+                placeholder = stringResource(R.string.full_name),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = stringResource(R.string.email_icon)
+                    )
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() })
+            )
+            FocusableTextField(
+                value = email,
+                onValueChange = onEmailChanged,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(emailFocusRequester)
+                    .padding(top = dimensionResource(R.dimen.dimen_standard)),
+                label = stringResource(R.string.email_address),
+                placeholder = stringResource(R.string.email_address),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = stringResource(R.string.email_icon)
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboardController?.hide()
+                    onPasskeyRegister(email)
+                    if (isTelevision) {
+                        tvSignUpButtonFocusRequester.requestFocus()
+                    }
+                })
+            )
+            passkeyInfoSection()
+        }
+
+        if (isTelevision) {
+            TvButton(
+                onClick = { onPasskeyRegister(email) },
+                enabled = !isPageLoading,
+                modifier = Modifier
+                    .widthIn(min = 280.dp)
+                    .focusRequester(tvSignUpButtonFocusRequester) // Applied FocusRequester
+            ) {
+                TvText(stringResource(R.string.sign_up))
+            }
+        } else {
+            ShrineButton(
+                onClick = { onPasskeyRegister(email) },
+                buttonText = stringResource(R.string.sign_up),
+                isButtonEnabled = !isPageLoading,
+                modifier = Modifier
+                    .widthIn(min = 280.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
     }
 }
 
@@ -305,12 +417,15 @@ private fun PasskeyInformationTab(
     onLearnMoreClicked: () -> Unit,
     onOtherWaysToSignUpClicked: () -> Unit,
 ) {
+
+    val tabModifier = Modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(dimensionResource(R.dimen.size_standard)))
+        .background(grayBackground)
+        .padding(dimensionResource(R.dimen.padding_large))
+
     Column(
-        modifier = Modifier
-            .widthIn(max = dimensionResource(id = R.dimen.passkey_info_tab_max_width)) // MODIFIED HERE
-            .clip(RoundedCornerShape(dimensionResource(R.dimen.size_standard)))
-            .background(grayBackground)
-            .padding(dimensionResource(R.dimen.padding_large)),
+        modifier = tabModifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
     ) {
         Row(
@@ -349,6 +464,31 @@ private fun PasskeyInformationTab(
 @Preview(showSystemUi = true)
 @Composable
 fun RegisterScreenPreview() {
+    ShrineTheme {
+        RegisterScreen(
+            onPasskeyRegister = { _ -> },
+            onLearnMoreClicked = { },
+            onOtherWaysToSignUpClicked = { },
+            onBackClicked = { },
+            uiState = RegisterUiState(),
+            fullName = "",
+            onFullNameChanged = { },
+            email = "",
+            onEmailChanged = { },
+        )
+    }
+}
+
+/**
+ * Generates a preview of the RegisterScreen composable function for TV.
+ */
+@Preview(
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_TYPE_TELEVISION,
+    device = Devices.TV_1080p
+)
+@Composable
+fun RegisterScreenTVPreview() {
     ShrineTheme {
         RegisterScreen(
             onPasskeyRegister = { _ -> },
