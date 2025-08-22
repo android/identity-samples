@@ -79,7 +79,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+        freeCompilerArgs += "-opt-in=androidx.tv.material3.ExperimentalTvMaterial3Api"
     }
 
     buildFeatures {
@@ -134,6 +134,7 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.material)
     implementation(libs.compose.material.iconsExtended)
+    implementation(libs.tv.material)
 
     implementation(libs.coil.kt.compose)
     implementation(libs.coil.svg)
@@ -158,6 +159,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.androidx.tv.material)
 
     // Testing
     testImplementation(libs.junit)
