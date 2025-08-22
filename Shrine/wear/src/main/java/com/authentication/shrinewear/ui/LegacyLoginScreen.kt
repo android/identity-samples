@@ -34,7 +34,7 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.authentication.shrinewear.Graph
 import com.authentication.shrinewear.R
-//import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
+// import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
 /**
  * Composable for the header of the legacy login options list.

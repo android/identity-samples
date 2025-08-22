@@ -92,7 +92,8 @@ fun PasskeyManagementScreen(
                         requestResult = data,
                         context = context,
                     )
-                })
+                },
+            )
         }
     }
 
@@ -183,7 +184,7 @@ fun PasskeyManagementScreen(
         if (snackbarMessage != null) {
             LaunchedEffect(snackbarMessage) {
                 snackbarHostState.showSnackbar(
-                    message = snackbarMessage
+                    message = snackbarMessage,
                 )
             }
         }
@@ -224,7 +225,7 @@ fun PasskeysListColumn(
                     HorizontalDivider(
                         modifier = Modifier.padding(
                             vertical = dimensionResource(R.dimen.padding_extra_small),
-                            horizontal = dimensionResource(R.dimen.dimen_standard)
+                            horizontal = dimensionResource(R.dimen.dimen_standard),
                         ),
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -321,8 +322,8 @@ fun PasskeyManagementScreenPreview() {
                     "passkey",
                     "aaguid",
                     1L,
-                    "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4"
-                )
+                    "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4",
+                ),
             ),
             aaguidData = mapOf(),
         )

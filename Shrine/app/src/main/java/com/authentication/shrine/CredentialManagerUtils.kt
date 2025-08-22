@@ -108,7 +108,7 @@ class CredentialManagerUtils @Inject constructor(
                         .setServerClientId(SERVER_CLIENT_ID)
                         .setFilterByAuthorizedAccounts(false)
                         .build(),
-                )
+                ),
             )
             result = credentialManager.getCredential(context, credentialRequest)
         } catch (e: GetCredentialCancellationException) {

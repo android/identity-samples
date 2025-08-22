@@ -165,7 +165,7 @@ interface AuthApiService {
      */
     @POST("federation/options")
     suspend fun getFederationOptions(
-        @Body urls: FederationOptionsRequest
+        @Body urls: FederationOptionsRequest,
     ): Response<GenericAuthResponse>
 
     /**
