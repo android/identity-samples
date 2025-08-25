@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.ui
+package com.authentication.shrinewear.ui.navigation
 
 import android.app.Application
 import androidx.compose.runtime.Composable
@@ -23,6 +23,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.authentication.shrinewear.ui.screens.HomeScreen
+import com.authentication.shrinewear.ui.screens.LegacyLoginScreen
+import com.authentication.shrinewear.ui.screens.OAuthScreen
+import com.authentication.shrinewear.ui.screens.SignOutScreen
+import com.authentication.shrinewear.ui.viewmodel.CredentialManagerViewModel
+import com.authentication.shrinewear.ui.viewmodel.LegacySignInWithGoogleViewModelFactory
+import com.authentication.shrinewear.ui.viewmodel.OAuthViewModel
 import com.google.android.horologist.auth.ui.googlesignin.signin.GoogleSignInScreen
 
 /**
@@ -47,8 +54,8 @@ fun ShrineNavGraph(
         navController = navController,
         startDestination = startDestination,
     ) {
-        val credentialManagerViewModel = CredentialManagerViewModel()
         composable(ShrineDestinations.HOME_ROUTE) {
+            val credentialManagerViewModel: CredentialManagerViewModel = viewModel()
             HomeScreen(
                 credentialManagerViewModel = credentialManagerViewModel,
                 navigateToLegacyLogin = navigationActions.navigateToLegacyLogin,

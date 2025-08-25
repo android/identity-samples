@@ -19,6 +19,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -29,6 +30,7 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.authentication.shrinewear.BuildConfig
 import com.authentication.shrinewear.extensions.awaitState
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 
@@ -39,9 +41,12 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
  * using Passkeys, Passwords, and Sign-In With Google credentials.
  *
  * @param context The Android [Context] used to create the [CredentialManager].
+ * @param authenticationServer The [AuthenticationServer] responsible for handling authentication requests.
  */
-class CredentialManagerAuthenticator(applicationContext: Context) {
-    private val authenticationServer = AuthenticationServer()
+class CredentialManagerAuthenticator(
+    applicationContext: Context,
+    private val authenticationServer: AuthenticationServer
+) {
     private val credentialManager: CredentialManager = CredentialManager.create(applicationContext)
 
     /**
@@ -50,14 +55,14 @@ class CredentialManagerAuthenticator(applicationContext: Context) {
      * @param activity The [Context] (preferably a [ComponentActivity]) used for the `getCredential` call.
      * @return `true` if credential manager authenticated the user, else `false`.
      */
-    suspend fun signInWithCredentialManager(activity: Activity): Boolean {
-        val getCredentialResponse =
+    internal suspend fun signInWithCredentialManager(activity: Activity): Boolean {
+        val getCredentialResponse: GetCredentialResponse =
             credentialManager.getCredential(activity, createGetCredentialRequest())
 
         // DANGER: Do not call your auth server until the activity has resumed.
         (activity as? LifecycleOwner)?.lifecycle?.awaitState(Lifecycle.State.RESUMED)
 
-        return authenticate(getCredentialResponse)
+        return authenticate(getCredentialResponse.credential)
     }
 
     /**signInRequest
@@ -70,32 +75,36 @@ class CredentialManagerAuthenticator(applicationContext: Context) {
             credentialOptions = listOf(
                 GetPublicKeyCredentialOption(authenticationServer.getPublicKeyRequestOptions()),
                 GetPasswordOption(),
-                GetGoogleIdOption.Builder().setServerClientId(SERVER_CLIENT_ID).build(),
+                GetGoogleIdOption.Builder().setServerClientId(BuildConfig.GOOGLE_SIGN_IN_SERVER_CLIENT_ID).build(),
             ),
         )
     }
 
     /**
-     * Processes the [GetCredentialResponse] received from [CredentialManager.getCredential].
+     * Routes the credential received from `getCredential` to the appropriate authentication
+     * type handler on the [AuthenticationServer].
      *
-     * Dispatches the credential to the appropriate authentication type handler on the
-     * [AuthenticationServer].
-     *
-     * @param getCredentialResponse The response object from the Credential Manager.
+     * @param credential The selected cre
      * @return `true` if the credential was successfully processed and authenticated, else 'false'.
      */
-    private suspend fun authenticate(getCredentialResponse: GetCredentialResponse): Boolean {
-        when (val credential = getCredentialResponse.credential) {
+    private suspend fun authenticate(credential: Credential): Boolean {
+        when (credential) {
             is PublicKeyCredential -> {
-                return authenticationServer.loginWithPasskey(credential)
+                return authenticationServer.loginWithPasskey(credential.authenticationResponseJson)
             }
 
             is PasswordCredential -> {
-                return authenticationServer.loginWithPassword(credential)
+                return authenticationServer.loginWithPassword(
+                    credential.id,
+                    credential.password
+                )
             }
 
             is CustomCredential -> {
-                return authenticationServer.loginWithCustomCredential(credential)
+                return authenticationServer.loginWithCustomCredential(
+                    credential.type,
+                    credential.data
+                )
             }
 
             else -> {

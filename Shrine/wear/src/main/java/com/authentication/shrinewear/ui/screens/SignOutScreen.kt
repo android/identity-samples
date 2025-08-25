@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.ui
+package com.authentication.shrinewear.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +25,7 @@ import androidx.wear.compose.material3.AlertDialog
 import androidx.wear.compose.material3.AlertDialogDefaults
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import com.authentication.shrinewear.AuthenticationState
 import com.authentication.shrinewear.Graph
 import com.authentication.shrinewear.R
 
@@ -43,7 +44,6 @@ fun SignOutScreen(
     var showDialog by remember { mutableStateOf(true) }
 
     fun signOut() {
-        Graph.authenticationStatusCode = R.string.credman_status_logged_out
         Graph.authenticationServer.signOut()
         showDialog = false
         navigateToHome()

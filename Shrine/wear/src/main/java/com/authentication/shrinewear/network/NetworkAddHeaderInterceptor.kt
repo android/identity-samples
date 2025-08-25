@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.authentication.shrinewear.api
+package com.authentication.shrinewear.network
 
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -23,7 +23,7 @@ import okhttp3.Response
  *
  * @param userAgent The user agent string to use.
  */
-internal class AddHeaderInterceptor(private val userAgent: String) : okhttp3.Interceptor {
+internal class NetworkAddHeaderInterceptor(private val userAgent: String) : okhttp3.Interceptor {
 
     /**
      * Intercepts the request and adds the headers.
