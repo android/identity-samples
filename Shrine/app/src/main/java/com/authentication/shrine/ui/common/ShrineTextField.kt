@@ -28,6 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+<<<<<<< HEAD
+=======
+import androidx.compose.ui.res.stringResource
+>>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme

@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-
 /**
  * Represents the possible authentication states of the application.
  */
@@ -65,8 +64,8 @@ object Graph {
     lateinit var credentialManagerAuthenticator: CredentialManagerAuthenticator
         private set
 
-
     private val _authenticationState = MutableStateFlow(AuthenticationState.LOGGED_OUT)
+
     /**
      * Stores the current authentication status code.  Defaults to [AuthenticationState.LOGGED_OUT].
      */
@@ -83,7 +82,8 @@ object Graph {
     fun provide(context: Context) {
         credentialManagerAuthenticator = CredentialManagerAuthenticator(
             context,
-            authenticationServer)
+            authenticationServer,
+        )
     }
 
     fun updateAuthenticationState(newState: AuthenticationState) {

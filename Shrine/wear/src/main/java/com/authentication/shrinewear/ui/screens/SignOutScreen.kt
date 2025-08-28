@@ -25,9 +25,7 @@ import androidx.wear.compose.material3.AlertDialog
 import androidx.wear.compose.material3.AlertDialogDefaults
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import com.authentication.shrinewear.AuthenticationState
 import com.authentication.shrinewear.Graph
-import com.authentication.shrinewear.R
 
 /**
  * Composable screen displayed after a successful sign-in, allowing the user to sign out.

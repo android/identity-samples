@@ -66,14 +66,14 @@ fun UpdateProfileScreen(
             value = username,
             onValueChange = onUsernameChanged,
             hint = stringResource(R.string.username),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         ShrineTextField(
             value = email,
             onValueChange = onEmailChanged,
             hint = stringResource(R.string.email_address),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         ShrineButton(
@@ -92,7 +92,7 @@ fun TestPreview() {
             {},
             "",
             {},
-            {_, _ -> },
+            { _, _ -> },
         )
     }
 }

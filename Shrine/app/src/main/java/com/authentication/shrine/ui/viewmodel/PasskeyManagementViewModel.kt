@@ -284,7 +284,7 @@ class PasskeyManagementViewModel @Inject constructor(
                     } else {
                         passkeyCredential
                     }
-                }
+                },
             )
         }
     }

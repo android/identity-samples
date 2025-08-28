@@ -427,15 +427,22 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
+<<<<<<< HEAD
         credentialResponse: GetCredentialResponse
     ): AuthResult<Unit> {
         return try {
             val credential = credentialResponse.credential
+=======
+        credentialResponse: GetCredentialResponse,
+    ): Boolean {
+        val credential = credentialResponse.credential
+        try {
+>>>>>>> b12d692 (Add spotless fixes)
             if (credential is CustomCredential) {
                 val isSuccess = verifyIdToken(
                     sessionId,
                     GoogleIdTokenCredential
-                        .createFrom(credential.data).idToken
+                        .createFrom(credential.data).idToken,
                 )
                 if (isSuccess) {
                     AuthResult.Success(Unit)
@@ -643,7 +650,7 @@ class AuthRepository @Inject constructor(
     suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
         val apiResult = authApiService.verifyIdToken(
             cookie = sessionId.createCookieHeader(),
-            requestParams = SignInWithGoogleRequest(token = token)
+            requestParams = SignInWithGoogleRequest(token = token),
         )
 
         if (apiResult.isSuccessful) {

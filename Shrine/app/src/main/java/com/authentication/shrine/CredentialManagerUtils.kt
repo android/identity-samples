@@ -39,13 +39,13 @@ import androidx.credentials.SignalUnknownCredentialRequest
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
-import com.authentication.shrine.repository.SERVER_CLIENT_ID
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.authentication.shrine.repository.AuthRepository.Companion.RP_ID_KEY
 import com.authentication.shrine.repository.AuthRepository.Companion.USER_ID_KEY
 import com.authentication.shrine.repository.AuthRepository.Companion.read
+import com.authentication.shrine.repository.SERVER_CLIENT_ID
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -117,7 +117,7 @@ class CredentialManagerUtils @Inject constructor(
                         .setServerClientId(SERVER_CLIENT_ID)
                         .setFilterByAuthorizedAccounts(false)
                         .build(),
-                )
+                ),
             )
             result = credentialManager.getCredential(context, credentialRequest)
         } catch (e: GetCredentialCancellationException) {

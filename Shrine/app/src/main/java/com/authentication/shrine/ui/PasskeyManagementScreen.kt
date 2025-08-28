@@ -42,6 +42,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+<<<<<<< HEAD
+=======
+import androidx.compose.runtime.getValue
+>>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -108,7 +112,7 @@ fun PasskeyManagementScreen(
 
     val onSignalBtnClicked = {
         val credentialIdsList = passkeysList
-            .filter { it.isSelected }
+            .filter { !it.isSelected }
             .map { it.id }
         if (credentialIdsList.isNotEmpty()) {
             viewModel.signalAccepted(credentialIdsList)
@@ -187,8 +191,8 @@ fun PasskeyManagementScreen(
 
                 ShrineButton(
                     onClick = onSignal,
-                    buttonText = "Signal Accepted",
-                    modifier = Modifier.fillMaxWidth()
+                    buttonText = "Delete selected credentials",
+                    modifier = Modifier.fillMaxWidth(),
                 )
             } else {
                 ShrineButton(
@@ -252,7 +256,7 @@ fun PasskeysListColumn(
                     credentialProviderName = item.name,
                     passkeyCreationDate = item.registeredAt.toReadableDate(),
                     isChecked = item.isSelected,
-                    modifier = Modifier.clickable { onItemClick(index) }
+                    modifier = Modifier.clickable { onItemClick(index) },
                 )
 
                 if (index < passkeysList.lastIndex) {
@@ -304,7 +308,7 @@ fun PasskeysDetailsRow(
         Checkbox(
             checked = isChecked,
             onCheckedChange = {},
-            modifier = Modifier.clickable(enabled = false, onClick = { })
+            modifier = Modifier.clickable(enabled = false, onClick = { }),
         )
 
         Image(
@@ -370,10 +374,18 @@ fun PasskeyManagementScreenPreview() {
                         providerIcon = ""
                     )
                 ),
+<<<<<<< HEAD
                 aaguidData = mapOf(),
                 onItemClick = { _ -> },
                 onSignal = { },
             )
         }
+=======
+            ),
+            aaguidData = mapOf(),
+            { _ -> },
+            {},
+        )
+>>>>>>> b12d692 (Add spotless fixes)
     }
 }
