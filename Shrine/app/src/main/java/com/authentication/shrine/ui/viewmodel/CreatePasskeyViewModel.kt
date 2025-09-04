@@ -21,6 +21,8 @@ import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
+import com.authentication.shrine.model.AuthError
+import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,34 +62,63 @@ class CreatePasskeyViewModel @Inject constructor(
         onSuccess: (navigateToHome: Boolean) -> Unit,
         createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        _uiState.value = CreatePasskeyUiState(isLoading = true)
+        _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val data = repository.registerPasskeyCreationRequest()
-            if (data != null) {
-                val createPasskeyResponse = createPasskey(data)
-                if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                    val isRegisterResponse = repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
-                    if (isRegisterResponse) {
-                        _uiState.update {
-                            CreatePasskeyUiState(navigateToMainMenu = true, messageResourceId = R.string.passkey_created_try_signin_with_passkeys)
+            when (val result = repository.registerPasskeyCreationRequest()) {
+                is AuthResult.Success -> {
+                    val createPasskeyResponse = createPasskey(result.data)
+                    if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                        when (repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)) {
+                            is AuthResult.Success -> {
+                                _uiState.update {
+                                    it.copy(
+                                        navigateToMainMenu = true
+                                    )
+                                }
+                                onSuccess(true)
+                            }
+
+                            is AuthResult.Failure -> {
+                                _uiState.update {
+                                    it.copy(
+                                        navigateToMainMenu = true,
+                                        messageResourceId = R.string.some_error_occurred_please_check_logs
+                                    )
+                                }
+                                onSuccess(true)
+                            }
                         }
-                    } else {
+                    } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
                         _uiState.update {
-                            CreatePasskeyUiState(navigateToMainMenu = true, messageResourceId = R.string.some_error_occurred_please_check_logs)
+                            it.copy(
+                                errorMessage = createPasskeyResponse.errorMessage,
+                                isLoading = false
+                            )
                         }
                     }
-                    onSuccess(true)
-                } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
+                }
+
+                is AuthResult.Failure -> {
+                    var errorMessage: String? = null
+                    val messageResId = when (val error = result.error) {
+                        is AuthError.NetworkError -> R.string.error_network
+                        is AuthError.ServerError -> R.string.error_server
+                        is AuthError.Unknown -> {
+                            errorMessage = error.message
+                            R.string.error_unknown
+                        }
+                        else -> R.string.error_unknown
+                    }
                     _uiState.update {
-                        CreatePasskeyUiState(errorMessage = createPasskeyResponse.errorMessage)
+                        it.copy(
+                            messageResourceId = messageResId,
+                            isLoading = false,
+                            errorMessage = errorMessage
+                        )
                     }
+                    onSuccess(false)
                 }
-            } else {
-                _uiState.update {
-                    CreatePasskeyUiState(messageResourceId = R.string.oops_an_internal_server_error_occurred)
-                }
-                onSuccess(false)
             }
         }
     }

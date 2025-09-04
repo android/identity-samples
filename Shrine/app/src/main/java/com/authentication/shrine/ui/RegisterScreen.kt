@@ -74,7 +74,7 @@ import com.authentication.shrine.ui.viewmodel.RegistrationViewModel
  * Stateful composable function that displays the registration screen.
  *
  * @param navigateToHome Callback for navigating to the home screen.
- * @param viewModel The AuthenticationViewModel that provides the UI state.
+ * @param viewModel The RegistrationViewModel that provides the UI state.
  */
 @Composable
 fun RegisterScreen(
@@ -199,20 +199,17 @@ fun RegisterScreen(
             ShrineLoader()
         }
 
-        val snackbarMessage = stringResource(uiState.messageResourceId)
-        if (snackbarMessage.isNotBlank()) {
-            LaunchedEffect(snackbarMessage) {
-                snackbarHostState.showSnackbar(
-                    message = snackbarMessage,
-                )
+        if (uiState.messageResourceId != R.string.empty_string) {
+            val baseMessage = stringResource(uiState.messageResourceId)
+            val finalMessage = if (uiState.errorMessage != null) {
+                "$baseMessage ${uiState.errorMessage}"
+            } else {
+                baseMessage
             }
-        }
 
-        val snackbarErrorMessage = uiState.errorMessage
-        if (!snackbarErrorMessage.isNullOrBlank()) {
-            LaunchedEffect(snackbarErrorMessage) {
+            LaunchedEffect(finalMessage) {
                 snackbarHostState.showSnackbar(
-                    message = snackbarErrorMessage,
+                    message = finalMessage,
                 )
             }
         }

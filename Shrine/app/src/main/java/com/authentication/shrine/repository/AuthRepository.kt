@@ -31,6 +31,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.AuthApiService
+import com.authentication.shrine.model.AuthError
+import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.model.CredmanResponse
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.PasskeysList
@@ -49,6 +51,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -92,20 +96,30 @@ class AuthRepository @Inject constructor(
      * @param username The username to send.
      * @return True if the login was successful, false otherwise.
      */
-    suspend fun registerUsername(username: String): Boolean {
-        val response = authApiService.registerUsername(UsernameRequest(username))
-        if (response.isSuccessful) {
-            dataStore.edit { prefs ->
-                prefs[USERNAME] = username
-                response.getSessionId()?.also {
-                    prefs[SESSION_ID] = it
+    suspend fun registerUsername(username: String): AuthResult<Unit> {
+        return try {
+            val response = authApiService.registerUsername(UsernameRequest(username))
+            if (response.isSuccessful) {
+                dataStore.edit { prefs ->
+                    prefs[USERNAME] = username
+                    response.getSessionId()?.also {
+                        prefs[SESSION_ID] = it
+                    }
                 }
+                AuthResult.Success(Unit)
+            } else {
+                if (response.code() == 401) {
+                    signOut()
+                }
+                AuthResult.Failure(AuthError.UserAlreadyExists)
             }
-            return true
-        } else if (response.code() == 401) {
-            signOut()
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
 
     /**
@@ -115,22 +129,33 @@ class AuthRepository @Inject constructor(
      * @param password The password to send.
      * @return True if the login was successful, false otherwise.
      */
-    suspend fun login(username: String, password: String): Boolean {
-        val response = authApiService.setUsername(UsernameRequest(username = username))
-        if (response.isSuccessful) {
-            dataStore.edit { prefs ->
-                prefs[USERNAME] = username
-                response.getSessionId()?.also {
-                    prefs[SESSION_ID] = it
+    suspend fun login(username: String, password: String): AuthResult<Unit> {
+        return try {
+            val response = authApiService.setUsername(UsernameRequest(username = username))
+            if (response.isSuccessful) {
+                dataStore.edit { prefs ->
+                    prefs[USERNAME] = username
+                    response.getSessionId()?.also {
+                        prefs[SESSION_ID] = it
+                    }
                 }
+                setSessionWithPassword(password)
+                AuthResult.Success(Unit)
+            } else {
+                if (response.code() == 401) {
+                    signOut()
+                }
+                AuthResult.Failure(AuthError.ServerError(null))
             }
-            setSessionWithPassword(password)
-            return true
-        } else if (response.code() == 401) {
-            signOut()
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
+
 
     /**
      * Signs in with a password.
@@ -187,8 +212,8 @@ class AuthRepository @Inject constructor(
      *
      * @return The public key credential request options, or null if there was an error.
      */
-    suspend fun registerPasskeyCreationRequest(): JSONObject? {
-        try {
+    suspend fun registerPasskeyCreationRequest(): AuthResult<JSONObject> {
+        return try {
             val sessionId = dataStore.read(SESSION_ID)
             if (!sessionId.isNullOrEmpty()) {
                 val response = authApiService.registerRequest(
@@ -201,15 +226,24 @@ class AuthRepository @Inject constructor(
                             prefs[SESSION_ID] = it
                         }
                     }
-                    return response.getJsonObject()
-                } else if (response.code() == 401) {
-                    signOut()
+                    val responseObject = response.getJsonObject()
+                    AuthResult.Success(responseObject)
+                } else {
+                    if (response.code() == 401) {
+                        signOut()
+                    }
+                    AuthResult.Failure(AuthError.ServerError(response.message()))
                 }
+            } else {
+                AuthResult.Failure(AuthError.Unknown(null))
             }
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
-            Log.e(TAG, "Cannot call registerRequest", e)
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return null
     }
 
     /**
@@ -221,8 +255,8 @@ class AuthRepository @Inject constructor(
      */
     suspend fun registerPasskeyCreationResponse(
         credentialResponse: CreateCredentialResponse,
-    ): Boolean {
-        try {
+    ): AuthResult<Unit> {
+        return try {
             // Field to pass as query parameter to authApiService.
             val typeParam: String?
             val registrationResponseJson = when (credentialResponse) {
@@ -237,7 +271,7 @@ class AuthRepository @Inject constructor(
                 }
 
                 else -> {
-                    return false
+                    return AuthResult.Failure(AuthError.Unknown("Unknown credential type"))
                 }
             }
 
@@ -267,15 +301,23 @@ class AuthRepository @Inject constructor(
                             prefs[SESSION_ID] = it
                         }
                     }
-                    return true
-                } else if (apiResult.code() == 401) {
-                    signOut()
+                    AuthResult.Success(Unit)
+                } else {
+                    if (apiResult.code() == 401) {
+                        signOut()
+                    }
+                    AuthResult.Failure(AuthError.ServerError(apiResult.message()))
                 }
+            } else {
+                AuthResult.Failure(AuthError.Unknown(null))
             }
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call registerPasskeyCreationResponse", e)
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
 
     /**
@@ -283,31 +325,42 @@ class AuthRepository @Inject constructor(
      *
      * @return The public key credential request options, or null if there was an error.
      */
-    suspend fun signInWithPasskeyOrPasswordRequest(): JSONObject? {
-        val response = authApiService.signInRequest()
-        if (response.isSuccessful) {
-            dataStore.edit { prefs ->
-                response.getSessionId()?.also {
-                    prefs[SESSION_ID] = it
+    suspend fun signInWithPasskeyOrPasswordRequest(): AuthResult<JSONObject> {
+        return try {
+            val response = authApiService.signInRequest()
+            if (response.isSuccessful) {
+                dataStore.edit { prefs ->
+                    response.getSessionId()?.also {
+                        prefs[SESSION_ID] = it
+                    }
                 }
+                val responseObject = response.getJsonObject()
+                AuthResult.Success(responseObject)
+            } else {
+                if (response.code() == 401) {
+                    signOut()
+                }
+                AuthResult.Failure(AuthError.ServerError(response.message()))
             }
-            return response.getJsonObject()
-        } else if (response.code() == 401) {
-            signOut()
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return null
     }
 
     /**
      * Finishes to signing in with a credential. This should only be called after a call to
-     * [signInWithPasskeyOrPasswordRequest] and a local API for key assertion.
+     * [signInWithPasskeyRequest] and a local API for key assertion.
      *
      * @param credentialResponse The credential response.
      * @return True if the sign-in was successful, false otherwise.
      */
-    suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): Boolean {
-        val credential = credentialResponse.credential
-        try {
+    suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): AuthResult<Unit> {
+        return try {
+            val credential = credentialResponse.credential
             if (credential is PublicKeyCredential) {
                 val signInResponse =
                     credential.data.getString(
@@ -338,15 +391,18 @@ class AuthRepository @Inject constructor(
                                 ),
                             ),
                         )
-                        if (apiResult.isSuccessful) {
+                        return if (apiResult.isSuccessful) {
                             dataStore.edit { prefs ->
                                 apiResult.getSessionId()?.also {
                                     prefs[SESSION_ID] = it
                                 }
                             }
-                            return true
-                        } else if (apiResult.code() == 401) {
-                            signOut()
+                            AuthResult.Success(Unit)
+                        } else {
+                            if (apiResult.code() == 401) {
+                                signOut()
+                            }
+                            AuthResult.Failure(AuthError.InvalidCredentials)
                         }
                     }
                 }
@@ -357,17 +413,18 @@ class AuthRepository @Inject constructor(
                     credential.data.getString("androidx.credentials.BUNDLE_KEY_PASSWORD")
                 if (email != null && password != null) {
                     return login(email, password)
-                } else {
-                    Log.e(TAG, "Cannot call registerResponse")
                 }
-            } else {
-                Log.e(TAG, "Cannot call registerResponse")
             }
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot call registerResponse")
+            AuthResult.Failure(AuthError.Unknown(null))
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
+
 
     /**
      * Sends the session ID to the server to sign in the user.
@@ -377,22 +434,31 @@ class AuthRepository @Inject constructor(
     suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
         credentialResponse: GetCredentialResponse
-    ): Boolean {
-        val credential = credentialResponse.credential
-        try {
+    ): AuthResult<Unit> {
+        return try {
+            val credential = credentialResponse.credential
             if (credential is CustomCredential) {
-                return verifyIdToken(
+                val isSuccess = verifyIdToken(
                     sessionId,
                     GoogleIdTokenCredential
                         .createFrom(credential.data).idToken
                 )
+                if (isSuccess) {
+                    AuthResult.Success(Unit)
+                } else {
+                    AuthResult.Failure(AuthError.InvalidCredentials)
+                }
             } else {
                 Log.e(TAG, "Invalid federated token credential")
+                AuthResult.Failure(AuthError.Unknown("Invalid federated token credential"))
             }
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot authorize federated token")
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
 
     /**
@@ -411,7 +477,7 @@ class AuthRepository @Inject constructor(
     /**
      * Checks if the user is signed in through passkeys.
      *
-     * @return True if the user is signed in through passkeys, false otherwise.
+      * @return True if the user is signed in through passkeys, false otherwise.
      */
     suspend fun isSignedInThroughPasskeys(): Boolean {
         val isSignedInThroughPasskeys = dataStore.read(IS_SIGNED_IN_THROUGH_PASSKEYS)
@@ -426,22 +492,28 @@ class AuthRepository @Inject constructor(
      *
      * @return True if the session id is valid, false otherwise.
      */
-    suspend fun isSessionIdValid(): Boolean {
-        val sessionId = dataStore.read(SESSION_ID)
-        if (!sessionId.isNullOrBlank()) {
-            try {
+    suspend fun isSessionIdValid(): AuthResult<Unit> {
+        return try {
+            val sessionId = dataStore.read(SESSION_ID)
+            if (!sessionId.isNullOrBlank()) {
                 val apiResult = authApiService.getKeys(
                     cookie = sessionId.createCookieHeader(),
                 )
                 if (apiResult.isSuccessful) {
-                    return true
+                    AuthResult.Success(Unit)
+                } else {
+                    AuthResult.Failure(AuthError.InvalidCredentials)
                 }
-            } catch (e: ApiException) {
-                Log.e(TAG, "Cannot call getKeys for isSessionIdValid")
+            } else {
+                AuthResult.Failure(AuthError.Unknown(null))
             }
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-
-        return false
     }
 
     /**
@@ -504,25 +576,33 @@ class AuthRepository @Inject constructor(
      * @param credentialId The ID of the credential to be deleted
      * @return True if the deletion was successful, false otherwise
      */
-    suspend fun deletePasskey(credentialId: String): Boolean {
+    suspend fun deletePasskey(credentialId: String): AuthResult<Unit> {
         val sessionId = dataStore.read(SESSION_ID)
         // Construct endpoint for deleting passkeys.
-        try {
+        return try {
             if (!sessionId.isNullOrEmpty()) {
                 val response = authApiService.deletePasskey(
                     cookie = sessionId.createCookieHeader(),
                     credentialId = credentialId,
                 )
                 if (response.isSuccessful) {
-                    return true
-                } else if (response.code() == 401) {
-                    signOut()
+                    AuthResult.Success(Unit)
+                } else {
+                    if (response.code() == 401) {
+                        signOut()
+                    }
+                    AuthResult.Failure(AuthError.ServerError(response.message()))
                 }
+            } else {
+                AuthResult.Failure(AuthError.Unknown(null))
             }
+        } catch (e: IOException) {
+            AuthResult.Failure(AuthError.NetworkError)
+        } catch (e: HttpException) {
+            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
-            Log.e(TAG, "Cannot call deletePasskey", e)
+            AuthResult.Failure(AuthError.Unknown(e.message))
         }
-        return false
     }
 
     suspend fun deleteRestoreKeyFromServer(): Boolean {
@@ -541,7 +621,7 @@ class AuthRepository @Inject constructor(
                     signOut()
                 }
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Cannot call deleteRestoreKey", e)
         }
         return false

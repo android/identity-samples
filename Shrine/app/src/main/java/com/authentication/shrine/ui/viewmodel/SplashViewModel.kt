@@ -17,6 +17,7 @@ package com.authentication.shrine.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.repository.AuthRepository
 import com.authentication.shrine.ui.navigation.ShrineAppDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,10 +63,13 @@ class SplashViewModel @Inject constructor(
     /**
      * Checks if the session ID is valid with the server.
      *
-     * @return True if the session ID is valid, false otherwise.
+     * @return True if the session ID is valid, false otherwise or if there was an error.
      */
     private suspend fun isSessionIdValid(): Boolean {
-        return repository.isSessionIdValid()
+        return when (repository.isSessionIdValid()) {
+            is AuthResult.Success -> true
+            is AuthResult.Failure -> false
+        }
     }
 
     /**

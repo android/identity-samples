@@ -22,6 +22,8 @@ import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
+import com.authentication.shrine.model.AuthError
+import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.model.PasskeyCredential
 import com.authentication.shrine.repository.AuthRepository
 import com.authentication.shrine.repository.AuthRepository.Companion.RESTORE_CREDENTIAL_AAGUID
@@ -92,31 +94,22 @@ class PasskeyManagementViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            try {
-                val data = authRepository.getListOfPasskeys()
-                if (data != null) {
-                    val filteredPasskeysList =
-                        data.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            userHasPasskeys = filteredPasskeysList.isNotEmpty(),
-                            passkeysList = filteredPasskeysList,
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            messageResourceId = R.string.get_keys_error,
-                        )
-                    }
-                }
-            } catch (e: Exception) {
+            val data = authRepository.getListOfPasskeys()
+            if (data != null) {
+                val filteredPasskeysList =
+                    data.credentials.filter { passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message,
+                        userHasPasskeys = filteredPasskeysList.isNotEmpty(),
+                        passkeysList = filteredPasskeysList,
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        messageResourceId = R.string.get_keys_error,
                     )
                 }
             }
@@ -131,44 +124,43 @@ class PasskeyManagementViewModel @Inject constructor(
     fun createPasskey(
         createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        _uiState.update {
-            it.copy(isLoading = true)
-        }
+        _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            try {
-                val data = authRepository.registerPasskeyCreationRequest()
-                if (data != null) {
-                    val createPasskeyResponse = createPasskey(data)
+            when (val result = authRepository.registerPasskeyCreationRequest()) {
+                is AuthResult.Success -> {
+                    val createPasskeyResponse = createPasskey(result.data)
                     if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                        val isRegisterResponse =
-                            authRepository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
-                        if (isRegisterResponse) {
-                            val passkeysList = authRepository.getListOfPasskeys()
-                            if (passkeysList != null) {
-                                val filteredPasskeysList =
-                                    passkeysList.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
-                                _uiState.update {
-                                    it.copy(
-                                        isLoading = false,
-                                        passkeysList = filteredPasskeysList,
-                                        messageResourceId = R.string.passkey_created
-                                    )
-                                }
-                            } else {
-                                _uiState.update {
-                                    it.copy(
-                                        isLoading = false,
-                                        messageResourceId = R.string.get_keys_error,
-                                    )
+                        when (authRepository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)) {
+                            is AuthResult.Success -> {
+                                val passkeysList = authRepository.getListOfPasskeys()
+                                if (passkeysList != null) {
+                                    val filteredPasskeysList =
+                                        passkeysList.credentials.filter { passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID }
+                                    _uiState.update {
+                                        it.copy(
+                                            isLoading = false,
+                                            passkeysList = filteredPasskeysList,
+                                            messageResourceId = R.string.passkey_created
+                                        )
+                                    }
+                                } else {
+                                    _uiState.update {
+                                        it.copy(
+                                            isLoading = false,
+                                            messageResourceId = R.string.get_keys_error,
+                                        )
+                                    }
                                 }
                             }
-                        } else {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    messageResourceId = R.string.some_error_occurred_please_check_logs
-                                )
+
+                            is AuthResult.Failure -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        messageResourceId = R.string.some_error_occurred_please_check_logs
+                                    )
+                                }
                             }
                         }
                     } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
@@ -180,22 +172,32 @@ class PasskeyManagementViewModel @Inject constructor(
                         }
                         authRepository.setSignedInState(false)
                     }
-                } else {
+                }
+
+                is AuthResult.Failure -> {
+                    var errorMessage: String? = null
+                    val messageResId = when (val error = result.error) {
+                        is AuthError.NetworkError -> R.string.error_network
+                        is AuthError.ServerError -> {
+                            errorMessage = error.message
+                            R.string.error_server
+                        }
+
+                        is AuthError.Unknown -> {
+                            errorMessage = error.message
+                            R.string.error_unknown
+                        }
+
+                        else -> R.string.error_unknown
+                    }
                     _uiState.update {
                         it.copy(
+                            messageResourceId = messageResId,
                             isLoading = false,
-                            messageResourceId = R.string.oops_an_internal_server_error_occurred
+                            errorMessage = errorMessage
                         )
                     }
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = e.message
-                    )
-                }
-                authRepository.setSignedInState(false)
             }
         }
     }
@@ -212,13 +214,13 @@ class PasskeyManagementViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            try {
-                if (authRepository.deletePasskey(credentialId)) {
+            when (val result = authRepository.deletePasskey(credentialId)) {
+                is AuthResult.Success -> {
                     // Refresh passkeys list after deleting a passkey
                     val data = authRepository.getListOfPasskeys()
                     if (data != null) {
                         val filteredPasskeysList =
-                            data.credentials.filter({ passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID })
+                            data.credentials.filter { passkey -> passkey.aaguid != RESTORE_CREDENTIAL_AAGUID }
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -235,20 +237,31 @@ class PasskeyManagementViewModel @Inject constructor(
                             )
                         }
                     }
-                } else {
+                }
+
+                is AuthResult.Failure -> {
+                    var errorMessage: String? = null
+                    val messageResId = when (val error = result.error) {
+                        is AuthError.NetworkError -> R.string.error_network
+                        is AuthError.ServerError -> {
+                            errorMessage = error.message
+                            R.string.error_server
+                        }
+
+                        is AuthError.Unknown -> {
+                            errorMessage = error.message
+                            R.string.error_unknown
+                        }
+
+                        else -> R.string.error_unknown
+                    }
                     _uiState.update {
                         it.copy(
+                            messageResourceId = messageResId,
                             isLoading = false,
-                            messageResourceId = R.string.delete_passkey_error,
+                            errorMessage = errorMessage
                         )
                     }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = e.message,
-                    )
                 }
             }
         }

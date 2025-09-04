@@ -200,11 +200,17 @@ fun RegisterPasswordScreen(
             ShrineLoader()
         }
 
-        val snackbarMessage = stringResource(uiState.messageResourceId)
-        if (snackbarMessage.isNotBlank()) {
-            LaunchedEffect(uiState) {
+        if (uiState.messageResourceId != R.string.empty_string) {
+            val baseMessage = stringResource(uiState.messageResourceId)
+            val finalMessage = if (uiState.errorMessage != null) {
+                "$baseMessage ${uiState.errorMessage}"
+            } else {
+                baseMessage
+            }
+
+            LaunchedEffect(finalMessage) {
                 snackbarHostState.showSnackbar(
-                    message = snackbarMessage,
+                    message = finalMessage,
                 )
             }
         }

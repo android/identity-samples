@@ -37,10 +37,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
-import com.authentication.shrine.ui.common.ErrorAlertDialog
 import com.authentication.shrine.ui.common.PasskeyInfo
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineLoader
@@ -48,7 +46,6 @@ import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.viewmodel.CreatePasskeyUiState
 import com.authentication.shrine.ui.viewmodel.CreatePasskeyViewModel
-import com.authentication.shrine.ui.viewmodel.ErrorDialogViewModel
 
 /**
  * Stateful composable function for the create passkey screen.
@@ -71,7 +68,6 @@ fun CreatePasskeyScreen(
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    val errorDialogViewModel: ErrorDialogViewModel = hiltViewModel()
 
     val context = LocalContext.current
     val onRegisterRequest = {
@@ -91,7 +87,6 @@ fun CreatePasskeyScreen(
         onLearnMoreClicked = onLearnMoreClicked,
         onRegisterRequest = onRegisterRequest,
         onNotNowClicked = onNotNowClicked,
-        showErrorDialog = errorDialogViewModel::showErrorDialog,
         uiState = uiState,
         modifier = modifier,
     )
@@ -105,7 +100,6 @@ fun CreatePasskeyScreen(
  * @param onLearnMoreClicked Callback invoked when the user clicks on "Learn more".
  * @param onRegisterRequest Callback to initiate the passkey creation request.
  * @param onNotNowClicked Callback invoked when the user clicks on "Not now".
- * @param showErrorDialog Method that resets the UI state of the Error Dialog
  * @param uiState The current UI state of the create passkey screen.
  * @param modifier Modifier to be applied to the composable.
  */
@@ -114,7 +108,6 @@ fun CreatePasskeyScreen(
     onLearnMoreClicked: () -> Unit,
     onRegisterRequest: () -> Unit,
     onNotNowClicked: () -> Unit,
-    showErrorDialog: () -> Unit,
     uiState: CreatePasskeyUiState,
     modifier: Modifier = Modifier,
 ) {
@@ -152,19 +145,15 @@ fun CreatePasskeyScreen(
             ShrineLoader()
         }
 
-        val messageId = uiState.messageResourceId
-        if (messageId != null) {
-            val snackbarMessage = stringResource(messageId)
-            LaunchedEffect(uiState) {
-                snackbarHostState.showSnackbar(snackbarMessage)
-            }
+        val snackbarMessage = when {
+            !uiState.errorMessage.isNullOrBlank() -> uiState.errorMessage
+            else -> null
         }
 
-        if (!uiState.errorMessage.isNullOrBlank()) {
-            showErrorDialog()
-            ErrorAlertDialog(
-                uiState.errorMessage,
-            )
+        if (snackbarMessage != null) {
+            LaunchedEffect(snackbarMessage) {
+                snackbarHostState.showSnackbar(snackbarMessage)
+            }
         }
     }
 }
@@ -213,7 +202,6 @@ fun CreatePasskeyScreenPreview() {
             onLearnMoreClicked = { },
             onRegisterRequest = { },
             onNotNowClicked = { },
-            showErrorDialog = { },
             uiState = CreatePasskeyUiState(),
             modifier = Modifier,
         )
