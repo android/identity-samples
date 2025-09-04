@@ -41,17 +41,14 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
-import com.authentication.shrine.ui.common.ErrorAlertDialog
 import com.authentication.shrine.ui.common.LogoHeading
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.viewmodel.AuthenticationUiState
 import com.authentication.shrine.ui.viewmodel.AuthenticationViewModel
-import com.authentication.shrine.ui.viewmodel.ErrorDialogViewModel
 
 /**
  * Stateful composable function for Authentication screen.
@@ -72,7 +69,6 @@ fun AuthenticationScreen(
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    val errorDialogViewModel: ErrorDialogViewModel = hiltViewModel()
     var isFirstCheckForRestoreKey by remember { mutableStateOf(true) }
 
     // Passing in the lambda / context to the VM
@@ -105,9 +101,10 @@ fun AuthenticationScreen(
 
     val onSignInWithSignInWithGoogleRequest = {
         viewModel.signInWithGoogleRequest(
-            onSuccess = { flag ->
+            onSuccess = {
                 createRestoreKey()
-                navigateToHome(flag)
+                // Don't suggest passkeys if user signs in with Google.
+                navigateToHome(false)
             },
             getCredential = {
                 credentialManagerUtils.getSignInWithGoogleCredential(
@@ -133,7 +130,6 @@ fun AuthenticationScreen(
         onSignInWithPasskeyOrPasswordRequest = onSignInWithPasskeyOrPasswordRequest,
         onSignInWithSignInWithGoogleRequest = onSignInWithSignInWithGoogleRequest,
         navigateToRegister = navigateToRegister,
-        showErrorDialog = errorDialogViewModel::showErrorDialog,
         uiState = uiState,
         modifier = modifier,
     )
@@ -146,7 +142,6 @@ fun AuthenticationScreen(
  *
  * @param modifier Modifier to be applied to the composable.
  * @param onSignInWithPasskeyOrPasswordRequest Callback to initiate the sign-in with passkeys or password request.
- * @param showErrorDialog Method that resets the UI state of the Error Dialog
  * @param navigateToRegister Callback to navigate to the registration screen.
  * @param uiState The current UI state of the authentication screen.
 */
@@ -155,7 +150,6 @@ fun AuthenticationScreen(
     onSignInWithPasskeyOrPasswordRequest: () -> Unit,
     onSignInWithSignInWithGoogleRequest: () -> Unit,
     navigateToRegister: () -> Unit,
-    showErrorDialog: () -> Unit,
     uiState: AuthenticationUiState,
     modifier: Modifier = Modifier,
 ) {
@@ -208,13 +202,6 @@ fun AuthenticationScreen(
             ShrineLoader()
         }
 
-        if (!uiState.passkeyRequestErrorMessage.isNullOrBlank()) {
-            showErrorDialog()
-            ErrorAlertDialog(
-                errorMessage = uiState.passkeyRequestErrorMessage,
-            )
-        }
-
         if (!uiState.isSignInWithPasskeysSuccess) {
             val snackbarMessage = stringResource(uiState.passkeyResponseMessageResourceId)
             if (snackbarMessage.isNotBlank()) {
@@ -228,6 +215,7 @@ fun AuthenticationScreen(
     }
 
     val snackbarMessage = when {
+        !uiState.passkeyRequestErrorMessage.isNullOrBlank() -> uiState.passkeyRequestErrorMessage
         !uiState.signInWithGoogleRequestErrorMessage.isNullOrBlank() -> uiState.signInWithGoogleRequestErrorMessage
         uiState.logInWithFederatedTokenFailure -> stringResource(R.string.sign_in_with_google_response_error_message)
         else -> null
@@ -255,7 +243,6 @@ fun AuthenticationScreenPreview() {
             onSignInWithPasskeyOrPasswordRequest = { },
             onSignInWithSignInWithGoogleRequest = { },
             navigateToRegister = { },
-            showErrorDialog = { },
             uiState = AuthenticationUiState(),
             modifier = Modifier,
         )

@@ -97,4 +97,9 @@
     <string name="cannot_call_delete_passkey">Cannot call deletePasskey</string>
     <string name="sign_in_with_google_response_error_message">Server error when attempting sign in with Google. Please check logs.</string>
     <string name="sign_in_with_google_button">Sign in with Google</string>
+    <string name="error_network">A network error occurred. Please check your connection and try again.</string>
+    <string name="error_user_exists">This username is already taken. Please choose another one.</string>
+    <string name="error_server">An unexpected server error occurred.</string>
+    <string name="error_unknown">An unknown error occurred.</string>
+    <string name="error_invalid_credentials">Invalid credentials. Please check your username and password.</string>
 </resources>

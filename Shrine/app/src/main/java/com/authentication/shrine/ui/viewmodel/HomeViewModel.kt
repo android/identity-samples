@@ -15,9 +15,11 @@
  */
 package com.authentication.shrine.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.repository.AuthRepository.Companion.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,9 +44,15 @@ class HomeViewModel @Inject constructor(
         deleteRestoreKey: suspend () -> Unit,
     ) {
         viewModelScope.launch {
-            deleteRestoreKey()
-            repository.deleteRestoreKeyFromServer()
-            repository.signOut()
+            try {
+                deleteRestoreKey()
+                repository.deleteRestoreKeyFromServer()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deleting restore key: " + e.message)
+                // Don't block user sign out if this fails.
+            } finally {
+                repository.signOut()
+            }
         }
     }
 }

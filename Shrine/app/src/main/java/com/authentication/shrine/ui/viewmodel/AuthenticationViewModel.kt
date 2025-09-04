@@ -15,6 +15,7 @@
  */
 package com.authentication.shrine.ui.viewmodel
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
@@ -22,7 +23,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.authentication.shrine.GenericCredentialManagerResponse
 import com.authentication.shrine.R
+import com.authentication.shrine.model.AuthError
+import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.repository.AuthRepository
+import com.authentication.shrine.repository.AuthRepository.Companion.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,25 +70,48 @@ class AuthenticationViewModel @Inject constructor(
         onSuccess: (Boolean) -> Unit,
         getCredential: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        _uiState.value = AuthenticationUiState(isLoading = true)
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            repository.signInWithPasskeyOrPasswordRequest()?.let { data ->
-                val credentialResponse = getCredential(data)
-                if (credentialResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
-                    signInWithPasskeyOrPasswordResponse(
-                        credentialResponse.getCredentialResponse,
-                        onSuccess,
-                    )
-                } else if (credentialResponse is GenericCredentialManagerResponse.Error) {
-                    repository.clearSessionIdFromDataStore()
+            when (val result = repository.signInWithPasskeyOrPasswordRequest()) {
+                is AuthResult.Success -> {
+                    val credentialResponse = getCredential(result.data)
+                    if (credentialResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
+                        signInWithPasskeyOrPasswordResponse(
+                            credentialResponse.getCredentialResponse,
+                            onSuccess,
+                        )
+                    } else if (credentialResponse is GenericCredentialManagerResponse.Error) {
+                        repository.clearSessionIdFromDataStore()
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                passkeyRequestErrorMessage = credentialResponse.errorMessage,
+                            )
+                        }
+                    } else if (credentialResponse is GenericCredentialManagerResponse.CancellationError) {
+                        repository.clearSessionIdFromDataStore()
+                        _uiState.update { it.copy(isLoading = false) }
+                    }
+                }
+
+                is AuthResult.Failure -> {
+                    var errorMessage: String? = null
+                    val messageResId = when (val error = result.error) {
+                        is AuthError.NetworkError -> R.string.error_network
+                        is AuthError.ServerError -> R.string.error_server
+                        is AuthError.Unknown -> {
+                            errorMessage = error.message
+                            R.string.error_unknown
+                        }
+                        else -> R.string.error_unknown
+                    }
                     _uiState.update {
-                        AuthenticationUiState(
-                            passkeyRequestErrorMessage = credentialResponse.errorMessage,
+                        it.copy(
+                            isLoading = false,
+                            passkeyResponseMessageResourceId = messageResId,
+                            passkeyRequestErrorMessage = errorMessage
                         )
                     }
-                } else if (credentialResponse is GenericCredentialManagerResponse.CancellationError) {
-                    repository.clearSessionIdFromDataStore()
-                    _uiState.update { AuthenticationUiState() }
                 }
             }
         }
@@ -101,25 +128,29 @@ class AuthenticationViewModel @Inject constructor(
         onSuccess: (navigateToHome: Boolean) -> Unit,
     ) {
         viewModelScope.launch {
-            val isSuccess = repository.signInWithPasskeyOrPasswordResponse(response)
-            if (isSuccess) {
-                val isPasswordCredential = response.credential is PasswordCredential
-                repository.setSignedInState(!isPasswordCredential)
-                onSuccess(isPasswordCredential)
-
-                _uiState.update {
-                    AuthenticationUiState(
-                        isSignInWithPasskeysSuccess = true,
-                    )
+            when (repository.signInWithPasskeyOrPasswordResponse(response)) {
+                is AuthResult.Success -> {
+                    val isPasswordCredential = response.credential is PasswordCredential
+                    repository.setSignedInState(!isPasswordCredential)
+                    _uiState.update {
+                        it.copy(
+                            isSignInWithPasskeysSuccess = true,
+                            isLoading = false
+                        )
+                    }
+                    onSuccess(isPasswordCredential)
                 }
-            } else {
-                repository.setSignedInState(false)
-                repository.clearSessionIdFromDataStore()
-                _uiState.update {
-                    AuthenticationUiState(
-                        passkeyResponseMessageResourceId = R.string.some_error_occurred_please_check_logs,
-                        isSignInWithPasskeysSuccess = false,
-                    )
+
+                is AuthResult.Failure -> {
+                    repository.setSignedInState(false)
+                    repository.clearSessionIdFromDataStore()
+                    _uiState.update {
+                        it.copy(
+                            passkeyResponseMessageResourceId = R.string.error_invalid_credentials,
+                            isSignInWithPasskeysSuccess = false,
+                            isLoading = false,
+                        )
+                    }
                 }
             }
         }
@@ -178,21 +209,24 @@ class AuthenticationViewModel @Inject constructor(
                 }
             } else {
                 // Log in to server with retrieved session ID and CredMan credentials.
-                val isSuccess = repository.signInWithFederatedTokenResponse(sessionId, response)
-                if (isSuccess) {
-                    repository.setSignedInState(flag = false)
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                        )
+                when (repository.signInWithFederatedTokenResponse(sessionId, response)) {
+                    is AuthResult.Success -> {
+                        repository.setSignedInState(flag = false)
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                            )
+                        }
+                        onSuccess(true)
                     }
-                    onSuccess(true)
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            logInWithFederatedTokenFailure = true,
-                        )
+
+                    is AuthResult.Failure -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                logInWithFederatedTokenFailure = true,
+                            )
+                        }
                     }
                 }
             }
@@ -208,7 +242,7 @@ class AuthenticationViewModel @Inject constructor(
      * @param onSuccess A lambda that takes a [Boolean] indicating the success of the sign-in operation.
      *
      * @see GenericCredentialManagerResponse
-     * @see signInWithPasskeyOrPasswordResponse
+     * @see signInWithPasskeyResponse
      */
     fun checkForStoredRestoreKey(
         getRestoreKey: suspend (JSONObject) -> GenericCredentialManagerResponse,
@@ -216,17 +250,23 @@ class AuthenticationViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             if (!repository.isSignedInThroughPasskeys() && !repository.isSignedInThroughPassword()) {
-                repository.signInWithPasskeyOrPasswordRequest()?.let { data ->
-                    val restoreKeyResponse = getRestoreKey(data)
-                    if (restoreKeyResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
-                        _uiState.update {
-                            AuthenticationUiState(isLoading = true)
+                when (val result = repository.signInWithPasskeyOrPasswordRequest()) {
+                    is AuthResult.Success -> {
+                        val restoreKeyResponse = getRestoreKey(result.data)
+                        if (restoreKeyResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
+                            _uiState.update {
+                                it.copy(isLoading = true)
+                            }
+                            signInWithPasskeyOrPasswordResponse(
+                                response = restoreKeyResponse.getCredentialResponse,
+                                onSuccess = onSuccess,
+                            )
+                        } else {
+                            repository.clearSessionIdFromDataStore()
                         }
-                        signInWithPasskeyOrPasswordResponse(
-                            response = restoreKeyResponse.getCredentialResponse,
-                            onSuccess = onSuccess,
-                        )
-                    } else {
+                    }
+
+                    is AuthResult.Failure -> {
                         repository.clearSessionIdFromDataStore()
                     }
                 }
@@ -247,10 +287,17 @@ class AuthenticationViewModel @Inject constructor(
         createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
     ) {
         coroutineScope.launch {
-            repository.registerPasskeyCreationRequest()?.let { data ->
-                val createRestoreKeyResponse = createRestoreKeyOnCredMan(data)
-                if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                    repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
+            when (val result = repository.registerPasskeyCreationRequest()) {
+                is AuthResult.Success -> {
+                    val createRestoreKeyResponse = createRestoreKeyOnCredMan(result.data)
+                    if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                        repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
+                    }
+                }
+
+                is AuthResult.Failure -> {
+                    Log.e(TAG, "Error creating restore key.")
+                    // Don't block user sign in if this fails.
                 }
             }
         }
