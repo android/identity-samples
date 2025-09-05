@@ -145,14 +145,18 @@ fun CreatePasskeyScreen(
             ShrineLoader()
         }
 
-        val snackbarMessage = when {
-            !uiState.errorMessage.isNullOrBlank() -> uiState.errorMessage
-            else -> null
-        }
+        if (uiState.messageResourceId != R.string.empty_string) {
+            val baseMessage = stringResource(uiState.messageResourceId)
+            val finalMessage = if (uiState.errorMessage != null) {
+                "$baseMessage ${uiState.errorMessage}"
+            } else {
+                baseMessage
+            }
 
-        if (snackbarMessage != null) {
-            LaunchedEffect(snackbarMessage) {
-                snackbarHostState.showSnackbar(snackbarMessage)
+            LaunchedEffect(finalMessage) {
+                snackbarHostState.showSnackbar(
+                    message = finalMessage,
+                )
             }
         }
     }

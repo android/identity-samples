@@ -135,6 +135,6 @@ class CreatePasskeyViewModel @Inject constructor(
 data class CreatePasskeyUiState(
     val isLoading: Boolean = false,
     val navigateToMainMenu: Boolean = false,
-    @StringRes val messageResourceId: Int? = null,
+    @StringRes val messageResourceId: Int= R.string.empty_string,
     val errorMessage: String? = null,
 )
