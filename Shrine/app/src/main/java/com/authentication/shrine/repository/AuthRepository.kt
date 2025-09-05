@@ -51,7 +51,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
-import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -111,12 +110,10 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.UserAlreadyExists)
+                AuthResult.Failure(AuthError.ServerError(response.message()))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -145,12 +142,10 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(null))
+                AuthResult.Failure(AuthError.ServerError(response.message()))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -239,8 +234,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -313,8 +306,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -344,8 +335,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -402,7 +391,7 @@ class AuthRepository @Inject constructor(
                             if (apiResult.code() == 401) {
                                 signOut()
                             }
-                            AuthResult.Failure(AuthError.InvalidCredentials)
+                            AuthResult.Failure(AuthError.ServerError(apiResult.message()))
                         }
                     }
                 }
@@ -418,8 +407,6 @@ class AuthRepository @Inject constructor(
             AuthResult.Failure(AuthError.Unknown(null))
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -454,8 +441,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -477,7 +462,7 @@ class AuthRepository @Inject constructor(
     /**
      * Checks if the user is signed in through passkeys.
      *
-      * @return True if the user is signed in through passkeys, false otherwise.
+     * @return True if the user is signed in through passkeys, false otherwise.
      */
     suspend fun isSignedInThroughPasskeys(): Boolean {
         val isSignedInThroughPasskeys = dataStore.read(IS_SIGNED_IN_THROUGH_PASSKEYS)
@@ -509,8 +494,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
@@ -598,8 +581,6 @@ class AuthRepository @Inject constructor(
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
-        } catch (e: HttpException) {
-            AuthResult.Failure(AuthError.ServerError(e.message()))
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
