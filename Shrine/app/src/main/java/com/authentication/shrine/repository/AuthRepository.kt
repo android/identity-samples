@@ -385,6 +385,7 @@ class AuthRepository @Inject constructor(
                                 apiResult.getSessionId()?.also {
                                     prefs[SESSION_ID] = it
                                 }
+                                prefs[USERNAME] = apiResult.body()?.username ?: ""
                             }
                             AuthResult.Success(Unit)
                         } else {

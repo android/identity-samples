@@ -48,7 +48,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.common.ShrineClickableText
-import com.authentication.shrine.ui.common.ShrineEditText
+import com.authentication.shrine.ui.common.ShrineTextField
 import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.common.ShrineToolbar
@@ -135,16 +135,14 @@ fun SettingsScreen(
 
             ShrineTextHeader(stringResource(R.string.account))
 
-            ShrineEditText(
+            ShrineTextField(
                 title = stringResource(R.string.full_name),
                 text = uiState.username,
-                isFieldLocked = true,
             )
 
-            ShrineEditText(
+            ShrineTextField(
                 title = stringResource(R.string.username),
                 text = uiState.username,
-                isFieldLocked = true,
             )
 
             SecuritySection(
@@ -400,7 +398,7 @@ fun SettingPreview() {
             onLearnMoreClicked = { },
             onManagePasskeysClicked = { },
             onBackClicked = { },
-            uiState = SettingsUiState(userHasPasskeys = false),
+            uiState = SettingsUiState(userHasPasskeys = false, username = "User 1"),
         )
     }
 }
