@@ -13,6 +13,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.android.authentication.myvault.ui.MainActivity
 
+/**
+ * Creates and registers a notification channel with the system.
+ *
+ * This is a utility extension function that creates a Notification Channel with
+ * [NotificationManager.IMPORTANCE_HIGH] to show pop-up notification on receiving
+ * signals from the RP apps
+ *
+ * @param channelName The user-visible name of the channel.
+ *                    This is displayed in the system's notification settings.
+ * @param channelDescription The user-visible description of the channel.
+ *                           This is displayed in the system's notification settings.
+ */
 fun Context.createNotificationChannel(
     channelName: String,
     channelDescription: String,
@@ -24,11 +36,17 @@ fun Context.createNotificationChannel(
     ).apply {
         description = channelDescription
     }
-    // Register the channel with the system.
+
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(channel)
 }
 
+/**
+ * Utility extension function that displays a system notification with the given title and content.
+ *
+ * @param title The title of the notification.
+ * @param content The main content text of the notification.
+ */
 fun Context.showNotification(
     title: String,
     content: String,
