@@ -75,4 +75,9 @@
     <string name="all_accepted_signal_message">The provider received the AcceptedCredentialIds request and thus updated the list of user credentials</string>
     <string name="user_details_updation">User details updated successfully</string>
     <string name="current_user_signal_message">The provider received the CurrentUserDetails request and thus updated the user details in the credential</string>
+    <string name="notification_channel_description">Notification channel used for testing Signal APIs. Apps pushes a notification if a Signal from RP is received</string>
+    <string name="notification_channel_name">Signal API notification channel</string>
+    <string name="failed_to_handle_unknowncredentialrequest">Failed to handle UnknownCredentialRequest</string>
+    <string name="failed_to_handle_acceptedcredentialsrequest">Failed to handle AcceptedCredentialsRequest</string>
+    <string name="failed_to_handle_currentuserdetailrequest">Failed to handle CurrentUserDetailRequest</string>
 </resources>

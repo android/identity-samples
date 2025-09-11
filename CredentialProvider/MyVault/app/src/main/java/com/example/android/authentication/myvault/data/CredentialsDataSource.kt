@@ -127,8 +127,8 @@ class CredentialsDataSource(
         return myVaultDao.getPasskey(credId)
     }
 
-    fun getPasskeyForUser(userId: String): List<PasskeyItem>? {
-        return myVaultDao.getPasskeysForUser(userId)
+    suspend fun getAllPasskeysForUser(userId: String): List<PasskeyItem>? {
+        return myVaultDao.getAllPasskeysForUser(userId)
     }
 
     suspend fun hidePasskey(passkey: PasskeyItem) {

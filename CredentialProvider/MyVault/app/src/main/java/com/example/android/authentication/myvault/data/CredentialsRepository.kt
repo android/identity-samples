@@ -228,8 +228,9 @@ class CredentialsRepository(
             val credentials = credentialsDataSource.credentialsForSite(request.rpId) ?: return false
 
             val passkeys = credentials.passkeys
-            for (passkey in passkeys) {
-                if (!passkey.hidden) {
+            passkeys
+                .filter { !it.hidden }
+                .forEach { passkey ->
                     val data = Bundle()
                     data.putString("requestJson", option.requestJson)
                     data.putString("credId", passkey.credId)
@@ -259,7 +260,6 @@ class CredentialsRepository(
                     // Add the entry to the response builder.
                     responseBuilder.addCredentialEntry(entry)
                 }
-            }
         } catch (e: IOException) {
             return false
         }
