@@ -23,6 +23,9 @@ import com.example.android.authentication.myvault.data.CredentialsDataSource
 import com.example.android.authentication.myvault.data.CredentialsRepository
 import com.example.android.authentication.myvault.data.RPIconDataSource
 import com.example.android.authentication.myvault.data.room.MyVaultDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * This class is an application-level singleton object which is providing dependencies required for the app to function.
@@ -41,6 +44,8 @@ object AppDependencies {
     var providerIcon: Icon? = null
 
     lateinit var rpIconDataSource: RPIconDataSource
+
+    lateinit var coroutineScope: CoroutineScope
 
     /**
      * Initializes the core components required for the application's data storage and icon handling.
@@ -72,5 +77,7 @@ object AppDependencies {
                 credentialsDataSource,
                 context,
             )
+
+        coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     }
 }

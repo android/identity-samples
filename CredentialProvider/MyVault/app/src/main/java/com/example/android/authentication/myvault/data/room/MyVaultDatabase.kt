@@ -89,6 +89,6 @@ interface MyVaultDao {
     @Query("SELECT * from passkeys WHERE credId = :credId")
     fun getPasskey(credId: String): PasskeyItem?
 
-    @Query("SELECT * from passkeys WHERE uid = :userId and hidden = false")
-    fun getPasskeysForUser(userId: String): List<PasskeyItem>?
+    @Query("SELECT * from passkeys WHERE uid = :userId")
+    suspend fun getAllPasskeysForUser(userId: String): List<PasskeyItem>?
 }
