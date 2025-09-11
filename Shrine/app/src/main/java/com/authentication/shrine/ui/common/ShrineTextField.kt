@@ -15,54 +15,62 @@
  */
 package com.authentication.shrine.ui.common
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
+import com.authentication.shrine.ui.theme.grayBackground
 
-/**
- * A custom TextField composable for the Shrine app.
- *
- * @param modifier The modifier to be applied to the TextField.
- * @param value The current value of the TextField.
- * @param onValueChange The callback to be invoked when the TextField value changes.
- */
 @Composable
 fun ShrineTextField(
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    modifier: Modifier = Modifier,
+    title: String,
+    text: String = "",
 ) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .width(300.dp)
-            .background(MaterialTheme.colorScheme.tertiaryContainer)
-            .padding(dimensionResource(R.dimen.dimen_standard)),
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(R.dimen.padding_small)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small)),
+    ) {
+        Text(text = title)
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = { },
+            modifier = Modifier
+                .fillMaxWidth(),
+            enabled = false,
+            shape = RoundedCornerShape(dimensionResource(R.dimen.size_standard)),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                focusedContainerColor = grayBackground,
+                unfocusedContainerColor = grayBackground,
+                disabledContainerColor = grayBackground,
+                errorContainerColor = grayBackground,
+            ),
+        )
+    }
 }
 
-/**
- * A preview of the ShrineTextField composable.
- */
-@Preview
+@Preview(showSystemUi = true)
 @Composable
-private fun ShrineTextFieldPreview() {
+fun ShrineTextFieldPreview() {
     ShrineTheme {
         ShrineTextField(
-            value = TextFieldValue(stringResource(R.string.demo)),
-            onValueChange = { },
+            "Full Name",
+            "ABC XYZ",
         )
     }
 }
