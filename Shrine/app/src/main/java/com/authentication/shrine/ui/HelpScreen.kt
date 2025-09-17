@@ -57,11 +57,13 @@ fun HelpScreen(
             text = stringResource(R.string.contact),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             text = stringResource(R.string.email),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }

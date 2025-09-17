@@ -17,11 +17,12 @@ package com.authentication.shrine.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -170,7 +171,7 @@ fun RegisterScreen(
                 .padding(contentPadding)
                 .padding(dimensionResource(R.dimen.padding_small))
                 .fillMaxSize()
-                .fillMaxHeight(),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -240,6 +241,7 @@ private fun RegisterScreenInputSection(
         Text(
             text = stringResource(R.string.full_name),
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
+            color = MaterialTheme.colorScheme.onSurface
         )
         TextField(
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
@@ -258,6 +260,7 @@ private fun RegisterScreenInputSection(
         Text(
             text = stringResource(R.string.username),
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
+            color = MaterialTheme.colorScheme.onSurface
         )
         TextField(
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
@@ -277,6 +280,7 @@ private fun RegisterScreenInputSection(
         Text(
             text = stringResource(R.string.signing_in),
             modifier = Modifier.padding(top = dimensionResource(R.dimen.dimen_standard)),
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         PasskeyInformationTab(onLearnMoreClicked, onOtherWaysToSignUpClicked)
@@ -306,7 +310,7 @@ private fun PasskeyInformationTab(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(dimensionResource(R.dimen.size_standard)))
-            .background(grayBackground)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh) // Changed for theme-aware distinction
             .padding(dimensionResource(R.dimen.padding_large)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
     ) {
@@ -327,7 +331,7 @@ private fun PasskeyInformationTab(
                     text = "",
                     clickableText = stringResource(R.string.other_ways_to_sign_up),
                     onTextClick = onOtherWaysToSignUpClicked,
-                    textStyle = TextStyle(color = Color(0xFF006B5F)),
+                    textStyle = MaterialTheme.typography.bodyMedium,
                 )
             }
 

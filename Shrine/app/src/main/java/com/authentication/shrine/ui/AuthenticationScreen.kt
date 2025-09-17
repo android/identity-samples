@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -41,6 +40,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.authentication.shrine.CredentialManagerUtils
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.LogoHeading
@@ -171,31 +171,36 @@ fun AuthenticationScreen(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_extra_large)))
 
-            // Sign In with passkey or password Button
-            ShrineButton(
-                onClick = onSignInWithPasskeyOrPasswordRequest,
-                buttonText = stringResource(id = R.string.sign_in),
-                isButtonEnabled = !uiState.isLoading,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Sign In with passkey or password Button
+                ShrineButton(
+                    onClick = onSignInWithPasskeyOrPasswordRequest,
+                    buttonText = stringResource(id = R.string.sign_in),
+                    isButtonEnabled = !uiState.isLoading,
+                )
 
-            // Sign Up Button
-            ShrineButton(
-                onClick = navigateToRegister,
-                buttonText = stringResource(id = R.string.sign_up),
-                isButtonDark = false,
-                isButtonEnabled = !uiState.isLoading,
-            )
+                // Sign Up Button
+                ShrineButton(
+                    onClick = navigateToRegister,
+                    buttonText = stringResource(id = R.string.sign_up),
+                    usePrimaryColor = false,
+                    isButtonEnabled = !uiState.isLoading,
+                )
 
-            // Sign in with Google image
-            Image(
-                painter = painterResource(id = R.drawable.siwg_button_light),
-                contentDescription = stringResource(R.string.sign_in_with_google_button),
-                modifier = Modifier
-                    .height(dimensionResource(R.dimen.siwg_button_height))
-                    .clickable(
-                        enabled = !uiState.isLoading,
-                        onClick = onSignInWithSignInWithGoogleRequest)
-            )
+                // Sign in with Google image
+                Image(
+                    painter = painterResource(id = R.drawable.siwg_button_light),
+                    contentDescription = stringResource(R.string.sign_in_with_google_button),
+                    modifier = Modifier
+                        .height(dimensionResource(R.dimen.siwg_button_height))
+                        .clickable(
+                            enabled = !uiState.isLoading,
+                            onClick = onSignInWithSignInWithGoogleRequest)
+                )
+            }
         }
 
         if (uiState.isLoading) {

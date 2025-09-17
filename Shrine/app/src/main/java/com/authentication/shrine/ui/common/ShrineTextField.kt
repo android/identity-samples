@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,7 +31,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.grayBackground
 
 @Composable
 fun ShrineTextField(
@@ -43,7 +43,10 @@ fun ShrineTextField(
             .padding(horizontal = dimensionResource(R.dimen.padding_small)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_extra_small)),
     ) {
-        Text(text = title)
+        Text(
+            text = title,
+            color = MaterialTheme.colorScheme.onSurface
+        )
 
         OutlinedTextField(
             value = text,
@@ -53,24 +56,34 @@ fun ShrineTextField(
             enabled = false,
             shape = RoundedCornerShape(dimensionResource(R.dimen.size_standard)),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.onBackground,
-                errorBorderColor = MaterialTheme.colorScheme.error,
-                focusedContainerColor = grayBackground,
-                unfocusedContainerColor = grayBackground,
-                disabledContainerColor = grayBackground,
-                errorContainerColor = grayBackground,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface
             ),
         )
     }
 }
 
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, name = "ShrineTextField Light")
 @Composable
-fun ShrineTextFieldPreview() {
-    ShrineTheme {
-        ShrineTextField(
-            "Full Name",
-            "ABC XYZ",
-        )
+fun ShrineTextFieldPreviewLight() {
+    ShrineTheme(darkTheme = false) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ShrineTextField(
+                "Full Name",
+                "ABC XYZ",
+            )
+        }
+    }
+}
+
+@Preview(showSystemUi = true, name = "ShrineTextField Dark")
+@Composable
+fun ShrineTextFieldPreviewDark() {
+    ShrineTheme(darkTheme = true) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ShrineTextField(
+                "Full Name",
+                "ABC XYZ",
+            )
+        }
     }
 }
