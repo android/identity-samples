@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -64,6 +65,6 @@ fun ShrineClickableText(
     BasicText(
         modifier = modifier,
         text = annotatedText,
-        style = textStyle.copy(color = MaterialTheme.colorScheme.onBackground),
+        style = textStyle.copy(color = textStyle.color.takeOrElse { MaterialTheme.colorScheme.onSurface }),
     )
 }

@@ -62,7 +62,6 @@ fun ShrineButton(
     usePrimaryColor: Boolean = true,
     isButtonEnabled: Boolean = true,
     shape: Shape = ButtonShape,
-    border: BorderStroke? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val isDarkTheme = isSystemInDarkTheme()
