@@ -16,6 +16,7 @@
 package com.authentication.shrine.ui.common
 
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.LinkAnnotation
@@ -44,21 +45,25 @@ fun ShrineClickableText(
     modifier: Modifier = Modifier,
 ) {
     val annotatedText = buildAnnotatedString {
-        append(text)
-        withLink(
-            link = LinkAnnotation.Clickable(
-                tag = "url",
-                styles = TextLinkStyles(style = SpanStyle(fontWeight = FontWeight.Bold)),
-                linkInteractionListener = { onTextClick() },
-            ),
-        ) {
-            append(clickableText)
+        if (text.isNotEmpty()) {
+            append("$text ")
+        }
+        if (clickableText.isNotEmpty()) {
+            withLink(
+                link = LinkAnnotation.Clickable(
+                    tag = "url",
+                    styles = TextLinkStyles(style = SpanStyle(fontWeight = FontWeight.Bold)),
+                    linkInteractionListener = { onTextClick() },
+                ),
+            ) {
+                append(clickableText)
+            }
         }
     }
 
     BasicText(
         modifier = modifier,
         text = annotatedText,
-        style = textStyle,
+        style = textStyle.copy(color = MaterialTheme.colorScheme.onBackground),
     )
 }

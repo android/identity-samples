@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -37,7 +38,6 @@ import com.authentication.shrine.R
 import com.authentication.shrine.ui.common.LogoHeading
 import com.authentication.shrine.ui.common.ShrineButton
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.greenBackground
 import com.authentication.shrine.ui.viewmodel.HomeViewModel
 
 /**
@@ -104,7 +104,7 @@ fun MainMenuScreen(
     ) { contentPadding ->
         Column(
             modifier = Modifier
-                .background(greenBackground)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(contentPadding)
                 .fillMaxHeight()
                 .padding(dimensionResource(R.dimen.padding_medium)),
@@ -156,7 +156,7 @@ private fun MainMenuButtonsList(
         ShrineButton(
             onClick = onSettingsButtonClicked,
             buttonText = stringResource(R.string.settings),
-            isButtonDark = false,
+            usePrimaryColor = false,
         )
 
         ShrineButton(
@@ -170,7 +170,7 @@ private fun MainMenuButtonsList(
                 navigateToLogin()
             },
             buttonText = stringResource(R.string.sign_out),
-            isButtonDark = false,
+            usePrimaryColor = false,
         )
     }
 }

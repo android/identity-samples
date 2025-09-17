@@ -15,8 +15,10 @@
  */
 package com.authentication.shrine.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -59,7 +62,6 @@ import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.common.ShrineTextHeader
 import com.authentication.shrine.ui.common.ShrineToolbar
 import com.authentication.shrine.ui.theme.ShrineTheme
-import com.authentication.shrine.ui.theme.grayBackground
 import com.authentication.shrine.ui.viewmodel.PasskeyManagementUiState
 import com.authentication.shrine.ui.viewmodel.PasskeyManagementViewModel
 import com.authentication.shrine.utility.toReadableDate
@@ -165,7 +167,7 @@ fun PasskeyManagementScreen(
                     onClick = onCreatePasskeyClicked,
                     buttonText = stringResource(R.string.create_passkey),
                     modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
-                    isButtonDark = false,
+                    usePrimaryColor = false,
                     isButtonEnabled = !uiState.isLoading,
                 )
             }
@@ -201,11 +203,13 @@ fun PasskeysListColumn(
     passkeysList: List<PasskeyCredential>,
     aaguidData: Map<String, Map<String, String>>,
 ) {
+    val shape = RoundedCornerShape(dimensionResource(R.dimen.padding_small))
     LazyColumn(
         modifier = Modifier
             .padding(dimensionResource(R.dimen.padding_small))
-            .clip(RoundedCornerShape(dimensionResource(R.dimen.padding_small)))
-            .background(grayBackground)
+            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shape = shape)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(dimensionResource(R.dimen.padding_small))
             .fillMaxWidth(),
     ) {
@@ -227,7 +231,7 @@ fun PasskeysListColumn(
                             horizontal = dimensionResource(R.dimen.dimen_standard)
                         ),
                         thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
@@ -278,11 +282,13 @@ fun PasskeysDetailsRow(
                 text = credentialProviderName,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
                 text = stringResource(R.string.created, passkeyCreationDate),
                 style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -294,7 +300,7 @@ fun PasskeysDetailsRow(
             Text(
                 text = stringResource(R.string.delete),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -307,24 +313,26 @@ fun PasskeysDetailsRow(
 @Composable
 fun PasskeyManagementScreenPreview() {
     ShrineTheme {
-        PasskeyManagementScreen(
-            onLearnMoreClicked = { },
-            onBackClicked = { },
-            onCreatePasskeyClicked = { },
-            onDeleteClicked = { },
-            uiState = PasskeyManagementUiState(),
-            passkeysList = listOf(
-                PasskeyCredential(
-                    "123",
-                    "234",
-                    "name",
-                    "passkey",
-                    "aaguid",
-                    1L,
-                    "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4"
-                )
-            ),
-            aaguidData = mapOf(),
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            PasskeyManagementScreen(
+                onLearnMoreClicked = { },
+                onBackClicked = { },
+                onCreatePasskeyClicked = { },
+                onDeleteClicked = { },
+                uiState = PasskeyManagementUiState(),
+                passkeysList = listOf(
+                    PasskeyCredential(
+                        id = "preview-id-1",
+                        name = "Preview Passkey",
+                        passkeyUserId = "user@preview.com",
+                        credentialType = "public-key",
+                        aaguid = "00000000-0000-0000-0000-000000000000",
+                        registeredAt = System.currentTimeMillis(),
+                        providerIcon = ""
+                    )
+                ),
+                aaguidData = mapOf(),
+            )
+        }
     }
 }
