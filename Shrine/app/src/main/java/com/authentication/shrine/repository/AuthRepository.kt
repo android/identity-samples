@@ -80,6 +80,9 @@ class AuthRepository @Inject constructor(
         val DISPLAYNAME = stringPreferencesKey("displayname")
         val IS_SIGNED_IN_THROUGH_PASSKEYS = booleanPreferencesKey("is_signed_passkeys")
         val SESSION_ID = stringPreferencesKey("session_id")
+        val RP_ID_KEY = stringPreferencesKey("rp_id_key")
+        val USER_ID_KEY = stringPreferencesKey("user_id_key")
+        val CRED_ID = stringPreferencesKey("cred_id")
         val RESTORE_KEY_CREDENTIAL_ID = stringPreferencesKey("restore_key_credential_id")
 
         // Value for restore credential AuthApiService parameter
@@ -157,7 +160,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-
     /**
      * Signs in with a password.
      *
@@ -225,6 +227,7 @@ class AuthRepository @Inject constructor(
                 )
                 if (response.isSuccessful) {
                     dataStore.edit { prefs ->
+                        prefs[RP_ID_KEY] = response.body()?.rp?.id ?: ""
                         response.getSessionId()?.also {
                             prefs[SESSION_ID] = it
                         }
@@ -295,6 +298,7 @@ class AuthRepository @Inject constructor(
                 )
                 if (apiResult.isSuccessful) {
                     dataStore.edit { prefs ->
+                        prefs[CRED_ID] = rawId
                         if (credentialResponse is CreateRestoreCredentialResponse) {
                             prefs[RESTORE_KEY_CREDENTIAL_ID] = rawId
                         }
@@ -329,6 +333,7 @@ class AuthRepository @Inject constructor(
             val response = authApiService.signInRequest()
             if (response.isSuccessful) {
                 dataStore.edit { prefs ->
+                    prefs[RP_ID_KEY] = response.body()?.rpId ?: ""
                     response.getSessionId()?.also {
                         prefs[SESSION_ID] = it
                     }
@@ -390,6 +395,7 @@ class AuthRepository @Inject constructor(
                         )
                         return if (apiResult.isSuccessful) {
                             dataStore.edit { prefs ->
+                                prefs[CRED_ID] = credentialId
                                 apiResult.getSessionId()?.also {
                                     prefs[SESSION_ID] = it
                                 }
@@ -430,15 +436,22 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
+<<<<<<< HEAD
         credentialResponse: GetCredentialResponse
     ): AuthResult<Unit> {
         return try {
             val credential = credentialResponse.credential
+=======
+        credentialResponse: GetCredentialResponse,
+    ): Boolean {
+        val credential = credentialResponse.credential
+        try {
+>>>>>>> b12d692 (Add spotless fixes)
             if (credential is CustomCredential) {
                 val isSuccess = verifyIdToken(
                     sessionId,
                     GoogleIdTokenCredential
-                        .createFrom(credential.data).idToken
+                        .createFrom(credential.data).idToken,
                 )
                 if (isSuccess) {
                     AuthResult.Success(Unit)
@@ -566,6 +579,9 @@ class AuthRepository @Inject constructor(
                 cookie = sessionId.createCookieHeader(),
             )
             if (apiResult.isSuccessful) {
+                dataStore.edit { prefs ->
+                    prefs[USER_ID_KEY] = apiResult.body()?.userId ?: ""
+                }
                 return apiResult.body()
             } else if (apiResult.code() == 401) {
                 signOut()
@@ -655,7 +671,7 @@ class AuthRepository @Inject constructor(
     suspend fun verifyIdToken(sessionId: String, token: String): Boolean {
         val apiResult = authApiService.verifyIdToken(
             cookie = sessionId.createCookieHeader(),
-            requestParams = SignInWithGoogleRequest(token = token)
+            requestParams = SignInWithGoogleRequest(token = token),
         )
 
         if (apiResult.isSuccessful) {

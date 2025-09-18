@@ -45,7 +45,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
  */
 class CredentialManagerAuthenticator(
     applicationContext: Context,
-    private val authenticationServer: AuthenticationServer
+    private val authenticationServer: AuthenticationServer,
 ) {
     private val credentialManager: CredentialManager = CredentialManager.create(applicationContext)
 
@@ -96,14 +96,14 @@ class CredentialManagerAuthenticator(
             is PasswordCredential -> {
                 return authenticationServer.loginWithPassword(
                     credential.id,
-                    credential.password
+                    credential.password,
                 )
             }
 
             is CustomCredential -> {
                 return authenticationServer.loginWithCustomCredential(
                     credential.type,
-                    credential.data
+                    credential.data,
                 )
             }
 

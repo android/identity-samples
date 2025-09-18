@@ -54,7 +54,7 @@ class CredentialManagerViewModel : ViewModel() {
             } catch (e: GetCredentialCancellationException) {
                 Log.i(
                     TAG,
-                    "Dismissed, launching old authentication. Exception: %s".format(e.message)
+                    "Dismissed, launching old authentication. Exception: %s".format(e.message),
                 )
                 Graph.updateAuthenticationState(AuthenticationState.DISMISSED_BY_USER)
             } catch (_: NoCredentialException) {
