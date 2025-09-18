@@ -73,6 +73,7 @@ class SettingsViewModel @Inject constructor(
                             isLoading = false,
                             userHasPasskeys = filteredPasskeysList.isNotEmpty(),
                             username = authRepository.getUsername(),
+                            displayname = authRepository.getDisplayname(),
                             passkeysList = filteredPasskeysList,
                         )
                     }
@@ -117,6 +118,7 @@ data class SettingsUiState(
     val isLoading: Boolean = false,
     val userHasPasskeys: Boolean = true,
     val username: String = "",
+    val displayname: String = "",
     val passkeysList: List<PasskeyCredential> = listOf(),
     val passwordChanged: String = "",
     @StringRes val messageResourceId: Int = R.string.empty_string,

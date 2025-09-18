@@ -15,15 +15,30 @@
  */
 package com.authentication.shrine.model
 
+import com.google.gson.annotations.SerializedName
+
 /**
- * Represents the request body for setting or updating a username.
+ * Represents the request body for setting or updating an existing username.
  * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
  * when making API calls related to username management.
  *
  * @property username The username to be set or updated.
  */
-data class UsernameRequest(
+data class EditUsernameRequest(
     val username: String,
+)
+
+/**
+ * Represents the request body for registering a new username.
+ * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
+ * when making API calls related to new user registration.
+ *
+ * @property username The username to be registered.
+ * @property displayName The display name for the new user.
+ */
+data class RegisterUsernameRequest(
+    val username: String,
+    val displayName: String,
 )
 
 /**

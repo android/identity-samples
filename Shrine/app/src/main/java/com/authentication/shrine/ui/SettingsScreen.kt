@@ -141,7 +141,7 @@ fun SettingsScreen(
 
             ShrineTextField(
                 title = stringResource(R.string.full_name),
-                text = uiState.username,
+                text = uiState.displayname,
             )
 
             ShrineTextField(

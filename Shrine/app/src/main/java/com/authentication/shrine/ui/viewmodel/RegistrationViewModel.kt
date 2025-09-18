@@ -51,20 +51,22 @@ class RegistrationViewModel @Inject constructor(
      * Registers a new user with a passkey.
      *
      * @param username The username of the new user.
+     * @param displayName The display name of the new user.
      * @param onSuccess Lambda to be invoked when the registration is successful.
      * @param createPasskeyCallback Lambda to be invoked after login is successful, usually to
      * navigate to the next screen.
      */
     fun onPasskeyRegister(
         username: String,
+        displayName: String,
         onSuccess: (navigateToHome: Boolean) -> Unit,
         createPasskeyCallback: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
         _uiState.update { it.copy(isLoading = true) }
 
-        if (username.isNotEmpty()) {
+        if (username.isNotEmpty() && displayName.isNotEmpty()) {
             viewModelScope.launch {
-                when (val result = repository.registerUsername(username)) {
+                when (val result = repository.registerUsername(username, displayName)) {
                     is AuthResult.Success -> {
                         // Now create the passkey and register with the server
                         createPasskey(onSuccess, createPasskeyCallback)
@@ -98,7 +100,7 @@ class RegistrationViewModel @Inject constructor(
         } else {
             _uiState.update {
                 it.copy(
-                    messageResourceId = R.string.enter_valid_username,
+                    messageResourceId = R.string.enter_valid_username_and_display_name,
                     isLoading = false
                 )
             }

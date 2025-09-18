@@ -52,6 +52,7 @@
     <string name="passkey_icon">Passkey Icon</string>
     <string name="wait_signing_you_in">Wait, signing you in.</string>
     <string name="enter_valid_username_and_password">Enter valid username and password</string>
+    <string name="enter_valid_username_and_display_name">Enter valid username and display name</string>
     <string name="shrine_app_menu_mockup">shrine app menu mockup</string>
     <string name="large_shrine_logo">large shrine logo</string>
     <string name="demo">Demo</string>
