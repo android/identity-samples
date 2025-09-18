@@ -15,8 +15,6 @@
  */
 package com.authentication.shrine.model
 
-import com.google.gson.annotations.SerializedName
-
 /**
  * Represents the request body for setting or updating an existing username.
  * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
