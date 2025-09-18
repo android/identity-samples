@@ -275,6 +275,9 @@ class PasskeyManagementViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update list of items
+     */
     fun updateItem(index: Int, passkeysList: List<PasskeyCredential>) {
         _uiState.update {
             it.copy(

@@ -181,6 +181,7 @@ fun ShrineNavGraph(
 
         composable(route = ShrineAppDestinations.UpdateProfileRoute.name) {
             UpdateProfileScreen(
+                onBackClicked = { navController.popBackStack() },
                 viewModel = hiltViewModel(),
             )
         }

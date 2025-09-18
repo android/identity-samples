@@ -104,4 +104,6 @@
     <string name="error_invalid_credentials">Invalid credentials. Please check your username and password.</string>
     <string name="update_user_info">Update User Info</string>
     <string name="update_profile">Update Profile</string>
+    <string name="accept_selected_credentials">Accept selected credentials</string>
+    <string name="display_name">Display Name</string>
 </resources>

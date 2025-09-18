@@ -33,8 +33,16 @@ import com.authentication.shrine.ui.common.ShrineToolbar
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.viewmodel.UpdateProfileViewModel
 
+/**
+ * A stateful Composable screen that allows users to update their profile information,
+ * specifically their username and display name.
+ *
+ * @param onBackClicked Lambda to be invoked when the back button in the toolbar is clicked.
+ * @param viewModel An instance of [UpdateProfileViewModel] used to handle the business logic
+ */
 @Composable
 fun UpdateProfileScreen(
+    onBackClicked: () -> Unit,
     viewModel: UpdateProfileViewModel,
 ) {
     var username by remember { mutableStateOf("") }
@@ -43,24 +51,39 @@ fun UpdateProfileScreen(
     UpdateProfileScreen(
         username = username,
         onUsernameChanged = { username = it },
-        email = email,
-        onEmailChanged = { email = it },
+        displayName = email,
+        onDisplayNameChanged = { email = it },
         onMetadataUpdate = viewModel::updateMetadata,
+        onBackClicked = onBackClicked,
     )
 }
 
+/**
+ * A stateless Composable screen that provides the UI for updating user profile information.
+ *
+ * @param username The current value of the username to be displayed in the text field.
+ * @param onUsernameChanged Lambda to update the username on change.
+ * @param displayName The current value of the display name to be displayed in the text field.
+ * @param onDisplayNameChanged Lambda to update the display name on change
+ * @param onMetadataUpdate Lambda function that is invoked when the update button is clicked.
+ *                         It receives the current username and display name strings as parameters,
+ * @param onBackClicked Lambda function to be invoked when the back button in the toolbar is clicked
+ */
 @Composable
 fun UpdateProfileScreen(
     username: String,
     onUsernameChanged: (String) -> Unit,
-    email: String,
-    onEmailChanged: (String) -> Unit,
+    displayName: String,
+    onDisplayNameChanged: (String) -> Unit,
     onMetadataUpdate: (String, String) -> Unit,
+    onBackClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        ShrineToolbar(onBackClicked = {})
+        ShrineToolbar(
+            onBackClicked = onBackClicked
+        )
 
         ShrineTextField(
             value = username,
@@ -70,29 +93,33 @@ fun UpdateProfileScreen(
         )
 
         ShrineTextField(
-            value = email,
-            onValueChange = onEmailChanged,
-            hint = stringResource(R.string.email_address),
+            value = displayName,
+            onValueChange = onDisplayNameChanged,
+            hint = stringResource(R.string.display_name),
             modifier = Modifier.fillMaxWidth(),
         )
 
         ShrineButton(
-            onClick = { onMetadataUpdate(username, email) },
+            onClick = { onMetadataUpdate(username, displayName) },
             buttonText = stringResource(R.string.update_user_info),
         )
     }
 }
 
+/**
+ * Preview Composable function of [UpdateProfileScreen]
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun TestPreview() {
     ShrineTheme {
         UpdateProfileScreen(
-            "",
-            {},
-            "",
-            {},
-            { _, _ -> },
+            username = "",
+            onUsernameChanged = { },
+            displayName = "",
+            onDisplayNameChanged = { },
+            onMetadataUpdate = { _, _ -> },
+            onBackClicked = { }
         )
     }
 }

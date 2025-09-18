@@ -44,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 <<<<<<< HEAD
 =======
-import androidx.compose.runtime.getValue
 >>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -112,7 +111,7 @@ fun PasskeyManagementScreen(
 
     val onSignalBtnClicked = {
         val credentialIdsList = passkeysList
-            .filter { !it.isSelected }
+            .filter { it.isSelected }
             .map { it.id }
         if (credentialIdsList.isNotEmpty()) {
             viewModel.signalAccepted(credentialIdsList)
@@ -191,7 +190,7 @@ fun PasskeyManagementScreen(
 
                 ShrineButton(
                     onClick = onSignal,
-                    buttonText = "Delete selected credentials",
+                    buttonText = stringResource(R.string.accept_selected_credentials),
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {

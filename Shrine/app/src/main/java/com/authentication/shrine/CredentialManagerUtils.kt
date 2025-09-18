@@ -46,6 +46,7 @@ import com.authentication.shrine.repository.AuthRepository.Companion.USER_ID_KEY
 import com.authentication.shrine.repository.AuthRepository.Companion.read
 import com.authentication.shrine.repository.SERVER_CLIENT_ID
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -264,8 +265,11 @@ class CredentialManagerUtils @Inject constructor(
         credentialId: String,
     ) {
         credentialManager.signalCredentialState(
-            SignalUnknownCredentialRequest(
-                """{"rpId":"${dataStore.read(RP_ID_KEY)}", "credentialId":"$credentialId"}""",
+            request = SignalUnknownCredentialRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("credentialId", credentialId)
+                }.toString()
             ),
         )
     }
@@ -275,8 +279,12 @@ class CredentialManagerUtils @Inject constructor(
         credentialIds: List<String>,
     ) {
         credentialManager.signalCredentialState(
-            SignalAllAcceptedCredentialIdsRequest(
-                """{"rpId":"${dataStore.read(RP_ID_KEY)}","userId":"${dataStore.read(USER_ID_KEY)}","allAcceptedCredentialIds":["${credentialIds.joinToString(",")}"]}""",
+            request = SignalAllAcceptedCredentialIdsRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("userId", dataStore.read(USER_ID_KEY))
+                    put("allAcceptedCredentialIds", JSONArray(credentialIds))
+                }.toString()
             ),
         )
     }
@@ -287,8 +295,13 @@ class CredentialManagerUtils @Inject constructor(
         newDisplayName: String,
     ) {
         credentialManager.signalCredentialState(
-            SignalCurrentUserDetailsRequest(
-                """{"rpId":"${dataStore.read(RP_ID_KEY)}","userId":"${dataStore.read(USER_ID_KEY)}", "name":"$newName","displayName":"$newDisplayName"}""",
+            request = SignalCurrentUserDetailsRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("userId", dataStore.read(USER_ID_KEY))
+                    put("name", newName)
+                    put("displayName", newDisplayName)
+                }.toString()
             ),
         )
     }

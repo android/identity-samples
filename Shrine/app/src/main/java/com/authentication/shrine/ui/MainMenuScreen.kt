@@ -180,7 +180,7 @@ private fun MainMenuButtonsList(
 
         ShrineButton(
             onClick = navigateToUpdateProfile,
-            buttonText = "Update Profile",
+            buttonText = stringResource(R.string.update_profile),
         )
     }
 }
