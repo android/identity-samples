@@ -106,6 +106,7 @@ fun RegisterScreen(
     val onPasskeyRegister = { emailAddress: String ->
         viewModel.onPasskeyRegister(
             username = emailAddress,
+            displayName = fullName,
             onSuccess = { flag ->
                 createRestoreKey()
                 navigateToHome(flag)

@@ -34,15 +34,16 @@ import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.AuthError
 import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.model.CredmanResponse
+import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
 import com.authentication.shrine.model.RegisterResponseRequestBody
+import com.authentication.shrine.model.RegisterUsernameRequest
 import com.authentication.shrine.model.ResponseObject
 import com.authentication.shrine.model.SignInResponseRequest
 import com.authentication.shrine.model.SignInWithGoogleRequest
-import com.authentication.shrine.model.UsernameRequest
 import com.authentication.shrine.utility.createCookieHeader
 import com.authentication.shrine.utility.getJsonObject
 import com.authentication.shrine.utility.getSessionId
@@ -76,6 +77,7 @@ class AuthRepository @Inject constructor(
 
         // Keys for SharedPreferences
         val USERNAME = stringPreferencesKey("username")
+        val DISPLAYNAME = stringPreferencesKey("displayname")
         val IS_SIGNED_IN_THROUGH_PASSKEYS = booleanPreferencesKey("is_signed_passkeys")
         val SESSION_ID = stringPreferencesKey("session_id")
         val RESTORE_KEY_CREDENTIAL_ID = stringPreferencesKey("restore_key_credential_id")
@@ -93,14 +95,17 @@ class AuthRepository @Inject constructor(
      * Registers the username with the server.
      *
      * @param username The username to send.
+     * @param displayName The display name to send.
      * @return True if the login was successful, false otherwise.
      */
-    suspend fun registerUsername(username: String): AuthResult<Unit> {
+    suspend fun registerUsername(username: String, displayName: String): AuthResult<Unit> {
         return try {
-            val response = authApiService.registerUsername(UsernameRequest(username))
+            val response = authApiService.registerUsername(RegisterUsernameRequest(username, displayName))
             if (response.isSuccessful) {
                 dataStore.edit { prefs ->
+                    // Use local values since server doesn't return response with these fields.
                     prefs[USERNAME] = username
+                    prefs[DISPLAYNAME] = displayName
                     response.getSessionId()?.also {
                         prefs[SESSION_ID] = it
                     }
@@ -128,10 +133,11 @@ class AuthRepository @Inject constructor(
      */
     suspend fun login(username: String, password: String): AuthResult<Unit> {
         return try {
-            val response = authApiService.setUsername(UsernameRequest(username = username))
+            val response = authApiService.setUsername(EditUsernameRequest(username = username))
             if (response.isSuccessful) {
                 dataStore.edit { prefs ->
-                    prefs[USERNAME] = username
+                    prefs[USERNAME] = response.body()?.username.orEmpty()
+                    prefs[DISPLAYNAME] = response.body()?.displayName.orEmpty()
                     response.getSessionId()?.also {
                         prefs[SESSION_ID] = it
                     }
@@ -170,6 +176,7 @@ class AuthRepository @Inject constructor(
                 if (response.isSuccessful) {
                     dataStore.edit { prefs ->
                         prefs[USERNAME] = response.body()?.username.orEmpty()
+                        prefs[DISPLAYNAME] = response.body()?.displayName.orEmpty()
                         response.getSessionId()?.also {
                             prefs[SESSION_ID] = it
                         }
@@ -196,6 +203,7 @@ class AuthRepository @Inject constructor(
     suspend fun signOut() {
         dataStore.edit { prefs ->
             prefs.remove(USERNAME)
+            prefs.remove(DISPLAYNAME)
             prefs.remove(SESSION_ID)
             prefs.remove(IS_SIGNED_IN_THROUGH_PASSKEYS)
             prefs.remove(RESTORE_KEY_CREDENTIAL_ID)
@@ -386,6 +394,7 @@ class AuthRepository @Inject constructor(
                                     prefs[SESSION_ID] = it
                                 }
                                 prefs[USERNAME] = apiResult.body()?.username ?: ""
+                                prefs[DISPLAYNAME] = apiResult.body()?.displayName.orEmpty()
                             }
                             AuthResult.Success(Unit)
                         } else {
@@ -531,6 +540,18 @@ class AuthRepository @Inject constructor(
      */
     suspend fun getUsername(): String {
         return dataStore.read(USERNAME).orEmpty()
+    }
+
+    /**
+     * Retrieves the stored displayname asynchronously.
+     *
+     * This is a suspend function that reads the displayname from the data store.
+     *
+     * @return The stored displayname as a [String]. Returns an empty string if no displayname is
+     * found.
+     */
+    suspend fun getDisplayname(): String {
+        return dataStore.read(DISPLAYNAME).orEmpty()
     }
 
     /**

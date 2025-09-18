@@ -15,6 +15,7 @@
  */
 package com.authentication.shrine.api
 
+import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.GenericAuthResponse
 import com.authentication.shrine.model.PasskeysList
@@ -22,10 +23,10 @@ import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
 import com.authentication.shrine.model.RegisterRequestResponse
 import com.authentication.shrine.model.RegisterResponseRequestBody
+import com.authentication.shrine.model.RegisterUsernameRequest
 import com.authentication.shrine.model.SignInRequestResponse
 import com.authentication.shrine.model.SignInResponseRequest
 import com.authentication.shrine.model.SignInWithGoogleRequest
-import com.authentication.shrine.model.UsernameRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -47,7 +48,7 @@ interface AuthApiService {
      */
     @POST("auth/username")
     suspend fun setUsername(
-        @Body username: UsernameRequest,
+        @Body username: EditUsernameRequest,
     ): Response<GenericAuthResponse>
 
     /**
@@ -141,12 +142,12 @@ interface AuthApiService {
     /**
      * Registers a username with the authentication server.
      *
-     * @param username The username to be used for sign-in.
+     * @param username The request body containing the username and display name.
      * @return A [Response] indicating the success or failure of the operation.
      */
     @POST("auth/new-user")
     suspend fun registerUsername(
-        @Body username: UsernameRequest,
+        @Body username: RegisterUsernameRequest,
     ): Response<GenericAuthResponse>
 
     /**
