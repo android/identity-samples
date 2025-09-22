@@ -70,7 +70,7 @@ class AuthenticationViewModel @Inject constructor(
         onSuccess: (Boolean) -> Unit,
         getCredential: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { AuthenticationUiState(isLoading = true) }
         viewModelScope.launch {
             when (val result = repository.signInWithPasskeyOrPasswordRequest()) {
                 is AuthResult.Success -> {
@@ -165,7 +165,7 @@ class AuthenticationViewModel @Inject constructor(
         onSuccess: (Boolean) -> Unit,
         getCredential: suspend () -> GenericCredentialManagerResponse,
     ) {
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { AuthenticationUiState(isLoading = true) }
         viewModelScope.launch {
             val credentialResponse = getCredential()
             if (credentialResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
@@ -255,7 +255,7 @@ class AuthenticationViewModel @Inject constructor(
                         val restoreKeyResponse = getRestoreKey(result.data)
                         if (restoreKeyResponse is GenericCredentialManagerResponse.GetCredentialSuccess) {
                             _uiState.update {
-                                it.copy(isLoading = true)
+                                AuthenticationUiState(isLoading = true)
                             }
                             signInWithPasskeyOrPasswordResponse(
                                 response = restoreKeyResponse.getCredentialResponse,

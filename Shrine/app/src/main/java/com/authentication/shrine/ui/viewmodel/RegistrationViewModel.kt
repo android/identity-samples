@@ -62,7 +62,7 @@ class RegistrationViewModel @Inject constructor(
         onSuccess: (navigateToHome: Boolean) -> Unit,
         createPasskeyCallback: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { RegisterUiState(isLoading = true) }
 
         if (username.isNotEmpty() && displayName.isNotEmpty()) {
             viewModelScope.launch {

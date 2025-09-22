@@ -69,7 +69,6 @@ fun AuthenticationScreen(
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    var isFirstCheckForRestoreKey by remember { mutableStateOf(true) }
 
     // Passing in the lambda / context to the VM
     val context = LocalContext.current
@@ -110,18 +109,6 @@ fun AuthenticationScreen(
                 credentialManagerUtils.getSignInWithGoogleCredential(
                     context = context,
                 )
-            },
-        )
-    }
-
-    if (isFirstCheckForRestoreKey) {
-        isFirstCheckForRestoreKey = false
-        viewModel.checkForStoredRestoreKey(
-            getRestoreKey = { requestResult ->
-                credentialManagerUtils.getRestoreKey(requestResult, context)
-            },
-            onSuccess = {
-                navigateToHome(true)
             },
         )
     }
@@ -207,30 +194,21 @@ fun AuthenticationScreen(
             ShrineLoader()
         }
 
-        if (!uiState.isSignInWithPasskeysSuccess) {
-            val snackbarMessage = stringResource(uiState.passkeyResponseMessageResourceId)
-            if (snackbarMessage.isNotBlank()) {
-                LaunchedEffect(uiState) {
-                    snackbarHostState.showSnackbar(
-                        message = snackbarMessage,
-                    )
-                }
+        val snackbarMessage: String? = when {
+            !uiState.passkeyRequestErrorMessage.isNullOrBlank() -> uiState.passkeyRequestErrorMessage
+            !uiState.signInWithGoogleRequestErrorMessage.isNullOrBlank() -> uiState.signInWithGoogleRequestErrorMessage
+            uiState.logInWithFederatedTokenFailure -> stringResource(R.string.sign_in_with_google_response_error_message)
+            !uiState.isSignInWithPasskeysSuccess && stringResource(uiState.passkeyResponseMessageResourceId).isNotBlank() -> {
+                stringResource(uiState.passkeyResponseMessageResourceId)
             }
+            else -> null
         }
-    }
-
-    val snackbarMessage = when {
-        !uiState.passkeyRequestErrorMessage.isNullOrBlank() -> uiState.passkeyRequestErrorMessage
-        !uiState.signInWithGoogleRequestErrorMessage.isNullOrBlank() -> uiState.signInWithGoogleRequestErrorMessage
-        uiState.logInWithFederatedTokenFailure -> stringResource(R.string.sign_in_with_google_response_error_message)
-        else -> null
-    }
-
-    if (snackbarMessage != null) {
-        LaunchedEffect(snackbarMessage) {
-            snackbarHostState.showSnackbar(
-                message = snackbarMessage
-            )
+        LaunchedEffect(uiState) {
+            snackbarMessage?.let {
+                snackbarHostState.showSnackbar(
+                    message = it,
+                )
+            }
         }
     }
 }

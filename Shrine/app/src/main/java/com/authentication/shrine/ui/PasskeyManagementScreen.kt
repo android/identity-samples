@@ -182,10 +182,10 @@ fun PasskeyManagementScreen(
             else -> null
         }
 
-        if (snackbarMessage != null) {
-            LaunchedEffect(snackbarMessage) {
+        LaunchedEffect(uiState) {
+            snackbarMessage?.let {
                 snackbarHostState.showSnackbar(
-                    message = snackbarMessage
+                    message = it
                 )
             }
         }
