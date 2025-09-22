@@ -100,7 +100,7 @@
     <string name="sign_in_with_google_button">Sign in with Google</string>
     <string name="error_network">A network error occurred. Please check your connection and try again.</string>
     <string name="error_user_exists">This username is already taken. Please choose another one.</string>
-    <string name="error_server">An unexpected server error occurred.</string>
+    <string name="error_server">A server error occurred.</string>
     <string name="error_unknown">An unknown error occurred.</string>
     <string name="error_invalid_credentials">Invalid credentials. Please check your username and password.</string>
 </resources>

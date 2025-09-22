@@ -51,6 +51,7 @@ import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import okhttp3.ResponseBody
 import org.json.JSONObject
 import java.io.IOException
 import javax.inject.Inject
@@ -100,7 +101,8 @@ class AuthRepository @Inject constructor(
      */
     suspend fun registerUsername(username: String, displayName: String): AuthResult<Unit> {
         return try {
-            val response = authApiService.registerUsername(RegisterUsernameRequest(username, displayName))
+            val response =
+                authApiService.registerUsername(RegisterUsernameRequest(username, displayName))
             if (response.isSuccessful) {
                 dataStore.edit { prefs ->
                     // Use local values since server doesn't return response with these fields.
@@ -115,7 +117,7 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(response.message()))
+                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -148,7 +150,7 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(response.message()))
+                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -235,7 +237,7 @@ class AuthRepository @Inject constructor(
                     if (response.code() == 401) {
                         signOut()
                     }
-                    AuthResult.Failure(AuthError.ServerError(response.message()))
+                    AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
                 }
             } else {
                 AuthResult.Failure(AuthError.Unknown(null))
@@ -307,7 +309,7 @@ class AuthRepository @Inject constructor(
                     if (apiResult.code() == 401) {
                         signOut()
                     }
-                    AuthResult.Failure(AuthError.ServerError(apiResult.message()))
+                    AuthResult.Failure(AuthError.ServerError(parseResponseError(apiResult.errorBody()!!)))
                 }
             } else {
                 AuthResult.Failure(AuthError.Unknown(null))
@@ -339,7 +341,7 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(response.message()))
+                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -401,7 +403,11 @@ class AuthRepository @Inject constructor(
                             if (apiResult.code() == 401) {
                                 signOut()
                             }
-                            AuthResult.Failure(AuthError.ServerError(apiResult.message()))
+                            AuthResult.Failure(
+                                AuthError.ServerError(
+                                    parseResponseError(apiResult.errorBody()!!)
+                                )
+                            )
                         }
                     }
                 }
@@ -596,7 +602,7 @@ class AuthRepository @Inject constructor(
                     if (response.code() == 401) {
                         signOut()
                     }
-                    AuthResult.Failure(AuthError.ServerError(response.message()))
+                    AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
                 }
             } else {
                 AuthResult.Failure(AuthError.Unknown(null))
@@ -668,5 +674,14 @@ class AuthRepository @Inject constructor(
         }
 
         return false
+    }
+
+    /**
+     * Parses an okhttp Response error message into a string.
+     */
+    fun parseResponseError(errorBody: ResponseBody): String {
+        val errorString = errorBody.string()
+        val jsonObject: JSONObject = JSONObject(errorString)
+        return jsonObject.getString("error")
     }
 }
