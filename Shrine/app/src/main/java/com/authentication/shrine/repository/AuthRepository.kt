@@ -117,7 +117,9 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
+                AuthResult.Failure(
+                    AuthError.ServerError(
+                        response.errorBody()?.let { parseResponseError(it) } ?: response.message()))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -150,7 +152,9 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
+                AuthResult.Failure(
+                    AuthError.ServerError(
+                        response.errorBody()?.let { parseResponseError(it) } ?: response.message()))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -237,7 +241,10 @@ class AuthRepository @Inject constructor(
                     if (response.code() == 401) {
                         signOut()
                     }
-                    AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
+                    AuthResult.Failure(
+                        AuthError.ServerError(
+                            response.errorBody()?.let { parseResponseError(it) }
+                                ?: response.message()))
                 }
             } else {
                 AuthResult.Failure(AuthError.Unknown(null))
@@ -341,7 +348,9 @@ class AuthRepository @Inject constructor(
                 if (response.code() == 401) {
                     signOut()
                 }
-                AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
+                AuthResult.Failure(
+                    AuthError.ServerError(
+                        response.errorBody()?.let { parseResponseError(it) } ?: response.message()))
             }
         } catch (e: IOException) {
             AuthResult.Failure(AuthError.NetworkError)
@@ -602,7 +611,10 @@ class AuthRepository @Inject constructor(
                     if (response.code() == 401) {
                         signOut()
                     }
-                    AuthResult.Failure(AuthError.ServerError(parseResponseError(response.errorBody()!!)))
+                    AuthResult.Failure(
+                        AuthError.ServerError(
+                            response.errorBody()?.let { parseResponseError(it) }
+                                ?: response.message()))
                 }
             } else {
                 AuthResult.Failure(AuthError.Unknown(null))
@@ -680,8 +692,13 @@ class AuthRepository @Inject constructor(
      * Parses an okhttp Response error message into a string.
      */
     fun parseResponseError(errorBody: ResponseBody): String {
-        val errorString = errorBody.string()
-        val jsonObject: JSONObject = JSONObject(errorString)
-        return jsonObject.getString("error")
+        return try {
+            val errorString = errorBody.string()
+            val jsonObject = JSONObject(errorString)
+            jsonObject.getString("error")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing response error body", e)
+            "A server error occurred."
+        }
     }
 }
