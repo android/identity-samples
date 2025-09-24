@@ -12,8 +12,4 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-<<<<<<<< HEAD:WebView/WebkitWebView/spotless/copyright.kts
  */
-========
- */
->>>>>>>> aa0a640 (Move Shrine app to main):Shrine/spotless/copyright.kts
