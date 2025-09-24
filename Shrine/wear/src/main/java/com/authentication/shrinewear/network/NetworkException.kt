@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:WebView/WebkitWebView/app/src/main/java/com/google/webkit/webviewsample/theme/Color.kt
 package com.google.webkit.webviewsample.theme
 
 import androidx.compose.ui.graphics.Color
@@ -22,13 +21,3 @@ val Purple200 = Color(0xFFBB86FC)
 val Purple500 = Color(0xFF6200EE)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
-========
-package com.authentication.shrinewear.network
-
-/**
- * An exception class for API errors.
- *
- * @param message The error message.
- */
-class NetworkException(message: String) : RuntimeException(message)
->>>>>>>> aa0a640 (Move Shrine app to main):Shrine/wear/src/main/java/com/authentication/shrinewear/network/NetworkException.kt

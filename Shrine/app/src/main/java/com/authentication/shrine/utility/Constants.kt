@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:WebView/WebkitWebView/app/src/main/java/com/google/webkit/webviewsample/theme/Shape.kt
 package com.google.webkit.webviewsample.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,10 +24,3 @@ val Shapes = Shapes(
     medium = RoundedCornerShape(4.dp),
     large = RoundedCornerShape(0.dp),
 )
-========
-package com.authentication.shrine.utility
-
-object Constants {
-    const val SESSION_ID_KEY = "SESAME_SESSION_COOKIE="
-}
->>>>>>>> aa0a640 (Move Shrine app to main):Shrine/app/src/main/java/com/authentication/shrine/utility/Constants.kt
