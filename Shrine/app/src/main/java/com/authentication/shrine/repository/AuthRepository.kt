@@ -404,7 +404,7 @@ class AuthRepository @Inject constructor(
                                 apiResult.getSessionId()?.also {
                                     prefs[SESSION_ID] = it
                                 }
-                                prefs[USERNAME] = apiResult.body()?.username ?: ""
+                                prefs[USERNAME] = apiResult.body()?.username.orEmpty()
                                 prefs[DISPLAYNAME] = apiResult.body()?.displayName.orEmpty()
                             }
                             AuthResult.Success(Unit)
@@ -680,7 +680,7 @@ class AuthRepository @Inject constructor(
             apiResult.getSessionId()?.let { newSessionId ->
                 dataStore.edit { prefs ->
                     prefs[SESSION_ID] = newSessionId
-                    prefs[USERNAME] = apiResult.body()?.username ?: ""
+                    prefs[USERNAME] = apiResult.body()?.username.orEmpty()
                     prefs[DISPLAYNAME] = apiResult.body()?.displayName.orEmpty()
                 }
                 return true
