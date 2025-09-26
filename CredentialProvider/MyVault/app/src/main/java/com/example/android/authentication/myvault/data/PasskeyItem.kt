@@ -31,6 +31,7 @@ import androidx.room.PrimaryKey
  * @property credPrivateKey The private key
  * @property siteId The ID of the site
  * @property lastUsedTimeMs The last time the passkey item was used
+ * @property hidden Whether a passkey is hidden from the end user or not
  */
 @Entity(
     tableName = "passkeys",
@@ -47,4 +48,5 @@ data class PasskeyItem(
     @ColumnInfo(name = "credPrivateKey") val credPrivateKey: String,
     @ColumnInfo(name = "siteId") val siteId: Long,
     @ColumnInfo(name = "lastUsedTimeMs") val lastUsedTimeMs: Long,
+    @ColumnInfo(name = "hidden") val hidden: Boolean = false,
 )

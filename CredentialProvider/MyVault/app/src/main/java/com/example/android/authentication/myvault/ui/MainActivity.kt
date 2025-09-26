@@ -20,12 +20,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
+import com.example.android.authentication.myvault.R
+import com.example.android.authentication.myvault.createNotificationChannel
 import com.example.android.authentication.myvault.ui.theme.MyVaultTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        createNotificationChannel(
+            getString(R.string.notification_channel_name),
+            getString(R.string.notification_channel_description),
+        )
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MyVaultTheme {
