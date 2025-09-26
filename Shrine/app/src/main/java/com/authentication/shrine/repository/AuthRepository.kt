@@ -680,6 +680,8 @@ class AuthRepository @Inject constructor(
             apiResult.getSessionId()?.let { newSessionId ->
                 dataStore.edit { prefs ->
                     prefs[SESSION_ID] = newSessionId
+                    prefs[USERNAME] = apiResult.body()?.username ?: ""
+                    prefs[DISPLAYNAME] = apiResult.body()?.displayName.orEmpty()
                 }
                 return true
             }
