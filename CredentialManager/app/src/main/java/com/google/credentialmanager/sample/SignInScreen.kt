@@ -36,7 +36,7 @@ fun SignInScreen(navController: NavController) {
                     is NavigationEvent.NavigateToHome -> {
                         DataProvider.setSignedInThroughPasskeys(event.signedInWithPasskeys)
                         navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Main.route) { inclusive = true }
+                            popUpTo(Screen.SignIn.route) { inclusive = true }
                         }
                     }
                 }
@@ -65,9 +65,9 @@ fun SignInScreen(navController: NavController) {
                 }
             }
 
-            if (signInError != null) {
+            signInError?.let {
                 Text(
-                    signInError!!,
+                    it,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
