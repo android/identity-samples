@@ -1,8 +1,8 @@
 {
     "challenge": "<challenge>",
     "rp": {
-        "id": "passkeys-codelab.glitch.me",
-        "name": "CredMan App Test"
+        "id": "project-sesame-426206.appspot.com",
+        "name": "project-sesame-426206"
     },
     "pubKeyCredParams": [
         {
