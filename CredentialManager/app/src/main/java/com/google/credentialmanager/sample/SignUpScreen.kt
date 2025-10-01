@@ -1,8 +1,5 @@
 package com.google.credentialmanager.sample
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,13 +20,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 import kotlinx.coroutines.flow.collectLatest
-
-// Helper extension function to find the activity from LocalContext
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

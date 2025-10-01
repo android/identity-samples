@@ -68,8 +68,6 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun HomeScreenPreview() {
     CredentialManagerSampleTheme {
-        val context = LocalContext.current
-        DataProvider.initSharedPref(context)
         HomeScreen(navController = rememberNavController())
     }
 }
