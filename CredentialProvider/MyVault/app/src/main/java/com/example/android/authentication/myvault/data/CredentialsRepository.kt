@@ -228,36 +228,38 @@ class CredentialsRepository(
             val credentials = credentialsDataSource.credentialsForSite(request.rpId) ?: return false
 
             val passkeys = credentials.passkeys
-            for (passkey in passkeys) {
-                val data = Bundle()
-                data.putString("requestJson", option.requestJson)
-                data.putString("credId", passkey.credId)
+            passkeys
+                .filter { !it.hidden }
+                .forEach { passkey ->
+                    val data = Bundle()
+                    data.putString("requestJson", option.requestJson)
+                    data.putString("credId", passkey.credId)
 
-                // Create a PendingIntent to launch the activity that will handle the passkey retrieval
-                val pendingIntent = createNewPendingIntent(
-                    "",
-                    GET_PASSKEY_INTENT,
-                    data,
-                )
-
-                // Create a PublicKeyCredentialEntry object to represent the passkey
-                val entryBuilder =
-                    configurePublicKeyCredentialEntryBuilder(passkey, pendingIntent, option)
-
-                // Configure biometric prompt data
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                    entryBuilder.setBiometricPromptData(
-                        BiometricPromptData(
-                            cryptoObject = null,
-                            allowedAuthenticators = allowedAuthenticator,
-                        ),
+                    // Create a PendingIntent to launch the activity that will handle the passkey retrieval
+                    val pendingIntent = createNewPendingIntent(
+                        "",
+                        GET_PASSKEY_INTENT,
+                        data,
                     )
-                }
 
-                val entry = entryBuilder.build()
-                // Add the entry to the response builder.
-                responseBuilder.addCredentialEntry(entry)
-            }
+                    // Create a PublicKeyCredentialEntry object to represent the passkey
+                    val entryBuilder =
+                        configurePublicKeyCredentialEntryBuilder(passkey, pendingIntent, option)
+
+                    // Configure biometric prompt data
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                        entryBuilder.setBiometricPromptData(
+                            BiometricPromptData(
+                                cryptoObject = null,
+                                allowedAuthenticators = allowedAuthenticator,
+                            ),
+                        )
+                    }
+
+                    val entry = entryBuilder.build()
+                    // Add the entry to the response builder.
+                    responseBuilder.addCredentialEntry(entry)
+                }
         } catch (e: IOException) {
             return false
         }
