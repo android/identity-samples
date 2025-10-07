@@ -33,11 +33,20 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.GetRestoreCredentialOption
+import androidx.credentials.SignalAllAcceptedCredentialIdsRequest
+import androidx.credentials.SignalCurrentUserDetailsRequest
+import androidx.credentials.SignalUnknownCredentialRequest
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.authentication.shrine.repository.AuthRepository.Companion.RP_ID_KEY
+import com.authentication.shrine.repository.AuthRepository.Companion.USER_ID_KEY
+import com.authentication.shrine.repository.AuthRepository.Companion.read
 import com.authentication.shrine.repository.SERVER_CLIENT_ID
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -48,6 +57,7 @@ import javax.inject.Inject
  */
 class CredentialManagerUtils @Inject constructor(
     private val credentialManager: CredentialManager,
+    private val dataStore: DataStore<Preferences>,
 ) {
 
     /**
@@ -108,7 +118,7 @@ class CredentialManagerUtils @Inject constructor(
                         .setServerClientId(SERVER_CLIENT_ID)
                         .setFilterByAuthorizedAccounts(false)
                         .build(),
-                )
+                ),
             )
             result = credentialManager.getCredential(context, credentialRequest)
         } catch (e: GetCredentialCancellationException) {
@@ -248,6 +258,52 @@ class CredentialManagerUtils @Inject constructor(
     suspend fun deleteRestoreKey() {
         val clearRequest = ClearCredentialStateRequest(requestType = TYPE_CLEAR_RESTORE_CREDENTIAL)
         credentialManager.clearCredentialState(clearRequest)
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalUnknown(
+        credentialId: String,
+    ) {
+        credentialManager.signalCredentialState(
+            request = SignalUnknownCredentialRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("credentialId", credentialId)
+                }.toString()
+            ),
+        )
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalAcceptedIds(
+        credentialIds: List<String>,
+    ) {
+        credentialManager.signalCredentialState(
+            request = SignalAllAcceptedCredentialIdsRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("userId", dataStore.read(USER_ID_KEY))
+                    put("allAcceptedCredentialIds", JSONArray(credentialIds))
+                }.toString()
+            ),
+        )
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalUserDetails(
+        newName: String,
+        newDisplayName: String,
+    ) {
+        credentialManager.signalCredentialState(
+            request = SignalCurrentUserDetailsRequest(
+                requestJson = JSONObject().apply {
+                    put("rpId", dataStore.read(RP_ID_KEY))
+                    put("userId", dataStore.read(USER_ID_KEY))
+                    put("name", newName)
+                    put("displayName", newDisplayName)
+                }.toString()
+            ),
+        )
     }
 }
 

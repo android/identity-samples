@@ -19,6 +19,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +42,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+<<<<<<< HEAD
+=======
+>>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,7 +99,22 @@ fun PasskeyManagementScreen(
                         requestResult = data,
                         context = context,
                     )
-                })
+                },
+            )
+        }
+    }
+
+    val passkeysList = uiState.passkeysList
+    val onItemClick = { index: Int ->
+        viewModel.updateItem(index, passkeysList)
+    }
+
+    val onSignalBtnClicked = {
+        val credentialIdsList = passkeysList
+            .filter { it.isSelected }
+            .map { it.id }
+        if (credentialIdsList.isNotEmpty()) {
+            viewModel.signalAccepted(credentialIdsList)
         }
     }
 
@@ -104,8 +124,10 @@ fun PasskeyManagementScreen(
         onCreatePasskeyClicked = onCreatePasskeyClicked,
         onDeleteClicked = onDeleteClicked,
         uiState = uiState,
-        passkeysList = uiState.passkeysList,
+        passkeysList = passkeysList,
         aaguidData = uiState.aaguidData,
+        onItemClick = onItemClick,
+        onSignal = onSignalBtnClicked,
         modifier = modifier,
     )
 }
@@ -126,6 +148,8 @@ fun PasskeyManagementScreen(
     uiState: PasskeyManagementUiState,
     passkeysList: List<PasskeyCredential>,
     aaguidData: Map<String, Map<String, String>>,
+    onItemClick: (Int) -> Unit,
+    onSignal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -161,6 +185,13 @@ fun PasskeyManagementScreen(
                     onDeleteClicked = onDeleteClicked,
                     passkeysList = passkeysList,
                     aaguidData = aaguidData,
+                    onItemClick = onItemClick,
+                )
+
+                ShrineButton(
+                    onClick = onSignal,
+                    buttonText = stringResource(R.string.accept_selected_credentials),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             } else {
                 ShrineButton(
@@ -202,6 +233,7 @@ fun PasskeysListColumn(
     onDeleteClicked: (credentialId: String) -> Unit,
     passkeysList: List<PasskeyCredential>,
     aaguidData: Map<String, Map<String, String>>,
+    onItemClick: (Int) -> Unit,
 ) {
     val shape = RoundedCornerShape(dimensionResource(R.dimen.padding_small))
     LazyColumn(
@@ -222,13 +254,15 @@ fun PasskeysListColumn(
                     iconSvgString = aaguidData[item.aaguid]?.get("icon_light"),
                     credentialProviderName = item.name,
                     passkeyCreationDate = item.registeredAt.toReadableDate(),
+                    isChecked = item.isSelected,
+                    modifier = Modifier.clickable { onItemClick(index) },
                 )
 
                 if (index < passkeysList.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.padding(
                             vertical = dimensionResource(R.dimen.padding_extra_small),
-                            horizontal = dimensionResource(R.dimen.dimen_standard)
+                            horizontal = dimensionResource(R.dimen.dimen_standard),
                         ),
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -253,9 +287,11 @@ fun PasskeysDetailsRow(
     iconSvgString: String?,
     credentialProviderName: String,
     passkeyCreationDate: String,
+    isChecked: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = dimensionResource(R.dimen.padding_small)),
         verticalAlignment = Alignment.CenterVertically,
@@ -266,6 +302,12 @@ fun PasskeysDetailsRow(
                 .data(iconSvgString?.toByteArray() ?: R.drawable.ic_passkey)
                 .decoderFactory(SvgDecoder.Factory())
                 .build(),
+        )
+
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = {},
+            modifier = Modifier.clickable(enabled = false, onClick = { }),
         )
 
         Image(
@@ -331,8 +373,18 @@ fun PasskeyManagementScreenPreview() {
                         providerIcon = ""
                     )
                 ),
+<<<<<<< HEAD
                 aaguidData = mapOf(),
+                onItemClick = { _ -> },
+                onSignal = { },
             )
         }
+=======
+            ),
+            aaguidData = mapOf(),
+            { _ -> },
+            {},
+        )
+>>>>>>> b12d692 (Add spotless fixes)
     }
 }

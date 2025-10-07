@@ -69,6 +69,7 @@ fun AuthenticationScreen(
     credentialManagerUtils: CredentialManagerUtils,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
+    var isFirstCheckForRestoreKey by remember { mutableStateOf(true) }
 
     // Passing in the lambda / context to the VM
     val context = LocalContext.current
@@ -109,6 +110,18 @@ fun AuthenticationScreen(
                 credentialManagerUtils.getSignInWithGoogleCredential(
                     context = context,
                 )
+            },
+        )
+    }
+
+    if (isFirstCheckForRestoreKey) {
+        isFirstCheckForRestoreKey = false
+        viewModel.checkForStoredRestoreKey(
+            getRestoreKey = { requestResult ->
+                credentialManagerUtils.getRestoreKey(requestResult, context)
+            },
+            onSuccess = {
+                navigateToHome(true)
             },
         )
     }
@@ -185,9 +198,22 @@ fun AuthenticationScreen(
                         .height(dimensionResource(R.dimen.siwg_button_height))
                         .clickable(
                             enabled = !uiState.isLoading,
-                            onClick = onSignInWithSignInWithGoogleRequest)
+                            onClick = onSignInWithSignInWithGoogleRequest
+                        )
                 )
             }
+
+            // Sign in with Google image
+            Image(
+                painter = painterResource(id = R.drawable.siwg_button_light),
+                contentDescription = stringResource(R.string.sign_in_with_google_button),
+                modifier = Modifier
+                    .height(dimensionResource(R.dimen.siwg_button_height))
+                    .clickable(
+                        enabled = !uiState.isLoading,
+                        onClick = onSignInWithSignInWithGoogleRequest,
+                    ),
+            )
         }
 
         if (uiState.isLoading) {
@@ -201,6 +227,7 @@ fun AuthenticationScreen(
             !uiState.isSignInWithPasskeysSuccess && stringResource(uiState.passkeyResponseMessageResourceId).isNotBlank() -> {
                 stringResource(uiState.passkeyResponseMessageResourceId)
             }
+
             else -> null
         }
         LaunchedEffect(uiState) {
