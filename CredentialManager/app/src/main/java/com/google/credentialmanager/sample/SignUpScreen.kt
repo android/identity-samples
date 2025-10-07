@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -25,7 +26,9 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SignUpScreen(navController: NavController) {
     CredentialManagerSampleTheme {
-        val viewModel: SignUpViewModel = viewModel()
+        val context = LocalContext.current
+        val viewModel: SignUpViewModel =
+            viewModel(factory = SignUpViewModelFactory(JsonProvider(context)))
 
         val username by viewModel.username.collectAsState()
         val password by viewModel.password.collectAsState()
@@ -36,8 +39,7 @@ fun SignUpScreen(navController: NavController) {
         val passkeyCreationError by viewModel.passkeyCreationError.collectAsState()
         val passwordCreationError by viewModel.passwordCreationError.collectAsState()
 
-        val context = LocalContext.current
-        val activity = context.findActivity()
+        val activity = context.findActivity()!!
 
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collectLatest { event ->
@@ -94,7 +96,10 @@ fun SignUpScreen(navController: NavController) {
             }
 
             if (isLoading) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("operation in progress...")
@@ -130,12 +135,12 @@ fun SignUpScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    if (activity != null) {
-                        viewModel.signUpWithPasskey(activity, context)
+                    viewModel.signUpWithPasskey {
+                        createCredential(activity, it) as CreatePublicKeyCredentialResponse
                     }
                 },
                 shape = RoundedCornerShape(4.dp),
-                enabled = !isLoading && activity != null,
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Sign Up with passkey")
@@ -156,12 +161,12 @@ fun SignUpScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    if (activity != null) {
-                        viewModel.signUpWithPassword(activity)
+                    viewModel.signUpWithPassword {
+                        createCredential(activity, it)
                     }
                 },
                 shape = RoundedCornerShape(4.dp),
-                enabled = !isLoading && activity != null,
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (isPasswordInputVisible) "Sign up with Password" else "Sign up with a password instead")
