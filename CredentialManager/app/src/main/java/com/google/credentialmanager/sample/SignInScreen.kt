@@ -21,12 +21,12 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SignInScreen(navController: NavController) {
     CredentialManagerSampleTheme {
-        val viewModel: SignInViewModel = viewModel()
+        val context = LocalContext.current
+        val viewModel: SignInViewModel = viewModel(factory = SignInViewModelFactory(JsonProvider(context)))
 
         val isLoading by viewModel.isLoading.collectAsState()
         val signInError by viewModel.signInError.collectAsState()
 
-        val context = LocalContext.current
         val activity = context.findActivity()
 
         LaunchedEffect(Unit) {
@@ -78,7 +78,7 @@ fun SignInScreen(navController: NavController) {
             Button(
                 onClick = {
                     if (activity != null) {
-                        viewModel.signIn(activity, context)
+                        viewModel.signIn(activity)
                     }
                 },
                 shape = RoundedCornerShape(4.dp),

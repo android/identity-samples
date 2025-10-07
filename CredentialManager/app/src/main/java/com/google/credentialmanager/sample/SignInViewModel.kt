@@ -1,7 +1,6 @@
 package com.google.credentialmanager.sample
 
 import android.app.Activity
-import android.content.Context
 import android.util.Log
 import androidx.credentials.*
 import androidx.lifecycle.ViewModel
@@ -12,7 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SignInViewModel : ViewModel() {
+class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -23,23 +22,23 @@ class SignInViewModel : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    fun signIn(activity: Activity, context: Context) {
+    fun signIn(activity: Activity) {
         _isLoading.value = true
         _signInError.value = null
 
         viewModelScope.launch {
-            val data = getSavedCredentials(activity, context)
+            val data = getSavedCredentials(activity)
 
-            if(data != null) {
+            if (data != null) {
                 sendSignInResponseToServer()
                 _navigationEvent.emit(NavigationEvent.NavigateToHome(signedInWithPasskeys = DataProvider.isSignedInThroughPasskeys()))
             }
         }
     }
 
-    private suspend fun getSavedCredentials(activity: Activity, context: Context): String? {
+    private suspend fun getSavedCredentials(activity: Activity): String? {
         val getPublicKeyCredentialOption =
-            GetPublicKeyCredentialOption(fetchAuthJsonFromServer(context), null)
+            GetPublicKeyCredentialOption(jsonProvider.fetchAuthJson(), null)
 
         val getPasswordOption = GetPasswordOption()
 
@@ -77,10 +76,6 @@ class SignInViewModel : ViewModel() {
         }
 
         return null
-    }
-
-    private fun fetchAuthJsonFromServer(context: Context): String {
-        return context.assets.open("AuthFromServer").bufferedReader().use { it.readText() }
     }
 
     private fun sendSignInResponseToServer(): Boolean {

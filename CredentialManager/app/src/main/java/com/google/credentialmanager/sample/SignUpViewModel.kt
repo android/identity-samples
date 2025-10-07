@@ -1,13 +1,12 @@
 package com.google.credentialmanager.sample
 
-import android.app.Activity
-import android.content.Context
 import android.util.Base64
 import android.util.Log
+import androidx.credentials.CreateCredentialRequest
+import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
-import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialCustomException
 import androidx.credentials.exceptions.CreateCredentialException
@@ -25,7 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.SecureRandom
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
 
@@ -65,7 +64,7 @@ class SignUpViewModel : ViewModel() {
         _passwordError.value = null
     }
 
-    fun signUpWithPasskey(activity: Activity, context: Context) {
+    fun signUpWithPasskey(createCredential: suspend (CreateCredentialRequest) -> CreatePublicKeyCredentialResponse) {
         if (_username.value.isBlank()) {
             _usernameError.value = "Username cannot be blank"
             return
@@ -75,49 +74,27 @@ class SignUpViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
 
-            val data = createPasskey(activity, context)
+            val request = CreatePublicKeyCredentialRequest(
+                jsonProvider.fetchRegistrationJson()
+                    .replace("<userId>", getEncodedUserId())
+                    .replace("<userName>", _username.value)
+                    .replace("<userDisplayName>", _username.value)
+                    .replace("<challenge>", getEncodedChallenge())
+            )
 
-            _isLoading.value = false
-            if (data != null) {
+            try {
+                createCredential(request)
                 registerResponse()
                 DataProvider.setSignedInThroughPasskeys(true)
                 _navigationEvent.emit(NavigationEvent.NavigateToHome(signedInWithPasskeys = true))
+            } catch (e: CreateCredentialException) {
+                handlePasskeyFailure(e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    suspend fun createPasskey(
-        activity: Activity,
-        context: Context
-    ): CreatePublicKeyCredentialResponse? {
-        var credentialManager = CredentialManager.create(activity)
-
-        var response: CreatePublicKeyCredentialResponse? = null
-        val request = CreatePublicKeyCredentialRequest(fetchRegistrationJsonFromServer(context))
-        try {
-            response = credentialManager.createCredential(
-                activity,
-                request
-            ) as CreatePublicKeyCredentialResponse
-        } catch (e: CreateCredentialException) {
-            _isLoading.value = false
-            handlePasskeyFailure(e)
-        }
-
-        return response
-    }
-
-    private fun fetchRegistrationJsonFromServer(context: Context): String {
-        val response = context.assets.open("RegFromServer").bufferedReader().use { it.readText() }
-
-        // Update userId,challenge, name and Display name in the mock
-        return response.replace("<userId>", getEncodedUserId())
-            .replace("<userName>", _username.value)
-            .replace("<userDisplayName>", _username.value)
-            .replace("<challenge>", getEncodedChallenge())
-    }
-
-    // These are types of errors that can occur during passkey creation.
     private fun handlePasskeyFailure(e: CreateCredentialException) {
         val msg = when (e) {
             is CreatePublicKeyCredentialDomException -> {
@@ -171,7 +148,7 @@ class SignUpViewModel : ViewModel() {
         return true
     }
 
-    fun signUpWithPassword(activity: Activity) {
+    fun signUpWithPassword(createCredential: suspend (CreateCredentialRequest) -> CreateCredentialResponse) {
         if (!_isPasswordInputVisible.value) {
             _isPasswordInputVisible.value = true
             clearErrors()
@@ -189,12 +166,11 @@ class SignUpViewModel : ViewModel() {
 
             clearErrors()
             _isLoading.value = true
-            val credentialManager = CredentialManager.create(activity)
 
             viewModelScope.launch {
                 val passwordRequest = CreatePasswordRequest(_username.value, _password.value)
                 try {
-                    credentialManager.createCredential(activity, passwordRequest)
+                    createCredential(passwordRequest)
                     simulateServerDelayAndLogIn()
                 } catch (e: Exception) {
                     val errorMessage = "Exception Message : " + e.message
