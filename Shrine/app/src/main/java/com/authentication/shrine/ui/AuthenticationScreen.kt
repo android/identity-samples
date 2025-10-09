@@ -202,18 +202,6 @@ fun AuthenticationScreen(
                         )
                 )
             }
-
-            // Sign in with Google image
-            Image(
-                painter = painterResource(id = R.drawable.siwg_button_light),
-                contentDescription = stringResource(R.string.sign_in_with_google_button),
-                modifier = Modifier
-                    .height(dimensionResource(R.dimen.siwg_button_height))
-                    .clickable(
-                        enabled = !uiState.isLoading,
-                        onClick = onSignInWithSignInWithGoogleRequest,
-                    ),
-            )
         }
 
         if (uiState.isLoading) {

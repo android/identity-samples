@@ -17,6 +17,7 @@ package com.authentication.shrine
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.ClearCredentialStateRequest.Companion.TYPE_CLEAR_RESTORE_CREDENTIAL
 import androidx.credentials.CreateCredentialRequest
@@ -60,6 +61,7 @@ class CredentialManagerUtils @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
 
+    private val TAG = "CredentialManagerUtils"
     /**
      * Retrieves a passkey or password credential from the credential manager.
      *
@@ -264,29 +266,40 @@ class CredentialManagerUtils @Inject constructor(
     suspend fun signalUnknown(
         credentialId: String,
     ) {
-        credentialManager.signalCredentialState(
-            request = SignalUnknownCredentialRequest(
-                requestJson = JSONObject().apply {
-                    put("rpId", dataStore.read(RP_ID_KEY))
-                    put("credentialId", credentialId)
-                }.toString()
-            ),
-        )
+        dataStore.read(RP_ID_KEY)?.let { rpId ->
+            credentialManager.signalCredentialState(
+                request = SignalUnknownCredentialRequest(
+                    requestJson = JSONObject().apply {
+                        put("rpId", rpId)
+                        put("credentialId", credentialId)
+                    }.toString()
+                ),
+            )
+        } ?: Log.e(TAG, "RP ID not present")
     }
 
     @SuppressLint("RestrictedApi")
     suspend fun signalAcceptedIds(
         credentialIds: List<String>,
     ) {
-        credentialManager.signalCredentialState(
-            request = SignalAllAcceptedCredentialIdsRequest(
-                requestJson = JSONObject().apply {
-                    put("rpId", dataStore.read(RP_ID_KEY))
-                    put("userId", dataStore.read(USER_ID_KEY))
-                    put("allAcceptedCredentialIds", JSONArray(credentialIds))
-                }.toString()
-            ),
-        )
+        val rpId = dataStore.read(RP_ID_KEY)
+        val userId = dataStore.read(USER_ID_KEY)
+
+        if (rpId.isNullOrBlank()) {
+            Log.e(TAG, "RP ID not present")
+        } else if (userId.isNullOrBlank()) {
+            Log.e(TAG, "User ID not present")
+        } else {
+            credentialManager.signalCredentialState(
+                request = SignalAllAcceptedCredentialIdsRequest(
+                    requestJson = JSONObject().apply {
+                        put("rpId", rpId)
+                        put("userId", userId)
+                        put("allAcceptedCredentialIds", JSONArray(credentialIds))
+                    }.toString()
+                ),
+            )
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -294,16 +307,25 @@ class CredentialManagerUtils @Inject constructor(
         newName: String,
         newDisplayName: String,
     ) {
-        credentialManager.signalCredentialState(
-            request = SignalCurrentUserDetailsRequest(
-                requestJson = JSONObject().apply {
-                    put("rpId", dataStore.read(RP_ID_KEY))
-                    put("userId", dataStore.read(USER_ID_KEY))
-                    put("name", newName)
-                    put("displayName", newDisplayName)
-                }.toString()
-            ),
-        )
+        val rpId = dataStore.read(RP_ID_KEY)
+        val userId = dataStore.read(USER_ID_KEY)
+
+        if (rpId.isNullOrBlank()) {
+            Log.e(TAG, "RP ID not present")
+        } else if (userId.isNullOrBlank()) {
+            Log.e(TAG, "User ID not present")
+        } else {
+            credentialManager.signalCredentialState(
+                request = SignalCurrentUserDetailsRequest(
+                    requestJson = JSONObject().apply {
+                        put("rpId", rpId)
+                        put("userId", userId)
+                        put("name", newName)
+                        put("displayName", newDisplayName)
+                    }.toString()
+                ),
+            )
+        }
     }
 }
 

@@ -42,9 +42,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-<<<<<<< HEAD
-=======
->>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -255,6 +252,7 @@ fun PasskeysListColumn(
                     credentialProviderName = item.name,
                     passkeyCreationDate = item.registeredAt.toReadableDate(),
                     isChecked = item.isSelected,
+                    onCheckboxClick = { onItemClick(index) },
                     modifier = Modifier.clickable { onItemClick(index) },
                 )
 
@@ -288,6 +286,7 @@ fun PasskeysDetailsRow(
     credentialProviderName: String,
     passkeyCreationDate: String,
     isChecked: Boolean,
+    onCheckboxClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -306,8 +305,7 @@ fun PasskeysDetailsRow(
 
         Checkbox(
             checked = isChecked,
-            onCheckedChange = {},
-            modifier = Modifier.clickable(enabled = false, onClick = { }),
+            onCheckedChange = { onCheckboxClick() },
         )
 
         Image(
@@ -373,18 +371,10 @@ fun PasskeyManagementScreenPreview() {
                         providerIcon = ""
                     )
                 ),
-<<<<<<< HEAD
                 aaguidData = mapOf(),
                 onItemClick = { _ -> },
                 onSignal = { },
             )
         }
-=======
-            ),
-            aaguidData = mapOf(),
-            { _ -> },
-            {},
-        )
->>>>>>> b12d692 (Add spotless fixes)
     }
 }

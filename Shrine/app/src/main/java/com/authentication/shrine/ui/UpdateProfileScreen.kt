@@ -17,7 +17,6 @@ package com.authentication.shrine.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,13 +45,13 @@ fun UpdateProfileScreen(
     viewModel: UpdateProfileViewModel,
 ) {
     var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    var displayName by remember { mutableStateOf("") }
 
     UpdateProfileScreen(
         username = username,
         onUsernameChanged = { username = it },
-        displayName = email,
-        onDisplayNameChanged = { email = it },
+        displayName = displayName,
+        onDisplayNameChanged = { displayName = it },
         onMetadataUpdate = viewModel::updateMetadata,
         onBackClicked = onBackClicked,
     )
@@ -86,17 +85,17 @@ fun UpdateProfileScreen(
         )
 
         ShrineTextField(
-            value = username,
-            onValueChange = onUsernameChanged,
-            hint = stringResource(R.string.username),
-            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.username),
+            text = username,
+            enabled = true,
+            onValueChanged = onUsernameChanged
         )
 
         ShrineTextField(
-            value = displayName,
-            onValueChange = onDisplayNameChanged,
-            hint = stringResource(R.string.display_name),
-            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.display_name),
+            text = displayName,
+            enabled = true,
+            onValueChanged = onDisplayNameChanged,
         )
 
         ShrineButton(

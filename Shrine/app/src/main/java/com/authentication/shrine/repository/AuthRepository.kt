@@ -451,17 +451,10 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signInWithFederatedTokenResponse(
         sessionId: String,
-<<<<<<< HEAD
         credentialResponse: GetCredentialResponse
     ): AuthResult<Unit> {
         return try {
             val credential = credentialResponse.credential
-=======
-        credentialResponse: GetCredentialResponse,
-    ): Boolean {
-        val credential = credentialResponse.credential
-        try {
->>>>>>> b12d692 (Add spotless fixes)
             if (credential is CustomCredential) {
                 val isSuccess = verifyIdToken(
                     sessionId,

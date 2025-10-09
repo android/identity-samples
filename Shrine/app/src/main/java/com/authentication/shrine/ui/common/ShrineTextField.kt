@@ -28,10 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-<<<<<<< HEAD
-=======
-import androidx.compose.ui.res.stringResource
->>>>>>> b12d692 (Add spotless fixes)
 import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
@@ -39,14 +35,15 @@ import com.authentication.shrine.ui.theme.ShrineTheme
 /**
  * A custom TextField composable for the Shrine app.
  *
- * @param modifier The modifier to be applied to the TextField.
- * @param value The current value of the TextField.
- * @param onValueChange The callback to be invoked when the TextField value changes.
+ * @param title The current value of the TextField.
+ * @param text The callback to be invoked when the TextField value changes.
  */
 @Composable
 fun ShrineTextField(
     title: String,
     text: String = "",
+    enabled: Boolean = false,
+    onValueChanged: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -61,10 +58,9 @@ fun ShrineTextField(
 
         OutlinedTextField(
             value = text,
-            onValueChange = { },
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = false,
+            onValueChange = onValueChanged,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
             shape = RoundedCornerShape(dimensionResource(R.dimen.size_standard)),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface
