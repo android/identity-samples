@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@ package com.google.credentialmanager.sample
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.appcompat.app.AlertDialog
 
+/**
+ * Finds the activity from a context.
+ *
+ * @return The activity if found, null otherwise.
+ */
 fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()

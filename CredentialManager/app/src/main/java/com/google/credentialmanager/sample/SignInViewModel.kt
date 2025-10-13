@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.credentialmanager.sample
 
 import android.app.Activity
@@ -11,6 +27,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * A view model for the sign-in screen.
+ *
+ * This view model handles the sign-in process, including calling the Credential Manager API,
+ * and exposing the sign-in state to the UI.
+ *
+ * @param jsonProvider The provider for JSON data.
+ */
 class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
@@ -22,6 +46,14 @@ class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    /**
+     * Signs in the user.
+     *
+     * This function initiates the sign-in process by calling the Credential Manager API to
+     * retrieve saved credentials.
+     *
+     * @param activity The activity to use for the sign-in request.
+     */
     fun signIn(activity: Activity) {
         _isLoading.value = true
         _signInError.value = null

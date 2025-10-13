@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.credentialmanager.sample
 
 import androidx.compose.foundation.layout.*
@@ -18,11 +34,19 @@ import androidx.navigation.compose.rememberNavController
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Stateful composable that displays the sign-in screen of the application.
+ *
+ * It uses[SignInViewModel] to handle the sign-in process.
+ *
+ * @param navController The navigation controller used for screen navigation.
+ */
 @Composable
 fun SignInScreen(navController: NavController) {
     CredentialManagerSampleTheme {
         val context = LocalContext.current
-        val viewModel: SignInViewModel = viewModel(factory = SignInViewModelFactory(JsonProvider(context)))
+        val viewModel: SignInViewModel =
+            viewModel(factory = SignInViewModelFactory(JsonProvider(context)))
 
         val isLoading by viewModel.isLoading.collectAsState()
         val signInError by viewModel.signInError.collectAsState()
@@ -30,8 +54,7 @@ fun SignInScreen(navController: NavController) {
         val activity = context.findActivity()
 
         LaunchedEffect(Unit) {
-            viewModel.navigationEvent.collectLatest {
-                event ->
+            viewModel.navigationEvent.collectLatest { event ->
                 when (event) {
                     is NavigationEvent.NavigateToHome -> {
                         DataProvider.setSignedInThroughPasskeys(event.signedInWithPasskeys)
@@ -58,7 +81,10 @@ fun SignInScreen(navController: NavController) {
             )
 
             if (isLoading) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp)) // Consider using theme color: color = MaterialTheme.colorScheme.primary
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("operation in progress...")
