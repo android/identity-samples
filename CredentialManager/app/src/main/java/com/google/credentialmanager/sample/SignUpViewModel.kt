@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.credentialmanager.sample
 
 import android.util.Base64
@@ -24,6 +40,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.SecureRandom
 
+/**
+ * A view model for the sign-up screen.
+ *
+ * This view model handles the sign-up process, including creating a passkey or a password,
+ * and exposing the sign-up state to the UI.
+ *
+ * @param jsonProvider The provider for JSON data.
+ */
 class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
@@ -52,6 +76,11 @@ class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    /**
+     * Called when the username changes.
+     *
+     * @param newUsername The new username.
+     */
     fun onUsernameChange(newUsername: String) {
         _username.value = newUsername
         _usernameError.value = null
@@ -59,11 +88,23 @@ class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
         _passwordCreationError.value = null
     }
 
+    /**
+     * Called when the password changes.
+     *
+     * @param newPassword The new password.
+     */
     fun onPasswordChange(newPassword: String) {
         _password.value = newPassword
         _passwordError.value = null
     }
 
+    /**
+     * Signs up the user with a passkey.
+     *
+     * This function initiates the passkey creation process by calling the Credential Manager API.
+     *
+     * @param createCredential A suspend function that takes a [CreateCredentialRequest] and returns a [CreatePublicKeyCredentialResponse].
+     */
     fun signUpWithPasskey(createCredential: suspend (CreateCredentialRequest) -> CreatePublicKeyCredentialResponse) {
         if (_username.value.isBlank()) {
             _usernameError.value = "Username cannot be blank"
@@ -148,6 +189,13 @@ class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
         return true
     }
 
+    /**
+     * Signs up the user with a password.
+     *
+     * This function initiates the password creation process by calling the Credential Manager API.
+     *
+     * @param createCredential A suspend function that takes a [CreateCredentialRequest] and returns a [CreateCredentialResponse].
+     */
     fun signUpWithPassword(createCredential: suspend (CreateCredentialRequest) -> CreateCredentialResponse) {
         if (!_isPasswordInputVisible.value) {
             _isPasswordInputVisible.value = true
