@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.credentialmanager.sample
 
 import androidx.compose.foundation.layout.*
@@ -22,6 +38,12 @@ import androidx.navigation.compose.rememberNavController
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Stateful composable that displays the sign-up screen of the application.
+ * It uses [SignUpViewModel] to handle the sign-up process.
+ *
+ * @param navController The navigation controller used for screen navigation.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(navController: NavController) {
@@ -135,6 +157,7 @@ fun SignUpScreen(navController: NavController) {
 
             Button(
                 onClick = {
+
                     viewModel.signUpWithPasskey {
                         createCredential(activity, it) as CreatePublicKeyCredentialResponse
                     }
