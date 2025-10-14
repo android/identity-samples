@@ -69,4 +69,15 @@
     <string name="unexpected_create_request_found_in_intent">Unexpected create request found in intent</string>
     <string name="unknown_failure">Unknown Failure</string>
     <string name="could_not_retrieve_gpm_allowlist">Could not retrieve GPM allowlist</string>
+    <string name="credential_deletion">Credential deleted successfully</string>
+    <string name="unknown_signal_message">The provider received the SignalUnknown request and thus deleted the credential</string>
+    <string name="credentials_list_updation">Credentials List updated successfully</string>
+    <string name="all_accepted_signal_message">The provider received the AcceptedCredentialIds request and thus updated the list of user credentials</string>
+    <string name="user_details_updation">User details updated successfully</string>
+    <string name="current_user_signal_message">The provider received the CurrentUserDetails request and thus updated the user details in the credential</string>
+    <string name="notification_channel_description">Notification channel used for testing Signal APIs. Apps pushes a notification if a Signal from RP is received</string>
+    <string name="notification_channel_name">Signal API notification channel</string>
+    <string name="failed_to_handle_unknowncredentialrequest">Failed to handle UnknownCredentialRequest</string>
+    <string name="failed_to_handle_acceptedcredentialsrequest">Failed to handle AcceptedCredentialsRequest</string>
+    <string name="failed_to_handle_currentuserdetailrequest">Failed to handle CurrentUserDetailRequest</string>
 </resources>

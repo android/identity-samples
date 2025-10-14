@@ -191,7 +191,7 @@ private fun CredentialsEntry(
         horizontalAlignment = Alignment.CenterHorizontally,
 
     ) {
-        items(site.passkeys) {
+        items(site.passkeys.filter { !it.hidden }) {
             PasskeyEntry(
                 passkey = it,
                 onPasskeyDelete = onPasskeyDelete,
