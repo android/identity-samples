@@ -17,16 +17,22 @@
 package com.google.credentialmanager.sample
 
 import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
+import androidx.credentials.CreateCredentialRequest
+import androidx.credentials.CreateCredentialResponse
+import androidx.credentials.CredentialManager
 
 /**
- * Finds the activity from a context.
+ * Creates a credential using the Credential Manager API.
  *
- * @return The activity if found, null otherwise.
+ * @param activity The activity to use for the create credential request.
+ * @param request The create credential request.
+ * @return The create credential response.
  */
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+
+suspend fun createCredential(
+    activity: Activity,
+    request: CreateCredentialRequest
+): CreateCredentialResponse {
+    val credentialManager = CredentialManager.create(activity)
+    return credentialManager.createCredential(activity, request)
 }
