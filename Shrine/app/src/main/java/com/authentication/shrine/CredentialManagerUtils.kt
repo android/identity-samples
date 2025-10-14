@@ -17,6 +17,7 @@ package com.authentication.shrine
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.ClearCredentialStateRequest.Companion.TYPE_CLEAR_RESTORE_CREDENTIAL
 import androidx.credentials.CreateCredentialRequest
@@ -33,11 +34,20 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.GetRestoreCredentialOption
+import androidx.credentials.SignalAllAcceptedCredentialIdsRequest
+import androidx.credentials.SignalCurrentUserDetailsRequest
+import androidx.credentials.SignalUnknownCredentialRequest
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.authentication.shrine.repository.AuthRepository.Companion.RP_ID_KEY
+import com.authentication.shrine.repository.AuthRepository.Companion.USER_ID_KEY
+import com.authentication.shrine.repository.AuthRepository.Companion.read
 import com.authentication.shrine.repository.SERVER_CLIENT_ID
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -48,7 +58,19 @@ import javax.inject.Inject
  */
 class CredentialManagerUtils @Inject constructor(
     private val credentialManager: CredentialManager,
+    private val dataStore: DataStore<Preferences>,
 ) {
+
+    private val TAG = "CredentialManagerUtils"
+
+    private object JSON_KEYS {
+        const val RP_ID = "rpId"
+        const val CREDENTIAL_ID = "credentialId"
+        const val USER_ID = "userId"
+        const val ALL_ACCEPTED_CREDENTIAL_IDS = "allAcceptedCredentialIds"
+        const val NAME = "name"
+        const val DISPLAY_NAME = "displayName"
+    }
 
     /**
      * Retrieves a passkey or password credential from the credential manager.
@@ -108,7 +130,7 @@ class CredentialManagerUtils @Inject constructor(
                         .setServerClientId(SERVER_CLIENT_ID)
                         .setFilterByAuthorizedAccounts(false)
                         .build(),
-                )
+                ),
             )
             result = credentialManager.getCredential(context, credentialRequest)
         } catch (e: GetCredentialCancellationException) {
@@ -248,6 +270,73 @@ class CredentialManagerUtils @Inject constructor(
     suspend fun deleteRestoreKey() {
         val clearRequest = ClearCredentialStateRequest(requestType = TYPE_CLEAR_RESTORE_CREDENTIAL)
         credentialManager.clearCredentialState(clearRequest)
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalUnknown(
+        credentialId: String,
+    ) {
+        dataStore.read(RP_ID_KEY)?.let { rpId ->
+            credentialManager.signalCredentialState(
+                request = SignalUnknownCredentialRequest(
+                    requestJson = JSONObject().apply {
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.CREDENTIAL_ID, credentialId)
+                    }.toString()
+                ),
+            )
+        } ?: Log.e(TAG, "RP ID not present")
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalAcceptedIds(
+        credentialIds: List<String>,
+    ) {
+        fetchDataAndPerformAction { rpId, userId ->
+            credentialManager.signalCredentialState(
+                request = SignalAllAcceptedCredentialIdsRequest(
+                    requestJson = JSONObject().apply {
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.USER_ID, userId)
+                        put(JSON_KEYS.ALL_ACCEPTED_CREDENTIAL_IDS, JSONArray(credentialIds))
+                    }.toString()
+                ),
+            )
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    suspend fun signalUserDetails(
+        newName: String,
+        newDisplayName: String,
+    ) {
+        fetchDataAndPerformAction { rpId, userId ->
+            credentialManager.signalCredentialState(
+                request = SignalCurrentUserDetailsRequest(
+                    requestJson = JSONObject().apply {
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.USER_ID, userId)
+                        put(JSON_KEYS.NAME, newName)
+                        put(JSON_KEYS.DISPLAY_NAME, newDisplayName)
+                    }.toString()
+                ),
+            )
+        }
+    }
+
+    suspend fun fetchDataAndPerformAction(
+        credentialManagerAction: suspend (rpId: String, userId: String) -> Unit
+    ) {
+        val rpId = dataStore.read(RP_ID_KEY)
+        val userId = dataStore.read(USER_ID_KEY)
+
+        if (rpId.isNullOrBlank()) {
+            Log.e(TAG, "RP ID not present")
+        } else if (userId.isNullOrBlank()) {
+            Log.e(TAG, "User ID not present")
+        } else {
+            credentialManagerAction(rpId, userId)
+        }
     }
 }
 

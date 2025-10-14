@@ -32,10 +32,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.authentication.shrine.R
 import com.authentication.shrine.ui.theme.ShrineTheme
 
+/**
+ * A custom TextField composable for the Shrine app.
+ *
+ * @param title The current value of the TextField.
+ * @param text The callback to be invoked when the TextField value changes.
+ */
 @Composable
 fun ShrineTextField(
     title: String,
     text: String = "",
+    enabled: Boolean = false,
+    onValueChanged: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -50,10 +58,9 @@ fun ShrineTextField(
 
         OutlinedTextField(
             value = text,
-            onValueChange = { },
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = false,
+            onValueChange = onValueChanged,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
             shape = RoundedCornerShape(dimensionResource(R.dimen.size_standard)),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface
@@ -62,6 +69,9 @@ fun ShrineTextField(
     }
 }
 
+/**
+ * A preview of the ShrineTextField composable.
+ */
 @Preview(showSystemUi = true, name = "ShrineTextField Light")
 @Composable
 fun ShrineTextFieldPreviewLight() {

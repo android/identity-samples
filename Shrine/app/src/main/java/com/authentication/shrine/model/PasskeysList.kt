@@ -47,4 +47,5 @@ data class PasskeyCredential(
     val aaguid: String,
     val registeredAt: Long,
     val providerIcon: String,
+    val isSelected: Boolean = false,
 )

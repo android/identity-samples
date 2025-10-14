@@ -54,8 +54,10 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
      * if the server indicates a sign-out state or an error occurs during retrieval.
      */
     internal suspend fun getPublicKeyRequestOptions(): String {
-        return when (val publicKeyRequestOptions =
-            authNetworkClient.fetchPublicKeyRequestOptions()) {
+        return when (
+            val publicKeyRequestOptions =
+                authNetworkClient.fetchPublicKeyRequestOptions()
+        ) {
             is NetworkResult.Success -> {
                 publicKeyRequestOptions.sessionId?.let { newSessionId ->
                     sessionId = newSessionId
@@ -78,9 +80,12 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
      * @return `true` on successful login and session update, `false` on failure.
      */
     internal suspend fun loginWithPasskey(passkeyResponseJSON: String): Boolean {
-        return when (val authorizationResult = authNetworkClient.authorizePasskeyWithServer(
-            passkeyResponseJSON, sessionId
-        )) {
+        return when (
+            val authorizationResult = authNetworkClient.authorizePasskeyWithServer(
+                passkeyResponseJSON,
+                sessionId,
+            )
+        ) {
             is NetworkResult.Success -> {
                 authorizationResult.sessionId?.let { newSessionId ->
                     sessionId = newSessionId
@@ -115,7 +120,7 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
 
                 is NetworkResult.SignedOutFromServer -> {
                     signOut()
-                    Log.e(TAG, "Username ${username} not found in server")
+                    Log.e(TAG, "Username $username not found in server")
                     return false
                 }
             }
@@ -126,8 +131,10 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
             return false
         }
 
-        return when (val result =
-            authNetworkClient.authorizePasswordWithServer(usernameSessionId, password)) {
+        return when (
+            val result =
+                authNetworkClient.authorizePasswordWithServer(usernameSessionId, password)
+        ) {
             is NetworkResult.Success -> {
                 result.sessionId?.let { passwordSessionId ->
                     sessionId = passwordSessionId
@@ -137,7 +144,7 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
 
             is NetworkResult.SignedOutFromServer -> {
                 signOut()
-                Log.e(TAG, "Password: ${password} incorrect")
+                Log.e(TAG, "Password: $password incorrect")
                 sessionId = null
                 false
             }
@@ -156,7 +163,7 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
         if (type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             federatedToken = GoogleIdTokenCredential.createFrom(data).idToken
         } else {
-            Log.e(TAG, "Unrecognized custom credential: ${type}")
+            Log.e(TAG, "Unrecognized custom credential: $type")
             return false
         }
 
@@ -190,11 +197,13 @@ class AuthenticationServer(private val authNetworkClient: AuthNetworkClient) {
             }
         }
 
-        return when (val authorizationResult =
-            authNetworkClient.authorizeFederatedTokenWithServer(
-                federatedToken,
-                federatedSessionId
-            )) {
+        return when (
+            val authorizationResult =
+                authNetworkClient.authorizeFederatedTokenWithServer(
+                    federatedToken,
+                    federatedSessionId,
+                )
+        ) {
             is NetworkResult.Success -> {
                 this.sessionId = authorizationResult.sessionId
                 return true

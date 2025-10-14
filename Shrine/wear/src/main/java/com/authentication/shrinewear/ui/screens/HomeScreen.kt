@@ -78,7 +78,6 @@ fun HomeScreen(
     }
 }
 
-
 object DemoInstructionsState {
     var isFirstLaunch: Boolean = true
 }
