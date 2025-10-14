@@ -62,6 +62,16 @@ class CredentialManagerUtils @Inject constructor(
 ) {
 
     private val TAG = "CredentialManagerUtils"
+
+    private object JSON_KEYS {
+        const val RP_ID = "rpId"
+        const val CREDENTIAL_ID = "credentialId"
+        const val USER_ID = "userId"
+        const val ALL_ACCEPTED_CREDENTIAL_IDS = "allAcceptedCredentialIds"
+        const val NAME = "name"
+        const val DISPLAY_NAME = "displayName"
+    }
+
     /**
      * Retrieves a passkey or password credential from the credential manager.
      *
@@ -270,8 +280,8 @@ class CredentialManagerUtils @Inject constructor(
             credentialManager.signalCredentialState(
                 request = SignalUnknownCredentialRequest(
                     requestJson = JSONObject().apply {
-                        put("rpId", rpId)
-                        put("credentialId", credentialId)
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.CREDENTIAL_ID, credentialId)
                     }.toString()
                 ),
             )
@@ -282,20 +292,13 @@ class CredentialManagerUtils @Inject constructor(
     suspend fun signalAcceptedIds(
         credentialIds: List<String>,
     ) {
-        val rpId = dataStore.read(RP_ID_KEY)
-        val userId = dataStore.read(USER_ID_KEY)
-
-        if (rpId.isNullOrBlank()) {
-            Log.e(TAG, "RP ID not present")
-        } else if (userId.isNullOrBlank()) {
-            Log.e(TAG, "User ID not present")
-        } else {
+        fetchDataAndPerformAction { rpId, userId ->
             credentialManager.signalCredentialState(
                 request = SignalAllAcceptedCredentialIdsRequest(
                     requestJson = JSONObject().apply {
-                        put("rpId", rpId)
-                        put("userId", userId)
-                        put("allAcceptedCredentialIds", JSONArray(credentialIds))
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.USER_ID, userId)
+                        put(JSON_KEYS.ALL_ACCEPTED_CREDENTIAL_IDS, JSONArray(credentialIds))
                     }.toString()
                 ),
             )
@@ -307,6 +310,23 @@ class CredentialManagerUtils @Inject constructor(
         newName: String,
         newDisplayName: String,
     ) {
+        fetchDataAndPerformAction { rpId, userId ->
+            credentialManager.signalCredentialState(
+                request = SignalCurrentUserDetailsRequest(
+                    requestJson = JSONObject().apply {
+                        put(JSON_KEYS.RP_ID, rpId)
+                        put(JSON_KEYS.USER_ID, userId)
+                        put(JSON_KEYS.NAME, newName)
+                        put(JSON_KEYS.DISPLAY_NAME, newDisplayName)
+                    }.toString()
+                ),
+            )
+        }
+    }
+
+    suspend fun fetchDataAndPerformAction(
+        credentialManagerAction: suspend (rpId: String, userId: String) -> Unit
+    ) {
         val rpId = dataStore.read(RP_ID_KEY)
         val userId = dataStore.read(USER_ID_KEY)
 
@@ -315,16 +335,7 @@ class CredentialManagerUtils @Inject constructor(
         } else if (userId.isNullOrBlank()) {
             Log.e(TAG, "User ID not present")
         } else {
-            credentialManager.signalCredentialState(
-                request = SignalCurrentUserDetailsRequest(
-                    requestJson = JSONObject().apply {
-                        put("rpId", rpId)
-                        put("userId", userId)
-                        put("name", newName)
-                        put("displayName", newDisplayName)
-                    }.toString()
-                ),
-            )
+            credentialManagerAction(rpId, userId)
         }
     }
 }
