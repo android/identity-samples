@@ -16,5 +16,5 @@
 package com.authentication.shrine.utility
 
 object Constants {
-    const val SESSION_ID_KEY = "SESAME_SESSION_COOKIE="
+    const val SESSION_ID_KEY = "__Secure-SESAME_SESSION_COOKIE="
 }
