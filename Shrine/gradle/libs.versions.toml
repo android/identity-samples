@@ -14,7 +14,6 @@ googleid = "1.1.1"
 hilt = "2.57.1"
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
-horologist = "0.7.15"
 kotlin = "2.2.0"
 kotlinCoroutines = "1.0"
 kotlinxCoroutines = "1.9.0"
@@ -28,12 +27,9 @@ okHttp = "4.12.0"
 playServicesAuth = "21.1.1"
 playServicesFido = "21.0.0"
 playServicesLocation = "21.2.0"
-playServicesWearable = "19.0.0"
 retrofit = "2.9.0"
 spotless = "6.21.0"
 sysUiController = "0.28.0"
-wearComposeMaterial3 = "1.5.0-beta04"
-wearRemoteInteractions = "1.1.0"
 
 # BOM Versions
 composeBom = "2025.05.01"
@@ -45,7 +41,6 @@ espressoCore = "3.5.1"
 extJUnit = "1.1.5"
 jUnit = "4.13.2"
 composeMaterial = "1.2.1"
-wearToolingPreview = "1.0.0"
 foundation = "1.8.3"
 
 
@@ -109,22 +104,6 @@ kotlin-coroutines = { group = "ru.gildor.coroutines", name = "kotlin-coroutines-
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okHttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okHttp" }
 
-# For Wear Module
-horologist-auth-ui = { module = "com.google.android.horologist:horologist-auth-ui", version.ref = "horologist" }
-horologist-compose-layout = { module = "com.google.android.horologist:horologist-compose-layout", version.ref = "horologist" }
-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearComposeMaterial3" }
-wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearComposeMaterial3" }
-wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "wearComposeMaterial3" }
-wear-compose-ui-tooling = { group = "androidx.wear.compose", name = "compose-ui-tooling"}
-wear-remote-interactions = { group = "androidx.wear", name = "wear-remote-interactions", version.ref = "wearRemoteInteractions" }
-kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlinBom" }
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-playServicesWearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
-
-
 # Testing
 compose-ui-test-junit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
@@ -132,10 +111,7 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "extJUnit" }
 junit = { group = "junit", name = "junit", version.ref = "jUnit"}
-androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
-androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidPlugin" }
