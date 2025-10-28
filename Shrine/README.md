@@ -1,7 +1,7 @@
 # Shrine Sample App
 
 This is the repository for the Credential Manager API code integration app,
-also known as the **"Shrine"** app.
+also known as the **"Shrine"** app for both Android and Wear OS.
 
 The Shrine app is a fully functional Android app built with Kotlin and Jetpack Compose.
 This sample app is built to share a working sample of Credential Manager APIs in Android
@@ -103,6 +103,10 @@ Project Sesame server, i.e. the data class `RegisterRequestResponse` defines fie
 server response from requesting passkey registration options. This is then used in `registerRequest`
 in `AuthApiService.kt`, and the server's returned JSON is expected to have those fields. You can
 verify this by looking at the logs in Logcat after making any server request.
+
+## Wear OS Module
+This sample also includes a Wear OS module that implements Credential Manager for a Wear OS app.
+See the wear/README.md file to learn about Wear OS behaviors and limitations.
 
 ## **License**
 

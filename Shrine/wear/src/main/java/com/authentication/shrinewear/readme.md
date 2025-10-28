@@ -1,46 +1,47 @@
-/
-Copyright 2024 The Android Open Source Project
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
 # Wear OS Shrine Sample
 
-The Wear OS Shrine Sample provides an look at how different features are integrated into a 
+The Wear OS Shrine Sample provides an look at how different features are integrated into a
 functioning Wear app.
 
-Current functionality:
-  * Credential Manager Authentication API
-    * Passkeys, Passwords, Sign in With Google
-  * Fallback Methods: OAuth, Legacy Sign in With Google
+## Functionality
+
+A Credential Manager Wear OS implementation will have the following functionality:
+
+* Authenticate with unified methods: Passkeys, Passwords, Sign in With Google
+* Authenticate with fallback Methods
+   * This sample demonstrates fallback methods: OAuth, Legacy Sign in With Google
+
+## Limitations
+
+Wear OS Credential Manager has the following limitations:
+
+* Cannot create passkeys on Wear, must use companion mobile device
+* Restore Credentials is not supported
+* Does not work on Wear 3.0
 
 ## Credential Manager
 
-The Credential Manager API integration demonstrates the flow of signing in with Credential manager.
+This sample demonstrates the flow of signing in with Credential manager.
 
 If a user dismisses Credential Manager, the sample falls back to the Wear OS legacy authentication
 methods.
 
 Once a user is authenticated, a screen will be shown to log out and restart the process.
 
+### Prerequisites
+
+* Android Studio with the latest SDK and build tools
+* A Wear OS emulator or physical device on Wear 4.0 or higher
+* Created and Stored credentials synced by the mobile Shrine app-- see 'Creating Testing Credentials'
+
 ### How it Works: Credential Syncing
 
-Since Wear OS cannot yet create passkeys or password, any Wear OS app implementing Credential
-Manager must rely on passkeys and passwords synced from other devices in order to sign in. 
-Credential Manager's Sign in With Google integration does not have this dependency.
+Since Wear OS cannot yet create credentials, any Wear OS app implementing Credential
+Manager must rely on credentials created from other devices to sign in.
 
-In other words, in order to provide passkeys and passwords on Wear OS, you must have a Credential
+In other words, in order to provide credentials on Wear OS, you must have a Credential
 Manager implementation on a device type which allows users to create credentials (probably
-mobile). 
+mobile).
 
 Credential Providers like Google Password Manager are mostly responsible for storing and syncing
 these credentials from other other devices. The public half of passkey pairs, however, can only be
@@ -54,12 +55,6 @@ You may want to remind users to verify their provider if their attempts to login
 an empty credentials list, see
 [NoCredentialsException.](https://developer.android.com/reference/kotlin/androidx/credentials/exceptions/NoCredentialException)
 
-### Prerequisites
-
-* Android Studio with the latest SDK and build tools.
-* A Wear OS emulator or physical device on Wear 5.1 or higher.
-* Created and Stored credentials synced by the mobile Shrine app. Instructions next section.
-
 ### Creating Testing Credentials
 
 Follow these instructions to create credentials that you can use for testing using an Android phone
@@ -67,7 +62,7 @@ that runs Android 13+ with the mobile Shrine sample.
 
 1. [Mobile] Setup google account.
 2. [Mobile] Settings->Passwords, passkeys & autofill, confirm preferred service is
-“Google password Manager”, or your preferred provider.
+   “Google password Manager”, or your preferred provider.
 3. [Mobile] Open Shrine app, Click create account and follow instructions. Each account must
    have a unique username.
 4. [Mobile] When prompted, save password to “Google password manager”, and create a passkey
@@ -111,10 +106,10 @@ tokens are filled, and the result is used to make an authenticated call to the G
 2. In the Google API console, select an existing or create a new project and register it as an OAuth
    2.0 client.
 
-    * Follow the instructions for
-["TV and limited input"](https://developers.google.com/identity/protocols/oauth2/limited-input-device#creatingcred). 
-    * Make sure to register https://wear.googleapis.com/3p_auth/<package_name> as the redirect URI
-for your client for this sample to work.
+   * Follow the instructions for
+     ["TV and limited input"](https://developers.google.com/identity/protocols/oauth2/limited-input-device#creatingcred).
+   * Make sure to register https://wear.googleapis.com/3p_auth/<package_name> as the redirect URI
+     for your client for this sample to work.
 
 3. Update the AuthViewModel.kt file to include the client_id and client_secret from the Google API
    project you previously selected to configure your OAuth client.

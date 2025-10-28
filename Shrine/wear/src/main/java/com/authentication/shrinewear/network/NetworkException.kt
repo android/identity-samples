@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.webkit.webviewsample.theme
+package com.authentication.shrinewear.network
 
-import androidx.compose.ui.graphics.Color
-
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+/**
+ * An exception class for API errors.
+ *
+ * @param message The error message.
+ */
+class NetworkException(message: String) : RuntimeException(message)
