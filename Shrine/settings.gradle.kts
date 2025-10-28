@@ -7,3 +7,4 @@ pluginManagement {
 }
 rootProject.name = "Shrine"
 include(":app")
+include(":wear")
