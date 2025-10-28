@@ -19,5 +19,5 @@ modules:
 * `Shrine` is a more developed mobile app featuring best practices and recommended UX when
   using Credential Manager. The sample features multiple methods of sign-up, sign-in, settings
   configuration, and session management.
-* `Shrinewear/appkt` is a Wear app that works together with the Shrine mobile app. It features
-  seamless authentication via passkey and Sign-in-with-Google logins.
+* `Shrine/wear` is a Wear app that works together with the Shrine mobile app. It features
+  seamless authentication via passkey, password, and Sign-in-with-Google logins.
