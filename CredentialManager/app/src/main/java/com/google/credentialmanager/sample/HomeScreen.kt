@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,9 +51,9 @@ fun HomeScreen(navController: NavController) {
     CredentialManagerSampleTheme {
         val isSignedInThroughPasskeys = DataProvider.isSignedInThroughPasskeys()
         val message = if (isSignedInThroughPasskeys) {
-            "Logged in successfully through passkeys"
+            stringResource(R.string.logged_in_successfully_through_passkeys)
         } else {
-            "Logged in successfully through password"
+            stringResource(R.string.logged_in_successfully_through_password)
         }
 
         Column(
@@ -82,7 +83,7 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(top = 20.dp)
             ) {
-                Text("Sign out and try again")
+                Text(stringResource(R.string.sign_out_and_try_again))
             }
         }
     }
