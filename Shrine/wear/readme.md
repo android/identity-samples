@@ -1,11 +1,11 @@
 # Wear OS Shrine Sample
 
-The Wear OS Shrine Sample provides an look at how different features are integrated into a
-functioning Wear app.
+The Wear OS Shrine Sample provides a look at the standard Credential Manager feature set in a
+functioning Wear OS app.
 
 ## Functionality
 
-A Credential Manager Wear OS implementation will have the following functionality:
+A Credential Manager Wear OS implementation will have the following functionalities:
 
 * Authenticate with unified methods: Passkeys, Passwords, Sign in With Google
 * Authenticate with fallback Methods
@@ -18,8 +18,19 @@ Wear OS Credential Manager has the following limitations:
 * Cannot create passkeys on Wear, must use companion mobile device
 * Restore Credentials is not supported
 * Does not work on Wear 3.0
+* Hybrid flows not supported
 
-## Credential Manager
+## Prerequisites
+
+* Android Studio with the latest SDK and build tools
+* A Wear OS emulator or physical device on Wear 4.0 or higher
+* Created and Stored credentials synced by the mobile Shrine app-- see 'Syncing' and 'Creating Testing Credentials'
+* Your Credential provider (e.g. Google Password Manager) on Wear must be **the same** as the one 
+  you used to create credentials for your app on another device type (of course if you are using
+  a third-party provider, they will need to have implemented a Wear OS app).
+* A device lock (pin or pattern) in order to use passkeys
+
+## Usage
 
 This sample demonstrates the flow of signing in with Credential manager.
 
@@ -28,59 +39,56 @@ methods.
 
 Once a user is authenticated, a screen will be shown to log out and restart the process.
 
-### Prerequisites
-
-* Android Studio with the latest SDK and build tools
-* A Wear OS emulator or physical device on Wear 4.0 or higher
-* Created and Stored credentials synced by the mobile Shrine app-- see 'Creating Testing Credentials'
-
-### How it Works: Credential Syncing
+### Pre-reading: Syncing
 
 Since Wear OS cannot yet create credentials, any Wear OS app implementing Credential
-Manager must rely on credentials created from other devices to sign in.
+Manager must rely on credentials created and synced from companion apps on other device types with
+Credential Manager integrations in order to sign in.  
 
-In other words, in order to provide credentials on Wear OS, you must have a Credential
-Manager implementation on a device type which allows users to create credentials (probably
-mobile).
+While Credential Providers like Google Password Manager are partially responsible for storing and syncing
+these credentials from other other devices, implementing apps also need to participate.
 
-Credential Providers like Google Password Manager are mostly responsible for storing and syncing
-these credentials from other other devices. The public half of passkey pairs, however, can only be
-stored and synced by you, the Credential Manager integrator.  We recommend an encrypted credentials
-server for this purpose, see [authenticationServer::loginWithPasskey](authenticator/AuthenticationServer.kt#L68).
+Passwords, federated identity tokens like Sign in with Google, and the public halves of
+passkeys must be stored and synced in an app credentials server implemented and owned by you, the 
+Credential Manager implementor.  Sign in with Google Credentials also require that you set up a 
+Google Cloud Console project, see instructions here: 
+https://developer.android.com/identity/sign-in/credential-manager-siwg
 
-To use a credential created on another device, your provider on Wear must be **the same** as the one
-you used to create credentials for your app on another device type.
+This app sample is linked to a sample live credentials server to store and sync credentials.  It
+will work with any Credential Provider out of the box for passwords and passkeys, but requires a
+separate cloud console for Sign in with Google, as noted above.
 
 You may want to remind users to verify their provider if their attempts to login result in
 an empty credentials list, see
 [NoCredentialsException.](https://developer.android.com/reference/kotlin/androidx/credentials/exceptions/NoCredentialException)
 
-### Creating Testing Credentials
+### Prerequisite: Creating Testing Credentials
 
 Follow these instructions to create credentials that you can use for testing using an Android phone
-that runs Android 13+ with the mobile Shrine sample.
+or emulator that runs Android 13+ with the mobile Shrine sample, and a Wear OS device or emulator
+running Wear OS 4.0 or greater.
 
 1. [Mobile] Setup google account.
 2. [Mobile] Settings->Passwords, passkeys & autofill, confirm preferred service is
    “Google password Manager”, or your preferred provider.
 3. [Mobile] Open Shrine app, Click create account and follow instructions. Each account must
-   have a unique username.
+   have a unique username. 
 4. [Mobile] When prompted, save password to “Google password manager”, and create a passkey
 5. [Mobile] Transfer the same google account on your phone to the watch via the phone Wear OS app.
 6. [Wear OS] Install the Shrine wear app.
 7. [Wear OS] Confirm that Google Password Manager (or the provider you chose on mobile)
    is chosen as the default provider in the passwords settings menu.
 
-### Usage
+### Instructions
 
 1. Launch the application on your Wear OS device or emulator.
-2. Tap 'Login'
-3. Interact with Credential Manager
-   a. Try Passkey login, inputting device credentials to authenticate passkey signing.
+2. Tap the checkmark to dismiss the intro, or just wait for the Credential Selector screen to launch.
+3. Interact with Credential selector screen
+   a. Try Passkey login, inputting device lock to authenticate passkey signing.
+   b. Try Passwords and Sign in with Google.
    b. Tap Sign-in Options to see a list of all usable credentials. Try them all.
 4. Fall back to legacy auth methods
-   a. After tapping 'login' on the splash page, scroll to the botton of the Credential Manager UI
-   and tap "Dismiss"
+   a. Scroll to the bottom of the Credential selector screen and tap "Dismiss"
    b. You will be redirected to a screen with the legacy Wear OS authentication methods, OAuth and
    Sign in with Google (standalone button).
    c. Try them both.
