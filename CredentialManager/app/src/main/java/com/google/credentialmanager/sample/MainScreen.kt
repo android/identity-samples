@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,7 +55,7 @@ fun MainScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Try passkeys demo",
+                text = stringResource(R.string.try_passkeys_demo),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 128.dp)
@@ -70,7 +71,7 @@ fun MainScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(top = 20.dp)
             ) {
-                Text("Sign up")
+                Text(stringResource(R.string.sign_up))
             }
             Button(
                 onClick = { navController.navigate(Screen.SignIn.route) },
@@ -79,7 +80,7 @@ fun MainScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(top = 20.dp)
             ) {
-                Text("Sign in")
+                Text(stringResource(R.string.sign_in))
             }
         }
     }

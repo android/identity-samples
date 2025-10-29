@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,7 +75,7 @@ fun SignInScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Sign in",
+                text = stringResource(R.string.sign_in),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 20.dp, bottom = 16.dp)
@@ -87,7 +88,7 @@ fun SignInScreen(navController: NavController) {
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp)) // Consider using theme color: color = MaterialTheme.colorScheme.primary
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("operation in progress...")
+                    Text(stringResource(R.string.operation_in_progress))
                 }
             }
 
@@ -111,7 +112,7 @@ fun SignInScreen(navController: NavController) {
                 enabled = !isLoading && activity != null,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign in with passkey/saved password")
+                Text(stringResource(R.string.sign_in_with_passkey_saved_password))
             }
         }
     }
