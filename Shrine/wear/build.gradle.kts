@@ -77,47 +77,45 @@ android {
     }
 
     dependencies {
-        // The trailing comments indicate version change status post migration.
-        // TODO(johnzoeller): Remove trailing comments once mobile dependency versions are updated.
-        implementation(platform(libs.compose.bom))      // "2025.05.00" to .01
-        implementation(libs.core.ktx)                   // 1.15.0 to 1.13.1
-        implementation(libs.activity.compose)           // bom 2025.05.00 to specific 1.9
-        implementation(libs.appcompat)                  // NO CHANGE
-        implementation(libs.compose.material.icons)     // Bom "2025.05.00" to .01
-        implementation(libs.compose.ui)                 // bom "2025.05.00" to .01
-        implementation(libs.credentials)                // NO CHANGE
-        implementation(libs.credentials.play.services.auth) // NO CHANGE
-        implementation(libs.lifecycle.runtime.ktx)      // 2.8.7 -> 2.7.0
-        implementation(libs.lifecycle.viewmodel.compose)    // 2.8.7 -> 2.7.0
-        implementation(libs.navigation.compose)         // 2.9.0 -> 2.7.7
+        implementation(platform(libs.compose.bom))
+        implementation(libs.core.ktx)
+        implementation(libs.activity.compose)
+        implementation(libs.appcompat)
+        implementation(libs.compose.material.icons)
+        implementation(libs.compose.ui)
+        implementation(libs.credentials)
+        implementation(libs.credentials.play.services.auth)
+        implementation(libs.lifecycle.runtime.ktx)
+        implementation(libs.lifecycle.viewmodel.compose)
+        implementation(libs.navigation.compose)
 
         // Wear Androidx Dependencies
-        implementation(libs.wear.compose.material3)     // New
-        implementation(libs.wear.compose.navigation)    // New
-        implementation(libs.wear.compose.ui.tooling)    // New
-        implementation(libs.wear.compose.foundation)    // New
-        implementation(libs.wear.remote.interactions)   // New
+        implementation(libs.wear.compose.material3)
+        implementation(libs.wear.compose.navigation)
+        implementation(libs.wear.compose.ui.tooling)
+        implementation(libs.wear.compose.foundation)
+        implementation(libs.wear.remote.interactions)
 
         // KotlinX
-        implementation(platform(libs.kotlin.bom))       // New
-        implementation(libs.kotlinx.coroutines.core)    // New
-        implementation(libs.kotlinx.coroutines.android) // New
-        implementation(libs.kotlinx.serialization.core) // New
-        implementation(libs.kotlinx.serialization.json) // New
+        implementation(platform(libs.kotlin.bom))
+        implementation(libs.kotlinx.coroutines.core)
+        implementation(libs.kotlinx.coroutines.android)
+        implementation(libs.kotlinx.serialization.core)
+        implementation(libs.kotlinx.serialization.json)
 
         // Wear Horologist SIWG composables
         implementation(libs.horologist.auth.ui)
         implementation(libs.horologist.compose.layout)
 
         // GMS
-        implementation(libs.google.id)                  // NO CHANGE
-        implementation(libs.playServicesWearable)       // New
+        implementation(libs.google.id)
+        implementation(libs.playServicesWearable)
 
         // Http Server
-        implementation(libs.okhttp)                     // NO CHANGE
-        implementation(libs.okhttp.logging.interceptor) // NO CHANGE
+        implementation(libs.okhttp)
+        implementation(libs.okhttp.logging.interceptor)
 
         // For Legacy Sign in With Google
-        implementation(libs.play.services.auth)         // 21.1.1 -> 21.3.0
+        implementation(libs.play.services.auth)
     }
 }
