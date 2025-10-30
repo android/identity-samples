@@ -1,0 +1,88 @@
+/*
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.kapt)
+}
+
+android {
+    compileSdk 35
+    namespace "com.google.android.gms.identity.credentials.sample"
+    defaultConfig {
+        applicationId "com.google.android.gms.identity.credentials.sample"
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    implementation libs.kotlin.stdlib
+    implementation libs.material.design
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.test.espresso.idling.resource
+
+    implementation libs.google.play.services.identity.credentials
+    implementation libs.androidx.credentials.play.services.auth
+
+    // Required because the broadcast pending-intent otherwise lacks the intent-flag.
+    // IllegalArgumentException: Targeting S+ (version 31 and above) requires that one of
+    // FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.
+    implementation libs.androidx.work.runtime
+
+    // Lifecycle
+    implementation libs.bundles.androidx.lifecycle
+
+    // Coroutines
+    implementation libs.kotlinx.coroutines.play.services
+
+    // Hilt
+    implementation libs.hilt.android
+    kapt libs.hilt.android.compiler
+    implementation libs.hilt.work
+    kapt libs.hilt.compiler
+
+    testImplementation libs.junit
+    debugImplementation libs.androidx.test.monitor
+    androidTestImplementation libs.bundles.androidx.test
+}
