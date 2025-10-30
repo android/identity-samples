@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,20 @@
 
 package com.google.credentialmanager.sample
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
-class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        DataProvider.initSharedPref(applicationContext)
-
-        setContent {
-            val startDestination = if (DataProvider.isSignedIn()) {
-                Screen.Home.route
-            } else {
-                Screen.Main.route
-            }
-            AppNavHost(startDestination = startDestination)
+/**
+ * A factory for creating [SignInViewModel] instances.
+ *
+ * @param jsonProvider The provider for JSON data.
+ */
+class SignInViewModelFactory(private val jsonProvider: JsonProvider) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SignInViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SignInViewModel(jsonProvider) as T
         }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

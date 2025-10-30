@@ -16,13 +16,22 @@
 
 <resources>
     <string name="app_name">CredentialManagerSample</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="sign_in">Sign in</string>
+    <string name="operation_in_progress">Operation in progress...</string>
+    <string name="sign_in_with_passkey_saved_password">Sign in with passkey/saved password</string>
+    <string name="logged_in_successfully_through_passkeys">Logged in successfully through passkeys</string>
+    <string name="logged_in_successfully_through_password">Logged in successfully through password</string>
+    <string name="sign_out_and_try_again">Sign out and try again</string>
+    <string name="try_passkeys_demo">Try passkeys demo</string>
+    <string name="sign_up">Sign up</string>
+    <string name="error_while_authenticating">An error occurred while authenticating: %1$s</string>
+    <string name="create_new_account">Create New Account</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="passkey_sign_up_description">Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.</string>
+    <string name="sign_up_with_passkey">Sign Up with passkey</string>
+    <string name="or_divider">-------------------- OR --------------------</string>
+    <string name="password_sign_up_description">Sign up to your account with a password. Your password will be saved securely with your password provider.</string>
+    <string name="sign_up_with_password">Sign up with Password</string>
+    <string name="sign_up_with_password_instead">Sign up with a password instead</string>
 </resources>
