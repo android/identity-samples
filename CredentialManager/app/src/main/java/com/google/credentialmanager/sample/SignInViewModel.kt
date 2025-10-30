@@ -16,9 +16,14 @@
 
 package com.google.credentialmanager.sample
 
-import android.app.Activity
 import android.util.Log
-import androidx.credentials.*
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.GetPasswordOption
+import androidx.credentials.GetPublicKeyCredentialOption
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -52,62 +57,61 @@ class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
      * This function initiates the sign-in process by calling the Credential Manager API to
      * retrieve saved credentials.
      *
-     * @param activity The activity to use for the sign-in request.
+     * @param getCredential A suspend function that takes a [GetCredentialRequest] and returns a [GetCredentialResponse].
      */
-    fun signIn(activity: Activity) {
+    fun signIn(getCredential: suspend (GetCredentialRequest) -> GetCredentialResponse) {
         _isLoading.value = true
         _signInError.value = null
 
         viewModelScope.launch {
-            val data = getSavedCredentials(activity)
+            val getPublicKeyCredentialOption =
+                GetPublicKeyCredentialOption(jsonProvider.fetchAuthJson(), null)
 
-            if (data != null) {
-                sendSignInResponseToServer()
-                _navigationEvent.emit(NavigationEvent.NavigateToHome(signedInWithPasskeys = DataProvider.isSignedInThroughPasskeys()))
-            }
-        }
-    }
+            val getPasswordOption = GetPasswordOption()
 
-    private suspend fun getSavedCredentials(activity: Activity): String? {
-        val getPublicKeyCredentialOption =
-            GetPublicKeyCredentialOption(jsonProvider.fetchAuthJson(), null)
-
-        val getPasswordOption = GetPasswordOption()
-
-        val credentialManager = CredentialManager.create(activity)
-        val result = try {
-            credentialManager.getCredential(
-                activity,
-                GetCredentialRequest(
-                    listOf(
-                        getPublicKeyCredentialOption,
-                        getPasswordOption
-                    )
+            val request = GetCredentialRequest(
+                listOf(
+                    getPublicKeyCredentialOption,
+                    getPasswordOption
                 )
             )
-        } catch (e: Exception) {
-            _isLoading.value = false
-            Log.e("Auth", "getCredential failed with exception: " + e.message.toString())
-            _signInError.value =
-                "An error occurred while authenticating: " + e.message.toString()
-            return null
-        }
 
-        if (result.credential is PublicKeyCredential) {
-            val cred = result.credential as PublicKeyCredential
-            DataProvider.setSignedInThroughPasskeys(true)
-            return "Passkey: ${cred.authenticationResponseJson}"
-        }
-        if (result.credential is PasswordCredential) {
-            val cred = result.credential as PasswordCredential
-            DataProvider.setSignedInThroughPasskeys(false)
-            return "Got Password - User:${cred.id} Password: ${cred.password}"
-        }
-        if (result.credential is CustomCredential) {
-            //If you are also using any external sign-in libraries, parse them here with the utility functions provided.
-        }
+            try {
+                val result = getCredential(request)
 
-        return null
+                val data = when (result.credential) {
+                    is PublicKeyCredential -> {
+                        val cred = result.credential as PublicKeyCredential
+                        DataProvider.setSignedInThroughPasskeys(true)
+                        "Passkey: ${cred.authenticationResponseJson}"
+                    }
+
+                    is PasswordCredential -> {
+                        val cred = result.credential as PasswordCredential
+                        DataProvider.setSignedInThroughPasskeys(false)
+                        "Got Password - User:${cred.id} Password: ${cred.password}"
+                    }
+
+                    is CustomCredential -> {
+                        //If you are also using any external sign-in libraries, parse them here with the utility functions provided.
+                        null
+                    }
+
+                    else -> null
+                }
+
+                if (data != null) {
+                    sendSignInResponseToServer()
+                    _navigationEvent.emit(NavigationEvent.NavigateToHome(signedInWithPasskeys = DataProvider.isSignedInThroughPasskeys()))
+                }
+            } catch (e: Exception) {
+                Log.e("Auth", "getCredential failed with exception: " + e.message.toString())
+                _signInError.value =
+                    "An error occurred while authenticating: " + e.message.toString()
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     private fun sendSignInResponseToServer(): Boolean {
