@@ -19,6 +19,9 @@ package com.google.credentialmanager.sample
 import android.content.Context
 import android.content.SharedPreferences
 
+/**
+ * A data provider that manages the user's signed-in status using SharedPreferences.
+ */
 object DataProvider {
 
     private lateinit var sharedPreference: SharedPreferences
@@ -28,28 +31,51 @@ object DataProvider {
     private const val IS_SIGNED_IN_THROUGH_PASSKEYS = "isSignedInThroughPasskeys"
     private const val PREF_NAME = "CREDMAN_PREF"
 
+    /**
+     * Initializes the SharedPreferences for the data provider.
+     *
+     * @param context The application context.
+     */
     fun initSharedPref(context: Context) {
         sharedPreference =
             context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         editor = sharedPreference.edit()
     }
 
-    //Set if the user is signed in or not
+    /**
+     * Sets the user's signed-in status.
+     *
+     * @param flag True if the user is signed in, false otherwise.
+     */
     fun configureSignedInPref(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN, flag)
         editor.commit()
     }
 
-    //Set if signed in through passkeys or not
+    /**
+     * Sets whether the user signed in through passkeys.
+     *
+     * @param flag True if the user signed in through passkeys, false otherwise.
+     */
     fun setSignedInThroughPasskeys(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN_THROUGH_PASSKEYS, flag)
         editor.commit()
     }
 
+    /**
+     * Checks if the user is signed in.
+     *
+     * @return True if the user is signed in, false otherwise.
+     */
     fun isSignedIn(): Boolean {
         return sharedPreference.getBoolean(IS_SIGNED_IN, false)
     }
 
+    /**
+     * Checks if the user signed in through passkeys.
+     *
+     * @return True if the user signed in through passkeys, false otherwise.
+     */
     fun isSignedInThroughPasskeys(): Boolean {
         return sharedPreference.getBoolean(IS_SIGNED_IN_THROUGH_PASSKEYS, false)
     }
