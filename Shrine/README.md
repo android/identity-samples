@@ -104,6 +104,16 @@ server response from requesting passkey registration options. This is then used 
 in `AuthApiService.kt`, and the server's returned JSON is expected to have those fields. You can
 verify this by looking at the logs in Logcat after making any server request.
 
+### Restore Credentials
+
+Restore Credentials are passkeys that are used to restore a user's app accounts when setting up a
+new device. In Shrine, this is created in `AuthenticationScreen.kt` upon signing in successfully and
+passing the `createRestoreKey()` function in to the View Model. This is also done in
+`RegisterPasswordScreen.kt`. When launching the app for the first time, Shrine checks for an
+existing restore key by calling `viewModel.checkForStoredRestoreKey()` in `AuthenticationScreen.kt`.
+If one exists, it uses that to log the user in automatically. You can read more about how Restore
+Credentials work at https://developer.android.com/identity/sign-in/restore-credentials.
+
 ## Wear OS Module
 This sample also includes a Wear OS module that implements Credential Manager for a Wear OS app.
 See the wear/README.md file to learn about Wear OS behaviors and limitations.
