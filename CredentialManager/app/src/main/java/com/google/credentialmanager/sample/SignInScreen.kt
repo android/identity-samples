@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.credentialmanager.sample
 
 import androidx.compose.foundation.layout.*
@@ -36,7 +52,7 @@ fun SignInScreen(navController: NavController) {
         val isLoading by viewModel.isLoading.collectAsState()
         val signInError by viewModel.signInError.collectAsState()
 
-        val activity = context.findActivity()!!
+        val activity = context.findActivity()
 
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collectLatest { event ->
@@ -78,7 +94,7 @@ fun SignInScreen(navController: NavController) {
 
             signInError?.let {
                 Text(
-                    it,
+                    stringResource(R.string.error_while_authenticating, it),
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
@@ -88,8 +104,10 @@ fun SignInScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    viewModel.signIn {
-                        getCredential(activity, it)
+                    activity?.let { activity ->
+                        viewModel.signIn {
+                            getCredential(activity, it)
+                        }
                     }
                 },
                 shape = RoundedCornerShape(4.dp),
@@ -109,4 +127,3 @@ fun SignInScreenPreview() {
         SignInScreen(navController = rememberNavController())
     }
 }
-
