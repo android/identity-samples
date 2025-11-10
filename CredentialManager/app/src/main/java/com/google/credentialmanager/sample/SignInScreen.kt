@@ -16,10 +16,24 @@
 
 package com.google.credentialmanager.sample
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -74,49 +88,66 @@ fun SignInScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.sign_in),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 20.dp, bottom = 16.dp)
-            )
-
-            if (isLoading) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp)) // Consider using theme color: color = MaterialTheme.colorScheme.primary
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.operation_in_progress))
+            SignInTitle()
+            LoadingIndicator(isLoading)
+            ErrorMessage(signInError)
+            SignInButton(isLoading) {
+                activity?.let { activity ->
+                    viewModel.signIn {
+                        getCredential(activity, it)
+                    }
                 }
             }
-
-            signInError?.let {
-                Text(
-                    stringResource(R.string.error_while_authenticating, it),
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-
-            Button(
-                onClick = {
-                    activity?.let { activity ->
-                        viewModel.signIn {
-                            getCredential(activity, it)
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(4.dp),
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.sign_in_with_passkey_saved_password))
-            }
         }
+    }
+}
+
+@Composable
+private fun SignInTitle() {
+    Text(
+        text = stringResource(R.string.sign_in),
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(top = 20.dp, bottom = 16.dp)
+    )
+}
+
+@Composable
+private fun LoadingIndicator(isLoading: Boolean) {
+    if (isLoading) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.operation_in_progress))
+        }
+    }
+}
+
+@Composable
+private fun ErrorMessage(signInError: String?) {
+    signInError?.let {
+        Text(
+            stringResource(R.string.error_while_authenticating, it),
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun SignInButton(isLoading: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(4.dp),
+        enabled = !isLoading,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(stringResource(R.string.sign_in_with_passkey_saved_password))
     }
 }
 
