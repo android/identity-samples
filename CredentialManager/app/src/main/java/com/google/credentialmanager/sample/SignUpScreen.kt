@@ -1,6 +1,22 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.google.credentialmanager.sample
 
-import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -47,7 +63,7 @@ fun SignUpScreen(navController: NavController) {
         val passkeyCreationError by viewModel.passkeyCreationError.collectAsState()
         val passwordCreationError by viewModel.passwordCreationError.collectAsState()
 
-        val activity = context.findActivity()!!
+        val activity = context.findActivity()
 
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collectLatest { event ->
@@ -76,13 +92,23 @@ fun SignUpScreen(navController: NavController) {
             LoadingIndicator(isLoading)
             ErrorMessages(passkeyCreationError, passwordCreationError)
             Spacer(modifier = Modifier.height(0.dp))
-            PasskeySignUp(isLoading, viewModel, activity)
+            PasskeySignUp(isLoading) {
+                activity?.let { activity ->
+                    viewModel.signUpWithPasskey {
+                        createCredential(activity, it) as CreatePublicKeyCredentialResponse
+                    }
+                }
+            }
             Text(
                 text = stringResource(R.string.or_divider),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
-            PasswordSignUp(isLoading, isPasswordInputVisible, viewModel, activity)
+            PasswordSignUp(isLoading, isPasswordInputVisible) {
+                activity?.let { activity ->
+                    viewModel.signUpWithPassword { createCredential(activity, it) }
+                }
+            }
         }
     }
 }
@@ -176,7 +202,7 @@ private fun ErrorMessages(passkeyCreationError: String?, passwordCreationError: 
 }
 
 @Composable
-private fun PasskeySignUp(isLoading: Boolean, viewModel: SignUpViewModel, activity: Activity) {
+private fun PasskeySignUp(isLoading: Boolean, onClick: () -> Unit) {
     Text(
         text = stringResource(R.string.passkey_sign_up_description),
         textAlign = TextAlign.Center,
@@ -185,11 +211,7 @@ private fun PasskeySignUp(isLoading: Boolean, viewModel: SignUpViewModel, activi
     )
 
     Button(
-        onClick = {
-            viewModel.signUpWithPasskey {
-                createCredential(activity, it) as CreatePublicKeyCredentialResponse
-            }
-        },
+        onClick = onClick,
         shape = RoundedCornerShape(4.dp),
         enabled = !isLoading,
         modifier = Modifier.fillMaxWidth()
@@ -202,8 +224,7 @@ private fun PasskeySignUp(isLoading: Boolean, viewModel: SignUpViewModel, activi
 private fun PasswordSignUp(
     isLoading: Boolean,
     isPasswordInputVisible: Boolean,
-    viewModel: SignUpViewModel,
-    activity: Activity
+    onClick: () -> Unit
 ) {
     Text(
         text = stringResource(R.string.password_sign_up_description),
@@ -213,11 +234,7 @@ private fun PasswordSignUp(
     )
 
     Button(
-        onClick = {
-            viewModel.signUpWithPassword {
-                createCredential(activity, it)
-            }
-        },
+        onClick = onClick,
         shape = RoundedCornerShape(4.dp),
         enabled = !isLoading,
         modifier = Modifier.fillMaxWidth()
