@@ -32,9 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingExtraSmall
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingMedium
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenPadding
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenTitleFontSize
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 
 /**
@@ -50,7 +53,7 @@ fun MainScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(screenPadding),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -59,26 +62,26 @@ fun MainScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 128.dp)
-                    .padding(16.dp),
+                    .padding(paddingMedium),
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp,
+                fontSize = screenTitleFontSize,
                 fontWeight = FontWeight.Bold
             )
             Button(
                 onClick = { navController.navigate(Screen.SignUp.route) },
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(paddingExtraSmall),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp)
+                    .padding(top = screenPadding)
             ) {
                 Text(stringResource(R.string.sign_up))
             }
             Button(
                 onClick = { navController.navigate(Screen.SignIn.route) },
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(paddingExtraSmall),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp)
+                    .padding(top = screenPadding)
             ) {
                 Text(stringResource(R.string.sign_in))
             }

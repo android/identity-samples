@@ -40,6 +40,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.SecureRandom
 
+/**
+ * A view model for the sign-up screen.
+ *
+ * This view model handles the sign-up process, including calling the Credential Manager API,
+ * and exposing the sign-up state to the UI.
+ *
+ * @param jsonProvider The provider for JSON data.
+ */
 class SignUpViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()

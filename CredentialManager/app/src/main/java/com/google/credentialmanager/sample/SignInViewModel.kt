@@ -69,7 +69,7 @@ class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
             try {
                 TODO("Call getCredential() with required credential options")
                 TODO("Complete the authentication process after validating the public key credential to your server and let the user in.")
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 Log.e("Auth", "getCredential failed with exception: " + e.message.toString())
                 _signInError.value = e.message.toString()
             } finally {
