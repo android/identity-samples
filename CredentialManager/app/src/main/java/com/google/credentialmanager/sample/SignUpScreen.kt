@@ -17,11 +17,29 @@
 
 package com.google.credentialmanager.sample
 
-import androidx.compose.foundation.layout.*
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,11 +50,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.bodyFontSize
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.circularProgressIndicatorSize
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingExtraSmall
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingSmall
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenPadding
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenTitleFontSize
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 import kotlinx.coroutines.flow.collectLatest
 
@@ -80,7 +103,7 @@ fun SignUpScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(screenPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -102,7 +125,7 @@ fun SignUpScreen(navController: NavController) {
             Text(
                 text = stringResource(R.string.or_divider),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = paddingSmall)
             )
             PasswordSignUp(isLoading, isPasswordInputVisible) {
                 activity?.let { activity ->
@@ -113,16 +136,26 @@ fun SignUpScreen(navController: NavController) {
     }
 }
 
+/**
+ * The title of the sign-up screen.
+ */
 @Composable
 private fun SignUpTitle() {
     Text(
         text = stringResource(R.string.create_new_account),
-        fontSize = 24.sp,
+        fontSize = screenTitleFontSize,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(top = 20.dp)
+        modifier = Modifier.padding(top = screenPadding)
     )
 }
 
+/**
+ * An input field for the user to enter their username.
+ *
+ * @param username The current username value.
+ * @param onUsernameChange The callback to be invoked when the username changes.
+ * @param usernameError An error message displayed if the username is blank.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UsernameInput(
@@ -139,10 +172,17 @@ private fun UsernameInput(
         modifier = Modifier.fillMaxWidth()
     )
     if (usernameError != null) {
-        Text(usernameError, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+        Text(usernameError, color = MaterialTheme.colorScheme.error, fontSize = bodyFontSize)
     }
 }
 
+/**
+ * An input field for the user to enter their password.
+ *
+ * @param password The current password value.
+ * @param onPasswordChange The callback to be invoked when the password changes.
+ * @param passwordError An error message displayed if the password is blank.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PasswordInput(
@@ -161,58 +201,79 @@ private fun PasswordInput(
         modifier = Modifier.fillMaxWidth()
     )
     if (passwordError != null) {
-        Text(passwordError, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+        Text(
+            passwordError,
+            color = MaterialTheme.colorScheme.error,
+            fontSize = bodyFontSize
+        )
     }
 }
 
+/**
+ * A loading indicator to show when an operation is in progress.
+ *
+ * @param isLoading Whether the loading indicator should be visible.
+ */
 @Composable
 private fun LoadingIndicator(isLoading: Boolean) {
     if (isLoading) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = paddingSmall)
         ) {
-            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(8.dp))
+            CircularProgressIndicator(modifier = Modifier.size(circularProgressIndicatorSize))
+            Spacer(modifier = Modifier.width(paddingSmall))
             Text(stringResource(R.string.operation_in_progress))
         }
     }
 }
 
+/**
+ * Displays error messages for passkey and password creation.
+ *
+ * @param passkeyCreationError An error message displayed if passkey creation fails.
+ * @param passwordCreationError An error message displayed if password creation fails
+ */
 @Composable
 private fun ErrorMessages(passkeyCreationError: String?, passwordCreationError: String?) {
     if (passkeyCreationError != null) {
         Text(
             passkeyCreationError,
             color = MaterialTheme.colorScheme.error,
-            fontSize = 12.sp,
+            fontSize = bodyFontSize,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier.padding(vertical = paddingExtraSmall)
         )
     }
     if (passwordCreationError != null) {
         Text(
             passwordCreationError,
             color = MaterialTheme.colorScheme.error,
-            fontSize = 12.sp,
+            fontSize = bodyFontSize,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier.padding(vertical = paddingExtraSmall)
         )
     }
 }
 
+/**
+ * A button and descriptive text for signing up with a passkey.
+ *
+ * @param isLoading Whether an operation is in progress.
+ * @param onClick The callback to be invoked when the button is clicked.
+ */
 @Composable
 private fun PasskeySignUp(isLoading: Boolean, onClick: () -> Unit) {
     Text(
         text = stringResource(R.string.passkey_sign_up_description),
         textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        modifier = Modifier.padding(bottom = 8.dp)
+        fontSize = bodyFontSize,
+        modifier = Modifier.padding(bottom = paddingSmall)
     )
 
     Button(
         onClick = onClick,
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(paddingExtraSmall),
         enabled = !isLoading,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -220,6 +281,13 @@ private fun PasskeySignUp(isLoading: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * A button and descriptive text for signing up with a password.
+ *
+ * @param isLoading Whether an operation is in progress.
+ * @param isPasswordInputVisible Whether the password input is visible.
+ * @param onClick The callback to be invoked when the button is clicked.
+ */
 @Composable
 private fun PasswordSignUp(
     isLoading: Boolean,
@@ -229,13 +297,13 @@ private fun PasswordSignUp(
     Text(
         text = stringResource(R.string.password_sign_up_description),
         textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        modifier = Modifier.padding(bottom = 8.dp)
+        fontSize = bodyFontSize,
+        modifier = Modifier.padding(bottom = paddingSmall)
     )
 
     Button(
         onClick = onClick,
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(paddingExtraSmall),
         enabled = !isLoading,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -248,6 +316,9 @@ private fun PasswordSignUp(
 }
 
 
+/**
+ * A preview for the [SignUpScreen].
+ */
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {

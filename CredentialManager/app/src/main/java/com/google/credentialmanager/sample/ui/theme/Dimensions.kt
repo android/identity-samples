@@ -10,24 +10,21 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the apermissions and
  * limitations under the License.
  */
 
 package com.google.credentialmanager.sample.ui.theme
 
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-val Pink200 = Color(0xFFF48FB1)
-val Pink500 = Color(0xFFE91E63)
-val Pink700 = Color(0xFFC2185B)
-val Yellow200 = Color(0xFFFFF59D)
-val Yellow700 = Color(0xFFFBC02D)
-
-// Defined from themes.xml
-val Primary = Pink500
-val PrimaryVariant = Pink700
-val OnPrimary = Color.White
-val Secondary = Yellow200
-val SecondaryVariant = Yellow700
-val OnSecondary = Color.Black
+object AppDimensions {
+    val screenTitleFontSize = 24.sp
+    val bodyFontSize = 12.sp
+    val screenPadding = 20.dp
+    val paddingMedium = 16.dp
+    val paddingSmall = 8.dp
+    val paddingExtraSmall = 4.dp
+    val circularProgressIndicatorSize = 24.dp
+}
