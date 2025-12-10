@@ -49,7 +49,7 @@ object DataProvider {
      */
     fun configureSignedInPref(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN, flag)
-        editor.commit()
+        editor.apply()
     }
 
     /**
@@ -59,7 +59,7 @@ object DataProvider {
      */
     fun setSignedInThroughPasskeys(flag: Boolean) {
         editor.putBoolean(IS_SIGNED_IN_THROUGH_PASSKEYS, flag)
-        editor.commit()
+        editor.apply()
     }
 
     /**

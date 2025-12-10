@@ -106,8 +106,7 @@ class SignInViewModel(private val jsonProvider: JsonProvider) : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("Auth", "getCredential failed with exception: " + e.message.toString())
-                _signInError.value =
-                    "An error occurred while authenticating: " + e.message.toString()
+                _signInError.value = e.message.toString()
             } finally {
                 _isLoading.value = false
             }

@@ -31,10 +31,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingExtraSmall
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.paddingMedium
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenPadding
+import com.google.credentialmanager.sample.ui.theme.AppDimensions.screenTitleFontSize
 import com.google.credentialmanager.sample.ui.theme.CredentialManagerSampleTheme
 
 /**
@@ -59,15 +61,15 @@ fun HomeScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(screenPadding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = message,
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(paddingMedium),
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp,
+                fontSize = screenTitleFontSize,
                 fontWeight = FontWeight.Bold
             )
             Button(
@@ -78,10 +80,10 @@ fun HomeScreen(navController: NavController) {
                         launchSingleTop = true
                     }
                 },
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(paddingExtraSmall),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp)
+                    .padding(top = screenPadding)
             ) {
                 Text(stringResource(R.string.sign_out_and_try_again))
             }
