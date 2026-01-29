@@ -1,0 +1,15 @@
+This software uses the following open source packages:
+
+{{#each packages}}
+----------------------------------------------------------------------------
+PACKAGE: {{name}} ({{version}})
+LICENSE: {{license}}
+URL: {{url}}
+----------------------------------------------------------------------------
+{{#if text}}
+{{text}}
+{{else}}
+(No license text found in package metadata)
+{{/if}}
+
+{{/each}}

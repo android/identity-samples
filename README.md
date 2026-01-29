@@ -21,3 +21,6 @@ modules:
   configuration, and session management.
 * `Shrine/wear` is a Wear app that works together with the Shrine mobile app. It features
   seamless authentication via passkey, password, and Sign-in-with-Google logins.
+
+Branch `wasm` notably contains the WASM module for credential filtering and matching.
+* `CredentialProvider/wasm/credential_transfer` - Rust WASM module for credential filtering and matching
