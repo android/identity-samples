@@ -49,6 +49,7 @@ import com.authentication.shrine.ui.common.ShrineLoader
 import com.authentication.shrine.ui.theme.ShrineTheme
 import com.authentication.shrine.ui.viewmodel.AuthenticationUiState
 import com.authentication.shrine.ui.viewmodel.AuthenticationViewModel
+import org.json.JSONObject
 
 /**
  * Stateful composable function for Authentication screen.
@@ -86,9 +87,20 @@ fun AuthenticationScreen(
 
     val onSignInWithPasskeyOrPasswordRequest = {
         viewModel.signInWithPasskeyOrPasswordRequest(
-            onSuccess = { flag ->
+            onSuccess = { isPasswordCredential ->
+                if (isPasswordCredential) {
+                    viewModel.conditionalCreatePasskey(
+                        createPasskeyOnCredMan = { createPasskeyRequestObj: JSONObject ->
+                            credentialManagerUtils.createPasskey(
+                                requestResult = createPasskeyRequestObj,
+                                context = context,
+                                isConditional = true,
+                            )
+                        }
+                    )
+                }
                 createRestoreKey()
-                navigateToHome(flag)
+                navigateToHome(!isPasswordCredential)
             },
             getCredential = { jsonObject ->
                 credentialManagerUtils.getPasskeyOrPasswordCredential(

@@ -36,6 +36,7 @@ import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.model.CredmanResponse
 import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
+import com.authentication.shrine.model.LoginUsernamePasswordRequest
 import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
@@ -140,7 +141,7 @@ class AuthRepository @Inject constructor(
      */
     suspend fun login(username: String, password: String): AuthResult<Unit> {
         return try {
-            val response = authApiService.setUsername(EditUsernameRequest(username = username))
+            val response = authApiService.loginWithUsernamePassword(LoginUsernamePasswordRequest(username, password))
             if (response.isSuccessful) {
                 dataStore.edit { prefs ->
                     prefs[USERNAME] = response.body()?.username.orEmpty()
@@ -149,7 +150,6 @@ class AuthRepository @Inject constructor(
                         prefs[SESSION_ID] = it
                     }
                 }
-                setSessionWithPassword(password)
                 AuthResult.Success(Unit)
             } else {
                 if (response.code() == 401) {
@@ -164,45 +164,6 @@ class AuthRepository @Inject constructor(
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message))
         }
-    }
-
-    /**
-     * Signs in with a password.
-     *
-     * @param password The password to use.
-     * @return True if the sign-in was successful, false otherwise.
-     */
-    private suspend fun setSessionWithPassword(password: String): Boolean {
-        val username = dataStore.read(USERNAME)
-        val sessionId = dataStore.read(SESSION_ID)
-        if (!username.isNullOrEmpty() && !sessionId.isNullOrEmpty()) {
-            try {
-                val response = authApiService.setPassword(
-                    cookie = sessionId.createCookieHeader(),
-                    password = PasswordRequest(password = password),
-                )
-                if (response.isSuccessful) {
-                    dataStore.edit { prefs ->
-                        prefs[USERNAME] = response.body()?.username.orEmpty()
-                        prefs[DISPLAYNAME] = response.body()?.displayName.orEmpty()
-                        response.getSessionId()?.also {
-                            prefs[SESSION_ID] = it
-                        }
-                    }
-                    return true
-                } else if (response.code() == 401) {
-                    signOut()
-                }
-            } catch (e: ApiException) {
-                Log.e(TAG, "Invalid login credentials", e)
-
-                // Remove previously stored credentials and start login over again
-                signOut()
-            }
-        } else {
-            Log.e(TAG, "Please check if username and session id is present in your datastore")
-        }
-        return false
     }
 
     /**

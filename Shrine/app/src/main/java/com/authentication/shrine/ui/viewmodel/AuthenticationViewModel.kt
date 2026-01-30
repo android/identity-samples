@@ -302,6 +302,32 @@ class AuthenticationViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Conditionally creates a passkey after a successful password login.
+     *
+     * @param createPasskeyOnCredMan A suspend function that takes a [JSONObject] and returns a
+     * [GenericCredentialManagerResponse]. This function is responsible for creating
+     * the passkey.
+     */
+    fun conditionalCreatePasskey(
+        createPasskeyOnCredMan: suspend (createPasskeyRequestObj: JSONObject) -> GenericCredentialManagerResponse,
+    ) {
+        coroutineScope.launch {
+            when (val result = repository.registerPasskeyCreationRequest()) {
+                is AuthResult.Success -> {
+                    val createPasskeyResponse = createPasskeyOnCredMan(result.data)
+                    if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                        repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
+                    }
+                }
+
+                is AuthResult.Failure -> {
+                    Log.e(TAG, "Error during conditional passkey creation.")
+                }
+            }
+        }
+    }
 }
 
 /**
