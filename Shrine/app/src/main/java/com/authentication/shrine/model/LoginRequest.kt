@@ -16,14 +16,15 @@
 package com.authentication.shrine.model
 
 /**
- * Represents the request body for setting or updating an existing username.
- * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
- * when making API calls related to username management.
+ * Represents the request body for logging in with a username and password.
  *
- * @property username The username to be set or updated.
+ * @property username The username to log in with.
+ * @property password The password to log in with.
  */
-data class EditUsernameRequest(
+
+data class LoginUsernamePasswordRequest(
     val username: String,
+    val password: String,
 )
 
 /**
@@ -37,15 +38,4 @@ data class EditUsernameRequest(
 data class RegisterUsernameRequest(
     val username: String,
     val displayName: String,
-)
-
-/**
- * Represents the request body for setting or updating a password.
- * This data class is typically used for serialization (e.g., with Gson or Kotlinx Serialization)
- * when making API calls related to password management.
- *
- * @property password The new password.
- */
-data class PasswordRequest(
-    val password: String,
 )

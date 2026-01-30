@@ -171,19 +171,24 @@ class CredentialManagerUtils @Inject constructor(
      *
      * @param requestResult The result of the passkey creation request.
      * @param context The activity context from the Composable, to be used in Credential Manager APIs
+     * @param isConditional Whether the passkey creation is conditional.
      * @return The [CreatePublicKeyCredentialResponse] object containing the passkey, or null if an error occurred.
      */
     @SuppressLint("PublicKeyCredential")
     suspend fun createPasskey(
         requestResult: JSONObject,
         context: Context,
+        isConditional: Boolean = false,
     ): GenericCredentialManagerResponse {
         val passkeysEligibility = PasskeysEligibility.isPasskeySupported(context)
         if (!passkeysEligibility.isEligible) {
             return GenericCredentialManagerResponse.Error(errorMessage = passkeysEligibility.reason)
         }
 
-        val credentialRequest = CreatePublicKeyCredentialRequest(requestResult.toString())
+        val credentialRequest = CreatePublicKeyCredentialRequest(
+            requestJson = requestResult.toString(),
+            isConditional = isConditional
+        )
         val credentialResponse: CreatePublicKeyCredentialResponse
         try {
             credentialResponse = credentialManager.createCredential(

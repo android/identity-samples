@@ -18,6 +18,7 @@ package com.authentication.shrine.api
 import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.GenericAuthResponse
+import com.authentication.shrine.model.LoginUsernamePasswordRequest
 import com.authentication.shrine.model.PasskeysList
 import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
@@ -40,41 +41,17 @@ import retrofit2.http.Query
 interface AuthApiService {
 
     /**
-     * Sets or updates the username for the current session.
+     * Logs in with the username and password
      *
-     * @param username The request body containing the new username.
+     * @param usernamePasswordRequest The request body containing the username and password.
      * @return A Retrofit {@link Response} wrapping a {@link GenericAuthResponse},
      *         indicating the success or failure of the operation.
      */
-    @POST("auth/username")
-    suspend fun setUsername(
-        @Body username: EditUsernameRequest,
+    @POST("auth/username-password")
+    suspend fun loginWithUsernamePassword(
+        @Body usernamePasswordRequest: LoginUsernamePasswordRequest,
     ): Response<GenericAuthResponse>
 
-    /**
-     * Sets or updates the password for the authenticated user.
-     *
-     * @param cookie The session cookie for authentication.
-     * @param password The request body containing the new password information.
-     * @return A Retrofit {@link Response} wrapping a {@link GenericAuthResponse},
-     *         indicating the success or failure of the operation.
-     */
-    @POST("auth/password")
-    suspend fun setPassword(
-        @Header("Cookie") cookie: String,
-        @Body password: PasswordRequest,
-    ): Response<GenericAuthResponse>
-
-    /**
-     * Initiates a WebAuthn registration ceremony by requesting registration options
-     * from the server.
-     *
-     * @param cookie The session cookie for authentication.
-     * @param requestBody The request body, potentially containing user information
-     *                    or relying party details for the registration request.
-     * @return A Retrofit {@link Response} wrapping a {@link RegisterRequestResponse},
-     *         which contains the challenge and options for the WebAuthn registration.
-     */
     @POST("webauthn/registerRequest")
     suspend fun registerRequest(
         @Header("Cookie") cookie: String,
