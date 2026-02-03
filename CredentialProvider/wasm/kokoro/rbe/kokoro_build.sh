@@ -24,9 +24,10 @@ rustup target add wasm32-unknown-unknown
 # Code under repo is checked out to ${KOKORO_ARTIFACTS_DIR}/github.
 # The final directory name in this path is determined by the scm name specified
 # in the job configuration.
-cd "${KOKORO_ARTIFACTS_DIR}/github/wasm"
-./build.sh
+cd "${KOKORO_ARTIFACTS_DIR}/github/wasm/CredentialProvider/wasm/credential_transfer"
+bash ./build.sh
 
+mv THIRD_PARTY_LICENSES "${KOKORO_ARTIFACTS_DIR}/github/wasm/CredentialProvider/wasm/credential_transfer/target/wasm32-unknown-unknown/release/"
 # Move Cargo.lock to artifacts directory for SBOM generation
-mv CredentialProvider/wasm/credential_transfer/Cargo.lock "CredentialProvider/credential_transfer/target/wasm32-unknown-unknown/release/"
+mv Cargo.lock "${KOKORO_ARTIFACTS_DIR}/github/wasm/CredentialProvider/wasm/credential_transfer/target/wasm32-unknown-unknown/release/"
 
