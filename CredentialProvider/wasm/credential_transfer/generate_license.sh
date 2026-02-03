@@ -2,7 +2,7 @@
 set -euo pipefail
 
 VENDOR_DIR="target/vendor_tmp"
-OUTPUT_FILE="THIRD_PARTY_LICENSES.txt"
+OUTPUT_FILE="THIRD_PARTY_LICENSES"
 
 # 1. Clean previous run
 rm -rf "$VENDOR_DIR"
