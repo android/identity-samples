@@ -16,17 +16,14 @@
 
 package com.google.credentialmanager.sample
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-
 /**
- * Finds the activity from a context.
- *
- * @return The activity if found, null otherwise.
+ * A sealed class that represents navigation events in the application.
  */
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+sealed class NavigationEvent {
+    /**
+     * A navigation event that navigates to the home screen.
+     *
+     * @param signedInWithPasskeys True if the user signed in with passkeys, false otherwise.
+     */
+    data class NavigateToHome(val signedInWithPasskeys: Boolean) : NavigationEvent()
 }

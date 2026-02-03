@@ -10,23 +10,21 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the apermissions and
  * limitations under the License.
  */
 
-package com.google.credentialmanager.sample
+package com.google.credentialmanager.sample.ui.theme
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-/**
- * Finds the activity from a context.
- *
- * @return The activity if found, null otherwise.
- */
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+object AppDimensions {
+    val screenTitleFontSize = 24.sp
+    val bodyFontSize = 12.sp
+    val screenPadding = 20.dp
+    val paddingMedium = 16.dp
+    val paddingSmall = 8.dp
+    val paddingExtraSmall = 4.dp
+    val circularProgressIndicatorSize = 24.dp
 }

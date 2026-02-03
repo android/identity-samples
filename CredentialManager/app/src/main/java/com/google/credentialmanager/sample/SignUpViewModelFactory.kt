@@ -16,17 +16,20 @@
 
 package com.google.credentialmanager.sample
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 /**
- * Finds the activity from a context.
+ * A factory for creating [SignUpViewModel] instances.
  *
- * @return The activity if found, null otherwise.
+ * @param jsonProvider The provider for JSON data.
  */
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+class SignUpViewModelFactory(private val jsonProvider: JsonProvider) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SignUpViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SignUpViewModel(jsonProvider) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

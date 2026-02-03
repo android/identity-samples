@@ -40,7 +40,7 @@ class AuthNetworkClient {
         /**
          * The key used for the session ID cookie.
          */
-        internal const val SESSION_ID_KEY = "SESAME_SESSION_COOKIE="
+        internal const val SESSION_ID_KEY = "__Secure-SESAME_SESSION_COOKIE="
     }
 
     init {
