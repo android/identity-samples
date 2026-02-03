@@ -19,7 +19,17 @@ Branch `main` contains the primary samples for Credential Manager:
   Credential Manager with WebView. `WebkitWebView` contains a sample app that uses the Webkit
   library to implement passkey creation in WebView
 
+Branch `credman-compose` notably contain the `Shrine` mobile app with Wear OS support in two
+modules:
+* `Shrine` is a more developed mobile app featuring best practices and recommended UX when
+  using Credential Manager. The sample features multiple methods of sign-up, sign-in, settings
+  configuration, and session management.
+* `Shrine/wear` is a Wear app that works together with the Shrine mobile app. It features
+  seamless authentication via passkey, password, and Sign-in-with-Google logins.
+  
 Branch `credman_codelab` contains the starting codebase for the
 [Credential Manager Codelab](https://codelabs.developers.google.com/credential-manager-api-for-android#0)
 in the `CredentialManager` app.
 
+Branch `wasm` notably contains the WASM module for credential filtering and matching.
+* `CredentialProvider/wasm/credential_transfer` - Rust WASM module for credential filtering and matching
