@@ -7,7 +7,9 @@
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law lifeboatress or implied.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -59,7 +61,7 @@ class RegistrationViewModel @Inject constructor(
     fun onPasskeyRegister(
         username: String,
         displayName: String,
-        onSuccess: (navigateToHome: Boolean) -> Unit,
+        onSuccess: suspend (navigateToHome: Boolean) -> Unit,
         createPasskeyCallback: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
         _uiState.update { RegisterUiState(isLoading = true) }
@@ -114,72 +116,70 @@ class RegistrationViewModel @Inject constructor(
      * @param createPasskey Reference to [CredentialManagerUtils.createPasskey]
      * The boolean parameter indicates whether the user should be navigated to the home screen.
      */
-    private fun createPasskey(
-        onSuccess: (navigateToHome: Boolean) -> Unit,
+    private suspend fun createPasskey(
+        onSuccess: suspend (navigateToHome: Boolean) -> Unit,
         createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
         _uiState.update { it.copy(isLoading = true) }
 
-        viewModelScope.launch {
-            when (val result = repository.registerPasskeyCreationRequest()) {
-                is AuthResult.Success -> {
-                    val createPasskeyResponse = createPasskey(result.data)
-                    if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                        when (repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)) {
-                            is AuthResult.Success -> {
-                                _uiState.update {
-                                    it.copy(
-                                        isSuccess = true,
-                                        isLoading = false,
-                                    )
-                                }
-                                onSuccess(false)
-                            }
-
-                            is AuthResult.Failure -> {
-                                _uiState.update {
-                                    it.copy(
-                                        isSuccess = false,
-                                        isLoading = false,
-                                        messageResourceId = R.string.some_error_occurred_please_check_logs
-                                    )
-                                }
+        when (val result = repository.registerPasskeyCreationRequest()) {
+            is AuthResult.Success -> {
+                val createPasskeyResponse = createPasskey(result.data)
+                if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                    when (repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)) {
+                        is AuthResult.Success -> {
+                            onSuccess(true)
+                            _uiState.update {
+                                it.copy(
+                                    isSuccess = true,
+                                    isLoading = false,
+                                )
                             }
                         }
-                    } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
-                        _uiState.update {
-                            it.copy(
-                                messageResourceId = R.string.some_error_occurred_please_check_logs,
-                                errorMessage = createPasskeyResponse.errorMessage,
-                                isLoading = false
-                            )
-                        }
-                        repository.setSignedInState(false)
-                    }
-                }
 
-                is AuthResult.Failure -> {
-                    var errorMessage: String? = null
-                    val messageResId = when (val error = result.error) {
-                        is AuthError.NetworkError -> R.string.error_network
-                        is AuthError.ServerError -> {
-                            errorMessage = error.message
-                            R.string.error_server
+                        is AuthResult.Failure -> {
+                            _uiState.update {
+                                it.copy(
+                                    isSuccess = false,
+                                    isLoading = false,
+                                    messageResourceId = R.string.some_error_occurred_please_check_logs
+                                )
+                            }
                         }
-                        is AuthError.Unknown -> {
-                            errorMessage = error.message
-                            R.string.error_unknown
-                        }
-                        else -> R.string.error_unknown
                     }
+                } else if (createPasskeyResponse is GenericCredentialManagerResponse.Error) {
                     _uiState.update {
                         it.copy(
-                            messageResourceId = messageResId,
-                            isLoading = false,
-                            errorMessage = errorMessage
+                            messageResourceId = R.string.some_error_occurred_please_check_logs,
+                            errorMessage = createPasskeyResponse.errorMessage,
+                            isLoading = false
                         )
                     }
-                    onSuccess(false)
+                    repository.setSignedInState(false)
+                }
+            }
+
+            is AuthResult.Failure -> {
+                var errorMessage: String? = null
+                val messageResId = when (val error = result.error) {
+                    is AuthError.NetworkError -> R.string.error_network
+                    is AuthError.ServerError -> {
+                        errorMessage = error.message
+                        R.string.error_server
+                    }
+                    is AuthError.Unknown -> {
+                        errorMessage = error.message
+                        R.string.error_unknown
+                    }
+                    else -> R.string.error_unknown
+                }
+                onSuccess(false)
+                _uiState.update {
+                    it.copy(
+                        messageResourceId = messageResId,
+                        isLoading = false,
+                        errorMessage = errorMessage
+                      )
                 }
             }
         }
@@ -197,7 +197,7 @@ class RegistrationViewModel @Inject constructor(
     fun onPasswordRegister(
         username: String,
         password: String,
-        onSuccess: (navigateToHome: Boolean) -> Unit,
+        onSuccess: suspend (navigateToHome: Boolean) -> Unit,
         createPassword: suspend (String, String) -> Unit,
     ) {
         _uiState.update { it.copy(isLoading = true) }
@@ -207,13 +207,13 @@ class RegistrationViewModel @Inject constructor(
                 when (val result = repository.login(username, password)) {
                     is AuthResult.Success -> {
                         createPassword(username, password)
+                        onSuccess(false)
                         _uiState.update {
                             it.copy(
                                 isSuccess = true,
                                 isLoading = false
                             )
                         }
-                        onSuccess(true)
                     }
 
                     is AuthResult.Failure -> {
@@ -259,23 +259,25 @@ class RegistrationViewModel @Inject constructor(
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the restore key.
      *
+     * @return Boolean indicating success
      * @see GenericCredentialManagerResponse
      */
-    fun createRestoreKey(
+    suspend fun createRestoreKey(
         createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
-    ) {
-        viewModelScope.launch {
-            when (val result = repository.registerPasskeyCreationRequest()) {
-                is AuthResult.Success -> {
-                    val createRestoreKeyResponse = createRestoreKeyOnCredMan(result.data)
-                    if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                        repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
-                    }
+    ): Boolean {
+        return when (val result = repository.registerPasskeyCreationRequest()) {
+            is AuthResult.Success -> {
+                val createRestoreKeyResponse = createRestoreKeyOnCredMan(result.data)
+                if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                    repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse) is AuthResult.Success
+                } else {
+                    false
                 }
+            }
 
-                is AuthResult.Failure -> {
-                    // Don't block user registration if this fails.
-                }
+            is AuthResult.Failure -> {
+                // Don't block user registration if this fails.
+                false
             }
         }
     }

@@ -74,7 +74,7 @@ fun AuthenticationScreen(
 
     // Passing in the lambda / context to the VM
     val context = LocalContext.current
-    val createRestoreKey = {
+    val createRestoreKey: suspend () -> Unit = {
         viewModel.createRestoreKey(
             createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
@@ -88,8 +88,9 @@ fun AuthenticationScreen(
     val onSignInWithPasskeyOrPasswordRequest = {
         viewModel.signInWithPasskeyOrPasswordRequest(
             onSuccess = { isPasswordCredential ->
+                var skipPasskeyPrompt = !isPasswordCredential
                 if (isPasswordCredential) {
-                    viewModel.conditionalCreatePasskey(
+                    val conditionalSuccess = viewModel.conditionalCreatePasskey(
                         createPasskeyOnCredMan = { createPasskeyRequestObj: JSONObject ->
                             credentialManagerUtils.createPasskey(
                                 requestResult = createPasskeyRequestObj,
@@ -98,9 +99,12 @@ fun AuthenticationScreen(
                             )
                         }
                     )
+                    createRestoreKey()
+                    if (conditionalSuccess) {
+                        skipPasskeyPrompt = true
+                    }
                 }
-                createRestoreKey()
-                navigateToHome(!isPasswordCredential)
+                navigateToHome(skipPasskeyPrompt)
             },
             getCredential = { jsonObject ->
                 credentialManagerUtils.getPasskeyOrPasswordCredential(
@@ -114,9 +118,8 @@ fun AuthenticationScreen(
     val onSignInWithSignInWithGoogleRequest = {
         viewModel.signInWithGoogleRequest(
             onSuccess = {
-                createRestoreKey()
                 // Don't suggest passkeys if user signs in with Google.
-                navigateToHome(false)
+                navigateToHome(true)
             },
             getCredential = {
                 credentialManagerUtils.getSignInWithGoogleCredential(

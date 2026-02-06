@@ -28,7 +28,6 @@ import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.repository.AuthRepository
 import com.authentication.shrine.repository.AuthRepository.Companion.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -51,7 +50,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val coroutineScope: CoroutineScope,
 ) : ViewModel() {
 
     /**
@@ -64,10 +62,10 @@ class AuthenticationViewModel @Inject constructor(
      * Requests a sign-in challenge from the server.
      *
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
-     * @param getPasskey Lambda that calls CredManUtil's getPasskey method with Activity reference
+     * @param getCredential Lambda that calls CredManUtil's getPasskey method with Activity reference
      */
     fun signInWithPasskeyOrPasswordRequest(
-        onSuccess: (Boolean) -> Unit,
+        onSuccess: suspend (Boolean) -> Unit,
         getCredential: suspend (JSONObject) -> GenericCredentialManagerResponse,
     ) {
         _uiState.update { AuthenticationUiState(isLoading = true) }
@@ -123,34 +121,32 @@ class AuthenticationViewModel @Inject constructor(
      * @param response The response from the server
      * @param onSuccess Lambda that handles actions on successful passkey sign-in
      */
-    private fun signInWithPasskeyOrPasswordResponse(
+    private suspend fun signInWithPasskeyOrPasswordResponse(
         response: GetCredentialResponse,
-        onSuccess: (navigateToHome: Boolean) -> Unit,
+        onSuccess: suspend (navigateToHome: Boolean) -> Unit,
     ) {
-        viewModelScope.launch {
-            when (repository.signInWithPasskeyOrPasswordResponse(response)) {
-                is AuthResult.Success -> {
-                    val isPasswordCredential = response.credential is PasswordCredential
-                    repository.setSignedInState(!isPasswordCredential)
-                    _uiState.update {
-                        it.copy(
-                            isSignInWithPasskeysSuccess = true,
-                            isLoading = false
-                        )
-                    }
-                    onSuccess(isPasswordCredential)
+        when (repository.signInWithPasskeyOrPasswordResponse(response)) {
+            is AuthResult.Success -> {
+                val isPasswordCredential = response.credential is PasswordCredential
+                repository.setSignedInState(!isPasswordCredential)
+                onSuccess(isPasswordCredential)
+                _uiState.update {
+                    it.copy(
+                        isSignInWithPasskeysSuccess = true,
+                        isLoading = false
+                    )
                 }
+            }
 
-                is AuthResult.Failure -> {
-                    repository.setSignedInState(false)
-                    repository.clearSessionIdFromDataStore()
-                    _uiState.update {
-                        it.copy(
-                            passkeyResponseMessageResourceId = R.string.error_invalid_credentials,
-                            isSignInWithPasskeysSuccess = false,
-                            isLoading = false,
-                        )
-                    }
+            is AuthResult.Failure -> {
+                repository.setSignedInState(false)
+                repository.clearSessionIdFromDataStore()
+                _uiState.update {
+                    it.copy(
+                        passkeyResponseMessageResourceId = R.string.error_invalid_credentials,
+                        isSignInWithPasskeysSuccess = false,
+                        isLoading = false,
+                    )
                 }
             }
         }
@@ -162,7 +158,7 @@ class AuthenticationViewModel @Inject constructor(
      * @param getCredential Lambda that retrieves the credential from the Credential Manager
      */
     fun signInWithGoogleRequest(
-        onSuccess: (Boolean) -> Unit,
+        onSuccess: suspend (Boolean) -> Unit,
         getCredential: suspend () -> GenericCredentialManagerResponse,
     ) {
         _uiState.update { AuthenticationUiState(isLoading = true) }
@@ -193,40 +189,38 @@ class AuthenticationViewModel @Inject constructor(
      * @response Credentials received from Credential Manager
      * @onSuccess Lambda that handles actions on successful Google sign in
      */
-    fun logInWithFederatedToken(
+    suspend fun logInWithFederatedToken(
         response: GetCredentialResponse,
-        onSuccess: (navigateToHome: Boolean) -> Unit,
+        onSuccess: suspend (navigateToHome: Boolean) -> Unit,
     ) {
-        viewModelScope.launch {
-            // Get sessionId from the server first.
-            val sessionId = repository.getFederationOptions()
-            if (sessionId == null) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        logInWithFederatedTokenFailure = true,
-                    )
-                }
-            } else {
-                // Log in to server with retrieved session ID and CredMan credentials.
-                when (repository.signInWithFederatedTokenResponse(sessionId, response)) {
-                    is AuthResult.Success -> {
-                        repository.setSignedInState(flag = false)
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                            )
-                        }
-                        onSuccess(true)
+        // Get sessionId from the server first.
+        val sessionId = repository.getFederationOptions()
+        if (sessionId == null) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    logInWithFederatedTokenFailure = true,
+                )
+            }
+        } else {
+            // Log in to server with retrieved session ID and CredMan credentials.
+            when (repository.signInWithFederatedTokenResponse(sessionId, response)) {
+                is AuthResult.Success -> {
+                    repository.setSignedInState(flag = false)
+                    onSuccess(true)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                        )
                     }
+                }
 
-                    is AuthResult.Failure -> {
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                logInWithFederatedTokenFailure = true,
-                            )
-                        }
+                is AuthResult.Failure -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            logInWithFederatedTokenFailure = true,
+                        )
                     }
                 }
             }
@@ -246,7 +240,7 @@ class AuthenticationViewModel @Inject constructor(
      */
     fun checkForStoredRestoreKey(
         getRestoreKey: suspend (JSONObject) -> GenericCredentialManagerResponse,
-        onSuccess: (Boolean) -> Unit,
+        onSuccess: suspend (Boolean) -> Unit,
     ) {
         viewModelScope.launch {
             if (!repository.isSignedInThroughPasskeys() && !repository.isSignedInThroughPassword()) {
@@ -281,26 +275,13 @@ class AuthenticationViewModel @Inject constructor(
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the restore key.
      *
+     * @return Boolean indicating success
      * @see GenericCredentialManagerResponse
      */
-    fun createRestoreKey(
+    suspend fun createRestoreKey(
         createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
-    ) {
-        coroutineScope.launch {
-            when (val result = repository.registerPasskeyCreationRequest()) {
-                is AuthResult.Success -> {
-                    val createRestoreKeyResponse = createRestoreKeyOnCredMan(result.data)
-                    if (createRestoreKeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                        repository.registerPasskeyCreationResponse(createRestoreKeyResponse.createPasskeyResponse)
-                    }
-                }
-
-                is AuthResult.Failure -> {
-                    Log.e(TAG, "Error creating restore key.")
-                    // Don't block user sign in if this fails.
-                }
-            }
-        }
+    ): Boolean {
+        return registerPasskey(createRestoreKeyOnCredMan, "Error creating restore key.")
     }
 
     /**
@@ -309,22 +290,38 @@ class AuthenticationViewModel @Inject constructor(
      * @param createPasskeyOnCredMan A suspend function that takes a [JSONObject] and returns a
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the passkey.
+     *
+     * @return Boolean indicating success
      */
-    fun conditionalCreatePasskey(
+    suspend fun conditionalCreatePasskey(
         createPasskeyOnCredMan: suspend (createPasskeyRequestObj: JSONObject) -> GenericCredentialManagerResponse,
-    ) {
-        coroutineScope.launch {
-            when (val result = repository.registerPasskeyCreationRequest()) {
-                is AuthResult.Success -> {
-                    val createPasskeyResponse = createPasskeyOnCredMan(result.data)
-                    if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
-                        repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse)
-                    }
-                }
+    ): Boolean {
+        val success = registerPasskey(createPasskeyOnCredMan, "Error during conditional passkey creation.")
+        if (success) {
+            repository.setSignedInState(true)
+        }
+        return success
+    }
 
-                is AuthResult.Failure -> {
-                    Log.e(TAG, "Error during conditional passkey creation.")
+    /**
+     * Internal helper to register a passkey (normal or restore key).
+     */
+    private suspend fun registerPasskey(
+        createPasskeyOnCredMan: suspend (JSONObject) -> GenericCredentialManagerResponse,
+        errorMessage: String
+    ): Boolean {
+        return when (val result = repository.registerPasskeyCreationRequest()) {
+            is AuthResult.Success -> {
+                val createPasskeyResponse = createPasskeyOnCredMan(result.data)
+                if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
+                    repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse) is AuthResult.Success
+                } else {
+                    false
                 }
+            }
+            is AuthResult.Failure -> {
+                Log.e(TAG, errorMessage)
+                false
             }
         }
     }

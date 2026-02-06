@@ -29,16 +29,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.authentication.shrine.api.ApiException
 import com.authentication.shrine.api.AuthApiService
 import com.authentication.shrine.model.AuthError
 import com.authentication.shrine.model.AuthResult
 import com.authentication.shrine.model.CredmanResponse
-import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.LoginUsernamePasswordRequest
 import com.authentication.shrine.model.PasskeysList
-import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
 import com.authentication.shrine.model.RegisterResponseRequestBody
 import com.authentication.shrine.model.RegisterUsernameRequest

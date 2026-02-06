@@ -51,12 +51,12 @@ class ShrineNavActions(navController: NavHostController) {
     // Takes user to Home flow.
     val navigateToHome: (isSignInThroughPasskeys: Boolean) -> Unit = {
         if (it) {
-            navController.navigate(ShrineAppDestinations.CreatePasskeyRoute.name) {
+            navController.navigate(ShrineAppDestinations.MainMenuRoute.name) {
                 popUpTo(ShrineAppDestinations.NavHostRoute.name)
                 launchSingleTop = true
             }
         } else {
-            navController.navigate(ShrineAppDestinations.MainMenuRoute.name) {
+            navController.navigate(ShrineAppDestinations.CreatePasskeyRoute.name) {
                 popUpTo(ShrineAppDestinations.NavHostRoute.name)
                 launchSingleTop = true
             }

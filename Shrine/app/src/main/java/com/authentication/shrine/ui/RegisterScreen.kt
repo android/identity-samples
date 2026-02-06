@@ -89,7 +89,7 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    val createRestoreKey = {
+    val createRestoreKey: suspend () -> Unit = {
         viewModel.createRestoreKey(
             createRestoreKeyOnCredMan = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
