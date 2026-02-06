@@ -15,12 +15,10 @@
  */
 package com.authentication.shrine.api
 
-import com.authentication.shrine.model.EditUsernameRequest
 import com.authentication.shrine.model.FederationOptionsRequest
 import com.authentication.shrine.model.GenericAuthResponse
 import com.authentication.shrine.model.LoginUsernamePasswordRequest
 import com.authentication.shrine.model.PasskeysList
-import com.authentication.shrine.model.PasswordRequest
 import com.authentication.shrine.model.RegisterRequestRequestBody
 import com.authentication.shrine.model.RegisterRequestResponse
 import com.authentication.shrine.model.RegisterResponseRequestBody

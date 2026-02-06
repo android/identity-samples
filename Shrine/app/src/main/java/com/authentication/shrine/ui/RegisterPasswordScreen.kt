@@ -85,23 +85,19 @@ fun RegisterPasswordScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val createRestoreKey = {
-        viewModel.createRestoreKey(
-            createRestoreKeyOnCredMan = { createRestoreCredObject ->
-                credentialManagerUtils.createRestoreKey(
-                    context = context,
-                    requestResult = createRestoreCredObject,
-                )
-            },
-        )
-    }
-
     val onRegister = { emailAddress: String, registrationPassword: String ->
         viewModel.onPasswordRegister(
             username = emailAddress,
             password = registrationPassword,
             onSuccess = { flag ->
-                createRestoreKey()
+                viewModel.createRestoreKey(
+                    createRestoreKeyOnCredMan = { createRestoreCredObject ->
+                        credentialManagerUtils.createRestoreKey(
+                            context = context,
+                            requestResult = createRestoreCredObject,
+                        )
+                    },
+                )
                 navigateToHome(flag)
             },
             createPassword = { username: String, password: String ->
