@@ -271,7 +271,7 @@ class AuthenticationViewModel @Inject constructor(
     /**
      * Creates a restore key by registering a new passkey.
      *
-     * @param createRestoreKeyOnCredMan A suspend function that takes a [JSONObject] and returns a
+     * @param createRestoreKey A suspend function that takes a [JSONObject] and returns a
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the restore key.
      *
@@ -279,24 +279,24 @@ class AuthenticationViewModel @Inject constructor(
      * @see GenericCredentialManagerResponse
      */
     suspend fun createRestoreKey(
-        createRestoreKeyOnCredMan: suspend (createRestoreCredRequestObj: JSONObject) -> GenericCredentialManagerResponse,
+        createRestoreKey: suspend (createRestoreCredentialsObject: JSONObject) -> GenericCredentialManagerResponse,
     ): Boolean {
-        return registerPasskey(createRestoreKeyOnCredMan, "Error creating restore key.")
+        return registerPasskey(createRestoreKey, R.string.error_restore_key)
     }
 
     /**
      * Conditionally creates a passkey after a successful password login.
      *
-     * @param createPasskeyOnCredMan A suspend function that takes a [JSONObject] and returns a
+     * @param createPasskey A suspend function that takes a [JSONObject] and returns a
      * [GenericCredentialManagerResponse]. This function is responsible for creating
      * the passkey.
      *
      * @return Boolean indicating success
      */
     suspend fun conditionalCreatePasskey(
-        createPasskeyOnCredMan: suspend (createPasskeyRequestObj: JSONObject) -> GenericCredentialManagerResponse,
+        createPasskey: suspend (createPasskeyRequestObject: JSONObject) -> GenericCredentialManagerResponse,
     ): Boolean {
-        val success = registerPasskey(createPasskeyOnCredMan, "Error during conditional passkey creation.")
+        val success = registerPasskey(createPasskey, "Error during conditional passkey creation.")
         if (success) {
             repository.setSignedInState(true)
         }
@@ -307,12 +307,12 @@ class AuthenticationViewModel @Inject constructor(
      * Internal helper to register a passkey (normal or restore key).
      */
     private suspend fun registerPasskey(
-        createPasskeyOnCredMan: suspend (JSONObject) -> GenericCredentialManagerResponse,
+        createPasskey: suspend (JSONObject) -> GenericCredentialManagerResponse,
         errorMessage: String
     ): Boolean {
         return when (val result = repository.registerPasskeyCreationRequest()) {
             is AuthResult.Success -> {
-                val createPasskeyResponse = createPasskeyOnCredMan(result.data)
+                val createPasskeyResponse = createPasskey(result.data)
                 if (createPasskeyResponse is GenericCredentialManagerResponse.CreatePasskeySuccess) {
                     repository.registerPasskeyCreationResponse(createPasskeyResponse.createPasskeyResponse) is AuthResult.Success
                 } else {
