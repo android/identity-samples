@@ -281,7 +281,7 @@ class AuthenticationViewModel @Inject constructor(
     suspend fun createRestoreKey(
         createRestoreKey: suspend (createRestoreCredentialsObject: JSONObject) -> GenericCredentialManagerResponse,
     ): Boolean {
-        return registerPasskey(createRestoreKey, R.string.error_restore_key)
+        return registerPasskey(createRestoreKey, "Error creating restore key.")
     }
 
     /**
