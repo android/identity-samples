@@ -76,7 +76,7 @@ fun AuthenticationScreen(
     val context = LocalContext.current
     val createRestoreKey: suspend () -> Unit = {
         viewModel.createRestoreKey(
-            createRestoreKeyOnCredMan = { createRestoreCredObject ->
+            createRestoreKey = { createRestoreCredObject ->
                 credentialManagerUtils.createRestoreKey(
                     context = context,
                     requestResult = createRestoreCredObject,
@@ -91,7 +91,7 @@ fun AuthenticationScreen(
                 var skipPasskeyPrompt = !isPasswordCredential
                 if (isPasswordCredential) {
                     val conditionalSuccess = viewModel.conditionalCreatePasskey(
-                        createPasskeyOnCredMan = { createPasskeyRequestObj: JSONObject ->
+                        createPasskey = { createPasskeyRequestObj: JSONObject ->
                             credentialManagerUtils.createPasskey(
                                 requestResult = createPasskeyRequestObj,
                                 context = context,
