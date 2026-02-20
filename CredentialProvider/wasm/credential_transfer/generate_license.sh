@@ -41,6 +41,13 @@ for package_path in "$VENDOR_DIR"/*; do
             cat "$package_path/LICENSE" >> "$OUTPUT_FILE"
             license_found=true
             
+        # Check for UNLICENSE (Public Domain)
+        elif [ -f "$package_path/UNLICENSE" ]; then
+            echo "LICENSE: Unlicensed (Public Domain)" >> "$OUTPUT_FILE"
+            echo "----------------------------------------------------------------------------" >> "$OUTPUT_FILE"
+            cat "$package_path/UNLICENSE" >> "$OUTPUT_FILE"
+            license_found=true
+            
         # Check for MIT as fallback
         elif [ -f "$package_path/LICENSE-MIT" ]; then
              echo "LICENSE: MIT" >> "$OUTPUT_FILE"
