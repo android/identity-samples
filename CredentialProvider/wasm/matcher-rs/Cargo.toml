@@ -1,0 +1,20 @@
+[package]
+name = "matcher-rs"
+version = "0.1.0"
+authors = ["rensiyuan"]
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+nanoserde = "0.1"
+
+[dev-dependencies]
+
+[build-dependencies]
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+lto = true
