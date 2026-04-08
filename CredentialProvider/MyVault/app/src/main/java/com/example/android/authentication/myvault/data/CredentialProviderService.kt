@@ -10,6 +10,7 @@ import androidx.credentials.SignalAllAcceptedCredentialIdsRequest
 import androidx.credentials.SignalCurrentUserDetailsRequest
 import androidx.credentials.SignalUnknownCredentialRequest
 import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.CreateCredentialUnknownException
 import androidx.credentials.provider.CallingAppInfo
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.credentials.providerevents.service.CredentialProviderEventsService
@@ -61,7 +62,7 @@ class CredentialProviderService : CredentialProviderEventsService() {
         val createReq = request.callingRequest
 
         // Check if the request is for conditional create.
-        if (createReq is CreatePublicKeyCredentialRequest/* && createReq.isConditional*/) {
+        if (createReq is CreatePublicKeyCredentialRequest) {
             // Perform any additional request or user validation.
             // ...
             // Create the public key request.
@@ -270,7 +271,7 @@ class CredentialProviderService : CredentialProviderEventsService() {
         }
     }
 
-    fun finalizeSilently(
+    private fun finalizeSilently(
         requestJson: String,
         callingAppInfo: CallingAppInfo?,
         clientDataHash: ByteArray?,
@@ -279,6 +280,7 @@ class CredentialProviderService : CredentialProviderEventsService() {
     ) {
         if (callingAppInfo == null) {
             Log.i(TAG, "no callingAppInfo")
+            callback.onError(CreateCredentialUnknownException("Calling app info is null"))
             return
         }
         val request = PublicKeyCredentialCreationOptions(requestJson)
@@ -287,12 +289,15 @@ class CredentialProviderService : CredentialProviderEventsService() {
         if (callingAppInfo.isOriginPopulated()) {
             val callingAppResult = PasskeyUtils.validatePrivilegedCallingApp(callingAppInfo)
             if (callingAppResult is PrivilegedValidationResult.Failure) {
+                callback.onError(CreateCredentialUnknownException("Unauthorized calling app"))
                 return
             }
         }
         // Native call. Check for asset links
-        if (!PasskeyUtils.checkRpValidity(request.rp.id, callingAppInfo))
+        if (!PasskeyUtils.checkRpValidity(request.rp.id, callingAppInfo)) {
+            callback.onError(CreateCredentialUnknownException("Asset link validation failed for RP ID"))
             return
+        }
 
 
         val publicKeyResponse = PasskeyUtils.createAndStorePasskey(
