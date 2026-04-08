@@ -63,20 +63,11 @@ class CredentialProviderService : CredentialProviderEventsService() {
 
         // Check if the request is for conditional create.
         if (createReq is CreatePublicKeyCredentialRequest) {
-            // Perform any additional request or user validation.
-            // ...
-            // Create the public key request.
-
             finalizeSilently(
                 createReq.requestJson,
                 request.callingAppInfo,
                 createReq.clientDataHash, CredentialsRepository.USER_ACCOUNT, callback,
             )
-
-            // Show a notification once the passkey is created.
-            // Context.showNotification(...)
-            // For any errors, invoke callback.onError(...)
-            //super.onCreateCredentialRequest(request, cancellationSignal, callback)
         }
     }
 
