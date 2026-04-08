@@ -9,12 +9,12 @@ espressoCore = "3.6.1"
 lifecycleRuntime = "2.8.7"
 activityCompose = "1.10.0"
 composeBom = "2025.02.00"
-credentials = "1.6.0-alpha05"
+credentials = "1.6.0-rc02"
 room = "2.7.2"
 biometrics = "1.2.0-alpha05"
 accompanist = "0.28.0"
 navigation = "2.8.7"
-providerevents = "1.0.0-alpha02"
+providerevents = "1.0.0-alpha06"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +33,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-credential-manager = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }

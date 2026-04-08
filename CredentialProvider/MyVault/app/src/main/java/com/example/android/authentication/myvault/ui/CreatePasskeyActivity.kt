@@ -17,7 +17,6 @@ package com.example.android.authentication.myvault.ui
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.SigningInfo
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -36,22 +35,17 @@ import com.example.android.authentication.myvault.AppDependencies
 import com.example.android.authentication.myvault.BiometricErrorUtils
 import com.example.android.authentication.myvault.R
 import com.example.android.authentication.myvault.data.PasskeyMetadata
-import com.example.android.authentication.myvault.fido.AssetLinkVerifier
 import com.example.android.authentication.myvault.fido.AuthenticatorAttestationResponse
 import com.example.android.authentication.myvault.fido.Cbor
 import com.example.android.authentication.myvault.fido.FidoPublicKeyCredential
 import com.example.android.authentication.myvault.fido.PublicKeyCredentialCreationOptions
-import com.example.android.authentication.myvault.fido.appInfoToOrigin
 import com.example.android.authentication.myvault.fido.b64Encode
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import com.example.android.authentication.myvault.util.PasskeyUtils
+import com.example.android.authentication.myvault.util.PrivilegedValidationResult
 import kotlinx.coroutines.runBlocking
 import java.math.BigInteger
-import java.net.URL
 import java.security.KeyPair
 import java.security.KeyPairGenerator
-import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
@@ -248,8 +242,24 @@ class CreatePasskeyActivity : FragmentActivity() {
             validateAssetLinks(request.rp.id, callingAppInfo)
         }
 
+        val publicKeyResponse = PasskeyUtils.createAndStorePasskey(
+            applicationContext,
+            credentialsDataSource,
+            request,
+            callingAppInfo,
+            callingAppInfoOrigin,
+            clientDataHash,
+            accountId,
+        )
+
+        // Set CreatePublicKeyCredentialResponse as an extra on an Intent through PendingIntentHandler.setCreateCredentialResponse(),
+        // and set that intent to the result of the Activity.
+        PendingIntentHandler.setCreateCredentialResponse(intent, publicKeyResponse)
+        setResult(RESULT_OK, intent)
+        finish()
+
         // Generate CredentialID
-        val credentialId = ByteArray(32)
+        /*val credentialId = ByteArray(32)
         SecureRandom().nextBytes(credentialId)
 
         // Generate key
@@ -273,7 +283,7 @@ class CreatePasskeyActivity : FragmentActivity() {
             clientDataHash,
         )
 
-        setIntentForCredentialCredentialResponse(credentialId, response)
+        setIntentForCredentialCredentialResponse(credentialId, response)*/
     }
 
     /**
@@ -333,49 +343,11 @@ class CreatePasskeyActivity : FragmentActivity() {
      * @param callingAppInfo : Information pertaining to the calling application.
      */
     private fun validateAssetLinks(rpId: String, callingAppInfo: CallingAppInfo) {
-        val isRpValid: Boolean = runBlocking {
-            val isRpValidDeferred: Deferred<Boolean> = async(Dispatchers.IO) {
-                if (!isValidRpId(
-                        rpId,
-                        callingAppInfo.signingInfo,
-                        callingAppInfo.packageName,
-                    )
-                ) {
-                    return@async false
-                }
-                return@async true
-            }
-            return@runBlocking isRpValidDeferred.await()
-        }
+        val isRpValid = PasskeyUtils.checkRpValidity(rpId, callingAppInfo)
 
         if (!isRpValid) {
             setUpFailureResponseAndFinish(getString(R.string.failed_to_validate_rp))
-            return
         }
-    }
-
-    /**
-     * Checks if the given Relying Party (RP) identifier is valid.
-     *
-     * @param rpId The RP identifier to validate.
-     * @param signingInfo The signing information of the calling application.
-     * @param callingPackage The package name of the calling application.
-     * @return True if the RP identifier is valid, false otherwise.
-     */
-    private fun isValidRpId(
-        rpId: String,
-        signingInfo: SigningInfo,
-        callingPackage: String,
-    ): Boolean {
-        val websiteUrl = "https://$rpId"
-        val assetLinkVerifier = AssetLinkVerifier(websiteUrl)
-        try {
-            // log the info returned.
-            return assetLinkVerifier.verify(callingPackage, signingInfo)
-        } catch (e: Exception) {
-            // Log exception
-        }
-        return false
     }
 
     /**
@@ -383,51 +355,14 @@ class CreatePasskeyActivity : FragmentActivity() {
      * @param callingAppInfo : Information pertaining to the calling application.
      */
     private fun validatePrivilegedCallingApp(callingAppInfo: CallingAppInfo): String? {
-        val privilegedAppsAllowlist = getGPMPrivilegedAppAllowlist()
-        if (privilegedAppsAllowlist != null) {
-            return try {
-                callingAppInfo.getOrigin(
-                    privilegedAppsAllowlist,
-                )
-            } catch (e: IllegalStateException) {
-                val message = getString(R.string.incoming_call_is_not_privileged_to_get_the_origin)
-                setUpFailureResponseAndFinish(message)
-                null
-            } catch (e: IllegalArgumentException) {
-                val message = getString(R.string.privileged_allowlist_is_not_formatted_properly)
-                setUpFailureResponseAndFinish(message)
-                null
-            }
+        val callingAppResult = PasskeyUtils.validatePrivilegedCallingApp(callingAppInfo)
+        if (callingAppResult is PrivilegedValidationResult.Success) {
+            return callingAppResult.origin
         }
+
         val message = "Could not retrieve GPM allowlist"
         setUpFailureResponseAndFinish(message)
         return null
-    }
-
-    /**
-     * Retrieves the list of privileged apps allowlisted by Google Password Manager (GPM).
-     *
-     * This method fetches the allowlist from a remote URL ({@link #GPM_ALLOWLIST_URL})
-     * in a background thread. The allowlist is expected to be a string.
-     *
-     * @return The allowlist of privileged apps as a string, or {@code null} if the
-     *         allowlist could not be retrieved or if an error occurred during the
-     *         retrieval process.
-     */
-    private fun getGPMPrivilegedAppAllowlist(): String? {
-        val gpmAllowlist: String? = runBlocking {
-            val allowlist: Deferred<String?> = async(Dispatchers.IO) {
-                try {
-                    val url = URL(GPM_ALLOWLIST_URL)
-                    return@async url.readText()
-                } catch (e: Exception) {
-                    return@async null
-                }
-            }
-            return@runBlocking allowlist.await()
-        }
-
-        return gpmAllowlist
     }
 
     /**
@@ -606,26 +541,26 @@ class CreatePasskeyActivity : FragmentActivity() {
 
     companion object {
         private const val INVALID_ALLOWLIST = "{\"apps\": [\n" +
-            "   {\n" +
-            "      \"type\": \"android\", \n" +
-            "      \"info\": {\n" +
-            "         \"package_name\": \"androidx.credentials.test\",\n" +
-            "         \"signatures\" : [\n" +
-            "         {\"build\": \"release\",\n" +
-            "             \"cert_fingerprint_sha256\": \"HELLO\"\n" +
-            "         },\n" +
-            "         {\"build\": \"ud\",\n" +
-            "         \"cert_fingerprint_sha256\": \"YELLOW\"\n" +
-            "         }]\n" +
-            "      }\n" +
-            "    }\n" +
-            "]}\n" +
-            "\n"
+                "   {\n" +
+                "      \"type\": \"android\", \n" +
+                "      \"info\": {\n" +
+                "         \"package_name\": \"androidx.credentials.test\",\n" +
+                "         \"signatures\" : [\n" +
+                "         {\"build\": \"release\",\n" +
+                "             \"cert_fingerprint_sha256\": \"HELLO\"\n" +
+                "         },\n" +
+                "         {\"build\": \"ud\",\n" +
+                "         \"cert_fingerprint_sha256\": \"YELLOW\"\n" +
+                "         }]\n" +
+                "      }\n" +
+                "    }\n" +
+                "]}\n" +
+                "\n"
 
         private const val GPM_ALLOWLIST_URL =
             "https://www.gstatic.com/gpm-passkeys-privileged-apps/apps.json"
 
-        private const val TAG = "MyVault"
+        const val TAG = "MyVault"
         const val KEY_ACCOUNT_LAST_USED_MS = "key_account_last_used_ms"
         const val KEY_ACCOUNT_ID = "key_account_id"
         const val USER_ACCOUNT = "user_account"

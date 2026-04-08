@@ -1,3 +1,7 @@
+import java.io.FileInputStream
+import java.util.Properties
+import kotlin.toString
+
 /*
  * Copyright 2024 The Android Open Source Project
  *
@@ -20,6 +24,10 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+val keystorePropertiesFile: File = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+
 android {
     namespace = "com.example.android.authentication.myvault"
     compileSdk = 35
@@ -37,13 +45,24 @@ android {
 
     }
 
+    signingConfigs {
+        create("config") {
+            keyAlias = keystoreProperties["keyAlias"].toString()
+            keyPassword = keystoreProperties["keyPassword"].toString()
+            storeFile = file(keystoreProperties["storeFile"].toString())
+            storePassword = keystoreProperties["storePassword"].toString()
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("config")
+        }
+
+        debug {
+            signingConfig = signingConfigs.getByName("config")
         }
     }
     compileOptions {
@@ -78,6 +97,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.androidx.credential.manager)
+    implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.provider.events)
     implementation(libs.provider.events.ps)
 
