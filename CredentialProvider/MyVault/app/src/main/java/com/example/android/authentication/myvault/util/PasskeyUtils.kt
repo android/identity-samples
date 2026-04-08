@@ -206,9 +206,7 @@ class PasskeyUtils {
          * @param accountId The account ID.
          */
         private fun updateMetaInSharedPreferences(applicationContext: Context, accountId: String?) {
-            if (accountId == null || (accountId != USER_ACCOUNT)) {
-                // AccountId was not set
-            } else {
+            if (accountId == USER_ACCOUNT) {
                 applicationContext.getSharedPreferences(
                     applicationContext.packageName,
                     MODE_PRIVATE,

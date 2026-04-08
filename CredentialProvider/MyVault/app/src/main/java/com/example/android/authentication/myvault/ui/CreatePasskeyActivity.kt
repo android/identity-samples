@@ -326,18 +326,6 @@ class CreatePasskeyActivity : FragmentActivity() {
     }
 
     /**
-     * Generates a new key pair for use in creating a public key credential.
-     *
-     * @return A new [KeyPair] instance.
-     */
-    private fun generateKeyPair(): KeyPair {
-        val spec = ECGenParameterSpec(getString(R.string.secp_256_r1))
-        val keyPairGen = KeyPairGenerator.getInstance(getString(R.string.ec))
-        keyPairGen.initialize(spec)
-        return keyPairGen.genKeyPair()
-    }
-
-    /**
      *  This method helps check the asset linking to verify client app idenity
      * @param rpId : Relying party identifier
      * @param callingAppInfo : Information pertaining to the calling application.
@@ -347,6 +335,7 @@ class CreatePasskeyActivity : FragmentActivity() {
 
         if (!isRpValid) {
             setUpFailureResponseAndFinish(getString(R.string.failed_to_validate_rp))
+            return
         }
     }
 
