@@ -6,6 +6,7 @@ pub struct CallingAppInfo {
     pub origin: [u8; 512],
 }
 
+#[link(wasm_import_module = "credman")]
 unsafe extern "C" {
     pub fn AddEntry(
         cred_id: i64,
