@@ -1,10 +1,17 @@
 package com.example.android.authentication.myvault.data
 
 import android.annotation.SuppressLint
+import android.os.CancellationSignal
 import android.util.Log
+import androidx.core.os.OutcomeReceiverCompat
+import androidx.credentials.CreateCredentialResponse
+import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.SignalAllAcceptedCredentialIdsRequest
 import androidx.credentials.SignalCurrentUserDetailsRequest
 import androidx.credentials.SignalUnknownCredentialRequest
+import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.provider.CallingAppInfo
+import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.credentials.providerevents.service.CredentialProviderEventsService
 import androidx.credentials.providerevents.signal.ProviderSignalCredentialStateCallback
 import androidx.credentials.providerevents.signal.ProviderSignalCredentialStateRequest
@@ -15,7 +22,11 @@ import com.example.android.authentication.myvault.DISPLAY_NAME
 import com.example.android.authentication.myvault.NAME
 import com.example.android.authentication.myvault.R
 import com.example.android.authentication.myvault.USER_ID
+import com.example.android.authentication.myvault.fido.PublicKeyCredentialCreationOptions
 import com.example.android.authentication.myvault.showNotification
+import com.example.android.authentication.myvault.util.PasskeyUtils
+import com.example.android.authentication.myvault.ui.CreatePasskeyActivity.Companion.TAG
+import com.example.android.authentication.myvault.util.PrivilegedValidationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,9 +40,44 @@ import org.json.JSONObject
  * such as when a credential is no longer valid, when a list of accepted credentials is accepted,
  * or when current user details change for credentials
  */
-class CredentialProviderService: CredentialProviderEventsService() {
+class CredentialProviderService : CredentialProviderEventsService() {
     private val dataSource = AppDependencies.credentialsDataSource
     private val coroutineScope = AppDependencies.coroutineScope
+
+    /**
+     * Called when a credential provider requests to create a new credential.
+     *
+     * This is defined primarily to handle passkey Conditional Create requests.
+     *
+     * @param request The request to create a new credential.
+     * @param cancellationSignal A signal to cancel the request.
+     * @param callback A callback to receive the result of the request.
+     */
+    override fun onCreateCredentialRequest(
+        request: ProviderCreateCredentialRequest,
+        cancellationSignal: CancellationSignal,
+        callback: OutcomeReceiverCompat<CreateCredentialResponse, CreateCredentialException>,
+    ) {
+        val createReq = request.callingRequest
+
+        // Check if the request is for conditional create.
+        if (createReq is CreatePublicKeyCredentialRequest/* && createReq.isConditional*/) {
+            // Perform any additional request or user validation.
+            // ...
+            // Create the public key request.
+
+            finalizeSilently(
+                createReq.requestJson,
+                request.callingAppInfo,
+                createReq.clientDataHash, CredentialsRepository.USER_ACCOUNT, callback,
+            )
+
+            // Show a notification once the passkey is created.
+            // Context.showNotification(...)
+            // For any errors, invoke callback.onError(...)
+            //super.onCreateCredentialRequest(request, cancellationSignal, callback)
+        }
+    }
 
     /**
      * Called when the system or another credential provider signals a change in credential state.
@@ -59,7 +105,7 @@ class CredentialProviderService: CredentialProviderEventsService() {
                     handleRequest = ::handleUnknownCredentialRequest,
                     requestJson = request.callingRequest.requestJson,
                     notificationTitle = getString(R.string.credential_deletion),
-                    notificationContent = getString(R.string.unknown_signal_message)
+                    notificationContent = getString(R.string.unknown_signal_message),
                 )
             }
 
@@ -68,7 +114,7 @@ class CredentialProviderService: CredentialProviderEventsService() {
                     handleRequest = ::handleAcceptedCredentialsRequest,
                     requestJson = request.callingRequest.requestJson,
                     notificationTitle = getString(R.string.credentials_list_updation),
-                    notificationContent = getString(R.string.all_accepted_signal_message)
+                    notificationContent = getString(R.string.all_accepted_signal_message),
                 )
             }
 
@@ -77,11 +123,11 @@ class CredentialProviderService: CredentialProviderEventsService() {
                     handleRequest = ::handleCurrentUserDetailRequest,
                     requestJson = request.callingRequest.requestJson,
                     notificationTitle = getString(R.string.user_details_updation),
-                    notificationContent = getString(R.string.current_user_signal_message)
+                    notificationContent = getString(R.string.current_user_signal_message),
                 )
             }
 
-            else -> { }
+            else -> {}
         }
 
         callback.onSignalConsumed()
@@ -137,7 +183,7 @@ class CredentialProviderService: CredentialProviderEventsService() {
             }
             return true
         } catch (e: Exception) {
-            Log.e(getString(R.string.failed_to_handle_unknowncredentialrequest),  e.toString())
+            Log.e(getString(R.string.failed_to_handle_unknowncredentialrequest), e.toString())
             return false
         }
     }
@@ -175,7 +221,8 @@ class CredentialProviderService: CredentialProviderEventsService() {
                     }
                 }
 
-                else -> { /*do nothing*/ }
+                else -> { /*do nothing*/
+                }
             }
 
             for (key in listCurrentPasskeysForUser) {
@@ -221,5 +268,51 @@ class CredentialProviderService: CredentialProviderEventsService() {
             Log.e(getString(R.string.failed_to_handle_currentuserdetailrequest), e.toString())
             return false
         }
+    }
+
+    fun finalizeSilently(
+        requestJson: String,
+        callingAppInfo: CallingAppInfo?,
+        clientDataHash: ByteArray?,
+        accountId: String?,
+        callback: OutcomeReceiverCompat<CreateCredentialResponse, CreateCredentialException>,
+    ) {
+        if (callingAppInfo == null) {
+            Log.i(TAG, "no callingAppInfo")
+            return
+        }
+        val request = PublicKeyCredentialCreationOptions(requestJson)
+
+        //Log.i(TAG, "Origin: $origin")
+        if (callingAppInfo.isOriginPopulated()) {
+            val callingAppResult = PasskeyUtils.validatePrivilegedCallingApp(callingAppInfo)
+            if (callingAppResult is PrivilegedValidationResult.Failure) {
+                return
+            }
+        }
+        // Native call. Check for asset links
+        if (!PasskeyUtils.checkRpValidity(request.rp.id, callingAppInfo))
+            return
+
+
+        val publicKeyResponse = PasskeyUtils.createAndStorePasskey(
+            applicationContext,
+            dataSource,
+            request,
+            callingAppInfo,
+            null,
+            clientDataHash,
+            accountId,
+        )
+        Log.i(TAG, "PublicKey response ${publicKeyResponse}")
+
+        showNotification(
+            title = "Passkey created",
+            content = "Sign in faster next time.",
+        )
+
+        Log.i(TAG, "Notification shown")
+
+        callback.onResult(publicKeyResponse)
     }
 }
