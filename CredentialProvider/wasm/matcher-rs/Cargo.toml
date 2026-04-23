@@ -9,6 +9,12 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 nanoserde = "0.1"
+log = "0.4"
+
+[features]
+default = ["static_log_off"]
+static_log_off = ["log/max_level_off"]
+logging = []
 
 [dev-dependencies]
 

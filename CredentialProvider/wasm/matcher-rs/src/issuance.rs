@@ -16,33 +16,83 @@ const ALLOWED_PROTOCOLS: [&str; 4] = [
 ];
 
 pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::error::Error>> {
+    log::info!("Starting issuance matching process");
     let matcher_data_buffer = credman.get_registered_data();
+    log::debug!(
+        "Retrieved matcher data buffer, size: {}",
+        matcher_data_buffer.len()
+    );
+
     let json_start = u32::from_le_bytes(matcher_data_buffer[..size_of::<u32>()].try_into()?);
-    let matcher_data: IssuanceMatcherData = DeJson::deserialize_json(std::str::from_utf8(
-        &matcher_data_buffer[json_start.try_into()?..],
-    )?)?;
-    let request: DigitalCredentialCreationRequest =
-        DeJson::deserialize_json(std::str::from_utf8(&credman.get_request_buffer())?)?;
-    if request.requests.iter().any(|r| {
-        ALLOWED_PROTOCOLS.iter().any(|s| r.protocol == *s)
-            && matcher_data
-                .filter
-                .matches(&RegularizedOpenId4VciRequestData::from(&r.data))
-    }) {
-        let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
-        let entry_id = CString::new(matcher_data.entry_id)?;
-        let title = matcher_data.title.map(|s| CString::new(s)).transpose()?;
-        let subtitle = matcher_data.subtitle.map(|s| CString::new(s)).transpose()?;
-        credman.add_string_id_entry(
-            &entry_id,
-            if icon.is_empty() { None } else { Some(icon) },
-            title.as_deref(),
-            subtitle.as_deref(),
-            None,
-            None,
-        );
+    let matcher_data_str = std::str::from_utf8(&matcher_data_buffer[json_start.try_into()?..])?;
+    let matcher_data: IssuanceMatcherData = match DeJson::deserialize_json(matcher_data_str) {
+        Ok(data) => data,
+        Err(e) => {
+            log::error!(
+                "Failed to deserialize matcher data: {:?}. JSON: {}",
+                e,
+                matcher_data_str
+            );
+            return Err(e.into());
+        }
+    };
+    log::debug!("Parsed matcher data for entry: {}", matcher_data.entry_id);
+
+    let request_buffer = credman.get_request_buffer();
+    let request_str = std::str::from_utf8(&request_buffer)?;
+    let request: DigitalCredentialCreationRequest = match DeJson::deserialize_json(request_str) {
+        Ok(req) => req,
+        Err(e) => {
+            log::error!(
+                "Failed to deserialize request: {:?}. JSON: {}",
+                e,
+                request_str
+            );
+            return Err(e.into());
+        }
+    };
+    log::debug!(
+        "Parsed request with {} sub-requests",
+        request.requests.len()
+    );
+
+    for (i, r) in request.requests.iter().enumerate() {
+        log::trace!("Checking request {}: protocol={}", i, r.protocol);
+        if ALLOWED_PROTOCOLS.iter().any(|s| r.protocol == *s) {
+            let regularized = RegularizedOpenId4VciRequestData::from(&r.data);
+            if matcher_data.filter.matches(&regularized) {
+                log::info!("Match found for request {} with protocol {}", i, r.protocol);
+                let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
+                let entry_id = CString::new(matcher_data.entry_id.clone())?;
+                let title = matcher_data
+                    .title
+                    .as_ref()
+                    .map(|s| CString::new(s.clone()))
+                    .transpose()?;
+                let subtitle = matcher_data
+                    .subtitle
+                    .as_ref()
+                    .map(|s| CString::new(s.clone()))
+                    .transpose()?;
+
+                log::debug!("Adding string ID entry: {}", matcher_data.entry_id);
+                credman.add_string_id_entry(
+                    &entry_id,
+                    if icon.is_empty() { None } else { Some(icon) },
+                    title.as_deref(),
+                    subtitle.as_deref(),
+                    None,
+                    None,
+                );
+                // Assuming we only need to add one entry if any request matches
+                break;
+            }
+        } else {
+            log::warn!("Unsupported protocol: {}", r.protocol);
+        }
     }
 
+    log::info!("Issuance matching process completed");
     Ok(())
 }
 

@@ -41,16 +41,28 @@ pub struct RegularizedOpenId4VciRequestData<'a> {
 // Implement From on a Reference
 impl<'a> From<&'a OpenId4VciRequestData> for RegularizedOpenId4VciRequestData<'a> {
     fn from(value: &'a OpenId4VciRequestData) -> Self {
+        log::trace!(
+            "Regularizing request for issuer: {}",
+            value.credential_issuer
+        );
         let mut configurations = Vec::with_capacity(value.credential_configuration_ids.len());
 
         if let Some(metadata) = &value.credential_issuer_metadata {
             for id in &value.credential_configuration_ids {
                 if let Some(config) = metadata.credential_configurations_supported.get(id) {
                     configurations.push(config);
+                } else {
+                    log::trace!("Configuration ID '{}' not found in metadata", id);
                 }
             }
+        } else {
+            log::trace!("No metadata available for regularization");
         }
 
+        log::trace!(
+            "Regularization complete: {} configurations matched",
+            configurations.len()
+        );
         Self {
             credential_issuer: &value.credential_issuer,
             credential_configuration_ids: &value.credential_configuration_ids,
