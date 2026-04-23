@@ -140,4 +140,6 @@ unsafe extern "C" {
         set_id: *const c_char,
         set_index: i32,
     );
+    pub fn fd_write(fd: i32, iovs_ptr: *const c_void, iovs_len: i32, nwritten_ptr: *mut i32)
+    -> i32;
 }

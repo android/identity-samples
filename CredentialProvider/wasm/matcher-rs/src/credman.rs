@@ -26,6 +26,7 @@ impl CredmanApi for CredmanApiImpl {
         unsafe {
             GetRequestSize(&mut size);
         }
+        log::debug!("Host requested request buffer of size: {}", size);
         let mut r = vec![0; size as usize];
         unsafe {
             GetRequestBuffer(r.as_mut_ptr() as *mut c_void);
@@ -37,6 +38,7 @@ impl CredmanApi for CredmanApiImpl {
         unsafe {
             GetCredentialsSize(&mut size);
         }
+        log::debug!("Host requested registered data buffer of size: {}", size);
         let mut r = vec![0; size.try_into().unwrap()];
         unsafe {
             ReadCredentialsBuffer(r.as_mut_ptr() as *mut c_void, 0, size as usize);
@@ -52,9 +54,16 @@ impl CredmanApi for CredmanApiImpl {
         disclaimer: Option<&CStr>,
         warning: Option<&CStr>,
     ) {
+        log::info!("Adding string ID entry: {:?}", entry_id);
         let icon_bytes =
             icon.map_or(std::ptr::null(), |x| x.as_ptr()) as *const std::os::raw::c_char;
         let icon_length = icon.map_or(0, |x| x.len());
+        log::trace!(
+            "Entry details - title: {:?}, subtitle: {:?}, icon_len: {}",
+            title,
+            subtitle,
+            icon_length
+        );
         unsafe {
             AddStringIdEntry(
                 entry_id.as_ptr(),

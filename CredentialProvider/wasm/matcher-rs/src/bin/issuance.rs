@@ -1,6 +1,7 @@
 use matcher_rs::{credman::CredmanApiImpl, issuance::issuance_main};
 
 fn main() {
+    matcher_rs::logger::init();
     issuance_main(&mut CredmanApiImpl {}).unwrap();
 }
 
