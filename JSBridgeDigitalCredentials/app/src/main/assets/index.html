@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digital Credentials JS Bridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin-bottom: 20px; }
+        #result { background: #f0f0f0; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; word-break: break-all; }
+        .label { font-weight: bold; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Digital Credentials</h1>
+    <p>This page uses a JS bridge to call the native Android Digital Credentials API.</p>
+
+    <button id="getCredBtn">Get Digital Credential</button>
+
+    <div class="label">Result:</div>
+    <div id="result">Waiting for action...</div>
+
+    <script src="bridge.js"></script>
+    <script>
+        document.getElementById('getCredBtn').onclick = async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = "Requesting credential...";
+
+            const request = {
+                "providers": [
+                    {
+                        "protocol": "openid4vp",
+                        "request": JSON.stringify({
+                            "requests": [
+                                {
+                                    "protocol": "openid4vp-v1-unsigned",
+                                    "data": {
+                                        "response_type": "vp_token",
+                                        "response_mode": "dc_api",
+                                        "nonce": "n-0S6_W_2F",
+                                        "dcql_query": {
+                                            "credentials": [
+                                                {
+                                                    "id": "user_info_query",
+                                                    "format": "dc+sd-jwt",
+                                                    "meta": {
+                                                        "vct_values": ["UserInfoCredential"]
+                                                    },
+                                                    "claims": [
+                                                        {"path": ["email"]},
+                                                        {"path": ["email_verified"]},
+                                                        {"path": ["name"]}
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        })
+                    }
+                ]
+            };
+
+            try {
+                // This calls the overridden navigator.credentials.get
+                const credential = await navigator.credentials.get({
+                    digital: request
+                });
+
+                resultDiv.innerText = JSON.stringify(credential, null, 2);
+            } catch (err) {
+                resultDiv.innerText = "Error: " + err.message;
+            }
+        };
+    </script>
+</body>
+</html>
