@@ -23,7 +23,10 @@ import android.content.Context
  *
  * @param context The application context.
  */
-class JsonProvider(private val context: Context) {
+class JsonProvider(context: Context) {
+    
+    val context = context.applicationContext
+    
     /**
      * Fetches the registration JSON from the "RegFromServer" asset.
      *
