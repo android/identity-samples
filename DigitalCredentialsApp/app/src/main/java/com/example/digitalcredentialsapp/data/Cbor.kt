@@ -16,42 +16,50 @@
 
 package com.example.digitalcredentialsapp.data
 
-import java.lang.IllegalArgumentException
-import java.nio.ByteBuffer
+data class CborTag(
+    val tag: Long,
+    val item: Any?
+)
 
-const val TYPE_UNSIGNED_INT = 0x00
-const val TYPE_NEGATIVE_INT = 0x01
-const val TYPE_BYTE_STRING = 0x02
-const val TYPE_TEXT_STRING = 0x03
-const val TYPE_ARRAY = 0x04
-const val TYPE_MAP = 0x05
-const val TYPE_TAG = 0x06
-const val TYPE_SIMPLE = 0x07
+fun cborDecode(data: ByteArray): Any? {
+    return Cbor().decode(data)
+}
 
-/**
- * A utility class for encoding and decoding data in CBOR (Concise Binary Object Representation) format.
- *
- * This implementation is designed specifically for demonstration purposes when handling
- * Mobile Driver's License (mDL) credential responses.
- */
+fun cborEncode(data: Any?): ByteArray {
+    return Cbor().encode(data)
+}
+
 class Cbor {
-    /**
-     * Encodes a supported object into a CBOR [ByteArray].
-     *
-     * @param data The object to encode (Supports: Number, ByteArray, String, List, Map).
-     * @return The encoded CBOR byte array.
-     * @throws IllegalArgumentException if the data type is unsupported.
-     */
-    fun encode(data: Any): ByteArray {
+    data class Item(val item: Any?, val len: Int, val type: Int)
+    data class Arg(val arg: Long, val len: Int)
+
+    val TYPE_UNSIGNED_INT = 0x00
+    val TYPE_NEGATIVE_INT = 0x01
+    val TYPE_BYTE_STRING = 0x02
+    val TYPE_TEXT_STRING = 0x03
+    val TYPE_ARRAY = 0x04
+    val TYPE_MAP = 0x05
+    val TYPE_TAG = 0x06
+    val TYPE_FLOAT = 0x07
+
+    fun decode(data: ByteArray): Any? {
+        val ret = parseItem(data, 0)
+        return ret.item
+    }
+
+    fun encode(data: Any?): ByteArray {
+        if (data == null) {
+            return createArg(TYPE_FLOAT, 22)
+        }
         if (data is Number) {
-            return if (data is Double) {
+            if (data is Double) {
                 throw IllegalArgumentException("Don't support doubles yet")
             } else {
                 val value = data.toLong()
                 if (value >= 0) {
-                    createArg(TYPE_UNSIGNED_INT, value)
+                    return createArg(TYPE_UNSIGNED_INT, value)
                 } else {
-                    createArg(TYPE_NEGATIVE_INT, -1 - value)
+                    return createArg(TYPE_NEGATIVE_INT, -1 - value)
                 }
             }
         }
@@ -64,7 +72,7 @@ class Cbor {
         if (data is List<*>) {
             var ret = createArg(TYPE_ARRAY, data.size.toLong())
             for (i in data) {
-                ret += encode(i!!)
+                ret += encode(i)
             }
             return ret
         }
@@ -76,12 +84,128 @@ class Cbor {
             }
             return ret
         }
+        if (data is CborTag) {
+            var ret = createArg(TYPE_TAG, data.tag)
+            ret += encode(data.item)
+            return ret
+        }
         throw IllegalArgumentException("Bad type")
     }
 
-    /**
-     * Helper to create the head/argument of a CBOR item.
-     */
+    private fun getType(data: ByteArray, offset: Int): Int {
+        val d = data[offset].toInt()
+        return (d and 0xFF) shr 5
+    }
+
+    private fun getArg(data: ByteArray, offset: Int): Arg {
+        val arg = data[offset].toLong() and 0x1F
+        if (arg < 24) {
+            return Arg(arg, 1)
+        }
+        if (arg == 24L) {
+            return Arg(data[offset + 1].toLong() and 0xFF, 2)
+        }
+        if (arg == 25L) {
+            var ret = (data[offset + 1].toLong() and 0xFF) shl 8
+            ret = ret or (data[offset + 2].toLong() and 0xFF)
+            return Arg(ret, 3)
+        }
+        if (arg == 26L) {
+            var ret = (data[offset + 1].toLong() and 0xFF) shl 24
+            ret = ret or ((data[offset + 2].toLong() and 0xFF) shl 16)
+            ret = ret or ((data[offset + 3].toLong() and 0xFF) shl 8)
+            ret = ret or (data[offset + 4].toLong() and 0xFF)
+            return Arg(ret, 5)
+        }
+        if (arg == 27L) {
+            var ret = (data[offset + 1].toLong() and 0xFF) shl 56
+            ret = ret or ((data[offset + 2].toLong() and 0xFF) shl 48)
+            ret = ret or ((data[offset + 3].toLong() and 0xFF) shl 40)
+            ret = ret or ((data[offset + 4].toLong() and 0xFF) shl 32)
+            ret = ret or ((data[offset + 5].toLong() and 0xFF) shl 24)
+            ret = ret or ((data[offset + 6].toLong() and 0xFF) shl 16)
+            ret = ret or ((data[offset + 7].toLong() and 0xFF) shl 8)
+            ret = ret or (data[offset + 8].toLong() and 0xFF)
+            return Arg(ret, 9)
+        }
+        throw IllegalArgumentException("Bad arg $arg")
+    }
+
+    private fun parseItem(data: ByteArray, offset: Int): Item {
+        val itemType = getType(data, offset)
+        val arg = getArg(data, offset)
+
+        when (itemType) {
+            TYPE_UNSIGNED_INT -> {
+                return Item(arg.arg, arg.len, TYPE_UNSIGNED_INT)
+            }
+
+            TYPE_NEGATIVE_INT -> {
+                return Item(-1 - arg.arg, arg.len, TYPE_NEGATIVE_INT)
+            }
+
+            TYPE_BYTE_STRING -> {
+                val ret =
+                    data.sliceArray(offset + arg.len.toInt() until offset + arg.len.toInt() + arg.arg.toInt())
+                return Item(ret, arg.len + arg.arg.toInt(), TYPE_BYTE_STRING)
+            }
+
+            TYPE_TEXT_STRING -> {
+                val ret =
+                    data.sliceArray(offset + arg.len.toInt() until offset + arg.len.toInt() + arg.arg.toInt())
+                return Item(
+                    ret.toString(Charsets.UTF_8), arg.len + arg.arg.toInt(),
+                    TYPE_TEXT_STRING
+                )
+            }
+
+            TYPE_ARRAY -> {
+                val ret = mutableListOf<Any?>()
+                var consumed = arg.len
+                for (i in 0 until arg.arg.toInt()) {
+                    val item = parseItem(data, offset + consumed)
+                    ret.add(item.item)
+                    consumed += item.len
+                }
+                return Item(ret.toList(), consumed, TYPE_ARRAY)
+            }
+
+            TYPE_MAP -> {
+                val ret = mutableMapOf<Any?, Any?>()
+                var consumed = arg.len
+                for (i in 0 until arg.arg.toInt()) {
+                    val key = parseItem(data, offset + consumed)
+                    consumed += key.len
+                    val value = parseItem(data, offset + consumed)
+                    consumed += value.len
+                    ret[key.item] = value.item
+                }
+                return Item(ret.toMap(), consumed, TYPE_MAP)
+            }
+
+            TYPE_TAG -> {
+                val tagItem = parseItem(data, offset + arg.len)
+                return Item(CborTag(arg.arg, tagItem.item), arg.len + tagItem.len, TYPE_TAG)
+            }
+
+            TYPE_FLOAT -> {
+                if (arg.arg.toInt() == 22) {
+                    return Item(null, arg.len, TYPE_FLOAT)
+                } else if (arg.arg.toInt() == 20) {
+                    return Item(false, arg.len, TYPE_FLOAT)
+                } else if (arg.arg.toInt() == 21) {
+                    return Item(true, arg.len, TYPE_FLOAT)
+                } else {
+                    throw IllegalArgumentException("Bad float $arg")
+                }
+            }
+
+            else -> {
+                throw IllegalArgumentException("Bad type")
+            }
+        }
+    }
+
     private fun createArg(type: Int, arg: Long): ByteArray {
         val t = type shl 5
         val a = arg.toInt()
@@ -91,14 +215,14 @@ class Cbor {
         if (arg <= 0xFF) {
             return byteArrayOf(
                 ((t or 24) and 0xFF).toByte(),
-                (a and 0xFF).toByte(),
+                (a and 0xFF).toByte()
             )
         }
         if (arg <= 0xFFFF) {
             return byteArrayOf(
                 ((t or 25) and 0xFF).toByte(),
                 ((a shr 8) and 0xFF).toByte(),
-                (a and 0xFF).toByte(),
+                (a and 0xFF).toByte()
             )
         }
         if (arg <= 0xFFFFFFFF) {
@@ -107,97 +231,9 @@ class Cbor {
                 ((a shr 24) and 0xFF).toByte(),
                 ((a shr 16) and 0xFF).toByte(),
                 ((a shr 8) and 0xFF).toByte(),
-                (a and 0xFF).toByte(),
+                (a and 0xFF).toByte()
             )
         }
         throw IllegalArgumentException("bad Arg")
-    }
-
-    /**
-     * A decoder for CBOR-encoded data.
-     *
-     * @property buffer The [ByteBuffer] containing the CBOR data.
-     */
-    class Decoder(private val buffer: ByteBuffer) {
-        constructor(bytes: ByteArray) : this(ByteBuffer.wrap(bytes))
-
-        /**
-         * Decodes the next item in the CBOR stream.
-         *
-         * @return The decoded object, or null if the buffer is empty.
-         * @throws IllegalArgumentException for unsupported major types or malformed data.
-         */
-        fun decodeNext(): Any? {
-            if (!buffer.hasRemaining()) return null
-            val b = buffer.get().toInt() and 0xFF
-            val majorType = b shr 5
-            val additionalInfo = b and 0x1F
-
-            return when (majorType) {
-                TYPE_UNSIGNED_INT -> readLength(additionalInfo)
-                TYPE_NEGATIVE_INT -> -1 - readLength(additionalInfo)
-                TYPE_BYTE_STRING -> {
-                    val length = readLength(additionalInfo).toInt()
-                    val bytes = ByteArray(length)
-                    buffer.get(bytes)
-                    bytes
-                }
-                TYPE_TEXT_STRING -> {
-                    val length = readLength(additionalInfo).toInt()
-                    val bytes = ByteArray(length)
-                    buffer.get(bytes)
-                    String(bytes)
-                }
-                TYPE_ARRAY -> {
-                    val size = readLength(additionalInfo).toInt()
-                    val list = mutableListOf<Any?>()
-                    repeat(size) {
-                        list.add(decodeNext())
-                    }
-                    list
-                }
-                TYPE_MAP -> {
-                    val size = readLength(additionalInfo).toInt()
-                    val map = mutableMapOf<Any?, Any?>()
-                    repeat(size) {
-                        val key = decodeNext()
-                        val value = decodeNext()
-                        map[key] = value
-                    }
-                    map
-                }
-                TYPE_TAG -> {
-                    val tag = readLength(additionalInfo)
-                    if (tag == 24L) {
-                        // ISO 18013-5 unwrapping of Tag 24 items
-                        val innerBytes = decodeNext() as? ByteArray
-                            ?: throw IllegalArgumentException("Tag 24 must be followed by byte string")
-                        Decoder(innerBytes).decodeNext()
-                    } else {
-                        decodeNext()
-                    }
-                }
-                TYPE_SIMPLE -> {
-                    when (additionalInfo) {
-                        20 -> false
-                        21 -> true
-                        22 -> null
-                        else -> null
-                    }
-                }
-                else -> throw IllegalArgumentException("Unsupported major type: $majorType")
-            }
-        }
-
-        private fun readLength(info: Int): Long {
-            return when (info) {
-                in 0..23 -> info.toLong()
-                24 -> buffer.get().toLong() and 0xFF
-                25 -> buffer.short.toLong() and 0xFFFF
-                26 -> buffer.int.toLong() and 0xFFFFFFFFL
-                27 -> buffer.long
-                else -> throw IllegalArgumentException("Invalid length info: $info")
-            }
-        }
     }
 }

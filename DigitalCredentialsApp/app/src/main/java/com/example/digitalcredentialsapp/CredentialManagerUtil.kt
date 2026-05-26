@@ -15,7 +15,8 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.GetCredentialInterruptedException
 import androidx.credentials.exceptions.GetCredentialUnknownException
 import androidx.credentials.exceptions.NoCredentialException
-import com.example.digitalcredentialsapp.data.Cbor
+import com.example.digitalcredentialsapp.data.CborTag
+import com.example.digitalcredentialsapp.data.cborDecode
 import com.example.digitalcredentialsapp.data.DescriptorMapping
 import com.example.digitalcredentialsapp.data.PresentationSubmission
 import com.example.digitalcredentialsapp.data.RequestedClaim
@@ -321,7 +322,7 @@ object CredentialManagerUtil {
         val claims = mutableListOf<CredentialClaim>()
         try {
             val bytes = Base64.decode(base64Mdoc, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            val decoded = Cbor.Decoder(bytes).decodeNext() as? Map<*, *> ?: return emptyList()
+            val decoded = cborDecode(bytes) as? Map<*, *> ?: return emptyList()
 
             val documents = decoded["documents"] as? List<*> ?: return emptyList()
             for (doc in documents) {
@@ -333,11 +334,21 @@ object CredentialManagerUtil {
 
                 if (mdlNamespace is List<*>) {
                     for (item in mdlNamespace) {
-                        (item as? Map<*, *>)?.let { extractClaim(it, claims) }
+                        val decodedItem = if (item is CborTag && item.tag == 24L) {
+                            cborDecode(item.item as ByteArray)
+                        } else {
+                            item
+                        }
+                        (decodedItem as? Map<*, *>)?.let { extractClaim(it, claims) }
                     }
                 } else if (mdlNamespace is Map<*, *>) {
                     mdlNamespace.forEach { (k, v) ->
-                        claims.add(CredentialClaim(formatLabel(k.toString()), v.toString()))
+                        val value = if (v is CborTag && v.tag == 24L) {
+                            cborDecode(v.item as ByteArray)
+                        } else {
+                            v
+                        }
+                        claims.add(CredentialClaim(formatLabel(k.toString()), value.toString()))
                     }
                 }
             }
