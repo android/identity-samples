@@ -47,7 +47,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.digitalcredentialsapp.data.CredentialManagerUtil
 
 /**
  * Stateful entry point for the Main screen.
@@ -68,7 +67,7 @@ fun MainScreen(
     MainContent(
         uiState = uiState,
         onGetDigitalCredentialClick = {
-            val activity = context as? Activity
+            val activity = context.findActivity()
             if (activity != null) {
                 viewModel.getDigitalCredential {
                     CredentialManagerUtil.getDigitalCredential(activity)
@@ -76,7 +75,7 @@ fun MainScreen(
             }
         },
         onGetVerifiedEmailClick = {
-            val activity = context as? Activity
+            val activity = context.findActivity()
             if (activity != null) {
                 viewModel.getVerifiedEmailCredential {
                     CredentialManagerUtil.getVerifiedEmailCredential(activity)
@@ -130,7 +129,7 @@ fun MainContent(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.1f))
+            Spacer(modifier = Modifier.height(24.dp))
             
             Button(
                 onClick = onGetDigitalCredentialClick,
@@ -154,7 +153,7 @@ fun MainContent(
             
             ResultSection(uiState)
 
-            Spacer(modifier = Modifier.weight(0.2f))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -198,7 +197,7 @@ fun ResultSection(uiState: MainUiState) {
                 }
                 if (uiState.claims.isEmpty()) {
                     Text(
-                        text = "No claims were extracted from the response. This may happen if the credential format is unrecognized.",
+                        text = stringResource(R.string.no_claims_extracted),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
