@@ -1,20 +1,4 @@
-/*
- * Copyright 2026 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.example.digitalcredentialsapp.data
+package com.example.digitalcredentialsapp
 
 import android.app.Activity
 import android.util.Base64
@@ -23,21 +7,25 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.DigitalCredential
 import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetDigitalCredentialOption
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.GetDigitalCredentialOption
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialCustomException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.GetCredentialInterruptedException
-import androidx.credentials.exceptions.GetCredentialCustomException
 import androidx.credentials.exceptions.GetCredentialUnknownException
 import androidx.credentials.exceptions.NoCredentialException
-import com.example.digitalcredentialsapp.CredentialClaim
-import com.example.digitalcredentialsapp.MainUiState
+import com.example.digitalcredentialsapp.data.Cbor
+import com.example.digitalcredentialsapp.data.DescriptorMapping
+import com.example.digitalcredentialsapp.data.PresentationSubmission
+import com.example.digitalcredentialsapp.data.RequestedClaim
+import com.example.digitalcredentialsapp.data.Requests
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.SecureRandom
+import kotlin.collections.get
 
 /**
  * Utility object for interacting with the Android Credential Manager API.
@@ -75,13 +63,24 @@ object CredentialManagerUtil {
     private suspend fun simulateMdlServerResponse(): String = withContext(Dispatchers.IO) {
         Requests.getOpenId4VpDigitalCredentialRequest(
             nonce = generateSecureRandomNonce(),
+            protocol = "openid4vp-v1-unsigned",
+            clientId = null,
+            clientMetadata = """
+                {
+                  "vp_formats_supported": {
+                    "mso_mdoc": {
+                      "deviceauth_alg_values": [-7],
+                      "issuerauth_alg_values": [-7]
+                    }
+                  }
+                }
+            """.trimIndent(),
             format = "mso_mdoc",
-            metaKey = "doctype_value",
-            metaValue = "org.iso.18013.5.1.mDL",
+            meta = """{"doctype_value": "org.iso.18013.5.1.mDL"}""",
             requestedClaims = listOf(
-                RequestedClaim("family_name", listOf("org.iso.18013.5.1", "family_name")),
-                RequestedClaim("given_name", listOf("org.iso.18013.5.1", "given_name")),
-                RequestedClaim("age_over_21", listOf("org.iso.18013.5.1", "age_over_21"))
+                RequestedClaim("", listOf("org.iso.18013.5.1", "family_name")),
+                RequestedClaim("", listOf("org.iso.18013.5.1", "given_name")),
+                RequestedClaim("", listOf("org.iso.18013.5.1", "age_over_21"))
             )
         )
     }
@@ -92,9 +91,11 @@ object CredentialManagerUtil {
     private suspend fun simulateEmailServerResponse(): String = withContext(Dispatchers.IO) {
         Requests.getOpenId4VpDigitalCredentialRequest(
             nonce = generateSecureRandomNonce(),
+            protocol = "openid4vp-v1-unsigned",
+            clientId = null,
+            clientMetadata = null,
             format = "dc+sd-jwt",
-            metaKey = "vct_values",
-            metaValue = "UserInfoCredential",
+            meta = """{"vct_values": ["UserInfoCredential"]}""",
             requestedClaims = listOf(
                 RequestedClaim("email", listOf("email")),
                 RequestedClaim("email_verified", listOf("email_verified"))
@@ -111,7 +112,7 @@ object CredentialManagerUtil {
         requestJson: String
     ): MainUiState = withContext(Dispatchers.IO) {
         try {
-            val credentialManager = CredentialManager.create(activity)
+            val credentialManager = CredentialManager.Companion.create(activity)
 
             val getDigitalCredentialOption = GetDigitalCredentialOption(requestJson = requestJson)
             val request = GetCredentialRequest(listOf(getDigitalCredentialOption))
@@ -212,13 +213,14 @@ object CredentialManagerUtil {
         val claims = mutableListOf<CredentialClaim>()
         try {
             val responseJson = JSONObject(responseJsonString)
-            val data = responseJson.optJSONObject("data") ?: return emptyList()
             
-            // Extract Presentation Submission metadata
+            // Check for 'data' wrapper or flat structure as per documentation
+            val data = responseJson.optJSONObject("data") ?: responseJson
+            val vpToken = data.opt("vp_token") ?: return emptyList()
+
+            // Extract Presentation Submission metadata if available
             val submissionJson = data.optJSONObject("presentation_submission")
             val submission = submissionJson?.let { parsePresentationSubmission(it) }
-            
-            val vpToken = data.opt("vp_token") ?: return emptyList()
 
             if (submission != null) {
                 // Robust parsing using standardized descriptor maps
@@ -231,7 +233,7 @@ object CredentialManagerUtil {
                     }
                 }
             } else {
-                // Fallback for cases where presentation_submission is missing (some DCQL responses)
+                // Fallback for cases where presentation_submission is missing
                 handleLegacyParsing(vpToken, claims)
             }
         } catch (e: Exception) {
@@ -241,7 +243,7 @@ object CredentialManagerUtil {
     }
 
     /**
-     * Parses a [PresentationSubmission] from its JSON representation.
+     * Parses a [com.example.digitalcredentialsapp.data.PresentationSubmission] from its JSON representation.
      */
     private fun parsePresentationSubmission(json: JSONObject): PresentationSubmission {
         val descriptorMap = mutableListOf<DescriptorMapping>()
@@ -272,22 +274,16 @@ object CredentialManagerUtil {
         return try {
             if (vpToken is JSONObject) {
                 // Handle cases where vp_token is an object with credential IDs as keys (typical for DCQL)
-                val token = vpToken.opt(descriptor.id)
-                if (token is JSONArray && token.length() > 0) {
-                    token.getString(0)
-                } else if (token is String) {
-                    token
-                } else {
-                    null
+                val token = vpToken.opt(descriptor.id) ?: vpToken.opt("digital_credential_query")
+                when (token) {
+                    is JSONArray -> if (token.length() > 0) token.getString(0) else null
+                    is String -> token
+                    else -> null
                 }
             } else if (vpToken is JSONArray && vpToken.length() > 0) {
                 // Handle standard array vp_tokens
                 vpToken.getString(0)
-            } else if (vpToken is String) {
-                vpToken
-            } else {
-                null
-            }
+            } else vpToken as? String
         } catch (e: Exception) {
             null
         }
@@ -326,15 +322,15 @@ object CredentialManagerUtil {
         try {
             val bytes = Base64.decode(base64Mdoc, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             val decoded = Cbor.Decoder(bytes).decodeNext() as? Map<*, *> ?: return emptyList()
-            
+
             val documents = decoded["documents"] as? List<*> ?: return emptyList()
             for (doc in documents) {
                 val docMap = doc as? Map<*, *> ?: continue
                 val issuerSigned = docMap["issuerSigned"] as? Map<*, *> ?: continue
                 val nameSpaces = issuerSigned["nameSpaces"] as? Map<*, *> ?: continue
-                
+
                 val mdlNamespace = nameSpaces["org.iso.18013.5.1"]
-                
+
                 if (mdlNamespace is List<*>) {
                     for (item in mdlNamespace) {
                         (item as? Map<*, *>)?.let { extractClaim(it, claims) }
@@ -357,7 +353,7 @@ object CredentialManagerUtil {
     private fun extractClaim(itemMap: Map<*, *>, claims: MutableList<CredentialClaim>) {
         val key = itemMap["elementIdentifier"] as? String ?: return
         val value = itemMap["elementValue"] ?: return
-        
+
         val formattedValue = when (value) {
             is Boolean -> if (value) "Yes" else "No"
             else -> value.toString()
@@ -371,7 +367,7 @@ object CredentialManagerUtil {
     private fun parseSdJwtClaims(sdJwt: String): List<CredentialClaim> {
         val claims = mutableListOf<CredentialClaim>()
         val parts = sdJwt.split("~")
-        for (i in 1 until parts.size - 1) {
+        for (i in 1 until parts.size) {
             val part = parts[i]
             if (part.isNotEmpty()) {
                 try {

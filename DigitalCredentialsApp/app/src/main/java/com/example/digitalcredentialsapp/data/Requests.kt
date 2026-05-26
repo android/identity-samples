@@ -38,40 +38,47 @@ object Requests {
      * Generates a dynamic OpenID4VP JSON request for any digital credential.
      *
      * @param nonce A cryptographically secure random string to prevent replay attacks.
+     * @param protocol The protocol identifier (e.g., "openid4vp-v1" or "openid4vp-v1-unsigned").
+     * @param clientId The unique identifier for the verifier (optional).
+     * @param clientMetadata Optional JSON string for client_metadata (e.g., supported algorithms).
      * @param format The credential format (e.g., "mso_mdoc" or "dc+sd-jwt").
-     * @param metaKey The key for metadata filtering (e.g., "doctype_value" or "vct_values").
-     * @param metaValue The value for metadata filtering (e.g., "org.iso.18013.5.1.mDL").
+     * @param meta The metadata object for filtering (passed as a raw JSON string).
      * @param requestedClaims A list of specific claims to request from the credential.
      * @return The formatted OpenID4VP JSON request string.
      */
     fun getOpenId4VpDigitalCredentialRequest(
         nonce: String,
+        protocol: String,
+        clientId: String?,
+        clientMetadata: String?,
         format: String,
-        metaKey: String,
-        metaValue: String,
+        meta: String,
         requestedClaims: List<RequestedClaim>
     ): String {
         val claimsJson = requestedClaims.joinToString(",") { claim ->
-            """{"id": "${claim.id}", "path": ${claim.path.map { "\"$it\"" }}}"""
+            """{"path": ${claim.path.map { "\"$it\"" }}}"""
         }
+
+        val clientIdJson = if (clientId != null) """ "client_id": "$clientId", """ else ""
+        val clientMetadataJson = if (clientMetadata != null) """ "client_metadata": $clientMetadata, """ else ""
 
         return """
         {
           "requests": [
             {
-              "protocol": "openid4vp-v1-unsigned",
+              "protocol": "$protocol",
               "data": {
                 "response_type": "vp_token",
                 "response_mode": "dc_api",
+                $clientIdJson
+                $clientMetadataJson
                 "nonce": "$nonce",
                 "dcql_query": {
                   "credentials": [
                     {
-                      "id": "digital_credential_query",
+                      "id": "cred1",
                       "format": "$format",
-                      "meta": {
-                        "$metaKey": ["$metaValue"]
-                      },
+                      "meta": $meta,
                       "claims": [$claimsJson]
                     }
                   ]
