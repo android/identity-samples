@@ -17,8 +17,6 @@ import androidx.credentials.exceptions.GetCredentialUnknownException
 import androidx.credentials.exceptions.NoCredentialException
 import com.example.digitalcredentialsapp.data.CborTag
 import com.example.digitalcredentialsapp.data.cborDecode
-import com.example.digitalcredentialsapp.data.DescriptorMapping
-import com.example.digitalcredentialsapp.data.PresentationSubmission
 import com.example.digitalcredentialsapp.data.RequestedClaim
 import com.example.digitalcredentialsapp.data.Requests
 import kotlinx.coroutines.Dispatchers
@@ -113,7 +111,7 @@ object CredentialManagerUtil {
         requestJson: String
     ): MainUiState = withContext(Dispatchers.IO) {
         try {
-            val credentialManager = CredentialManager.Companion.create(activity)
+            val credentialManager = CredentialManager.create(activity)
 
             val getDigitalCredentialOption = GetDigitalCredentialOption(requestJson = requestJson)
             val request = GetCredentialRequest(listOf(getDigitalCredentialOption))
@@ -133,8 +131,7 @@ object CredentialManagerUtil {
      */
     @OptIn(ExperimentalDigitalCredentialApi::class)
     private fun verifyResult(result: GetCredentialResponse): MainUiState {
-        val credential = result.credential
-        return when (credential) {
+        return when (val credential = result.credential) {
             is DigitalCredential -> {
                 val responseJson = credential.credentialJson
                 validateResponseOnServer(responseJson)
@@ -207,35 +204,41 @@ object CredentialManagerUtil {
     /**
      * Parses the raw JSON response from the Digital Credentials API into a list of [CredentialClaim]s.
      *
-     * This implementation robustly handles OpenID4VP responses by utilizing the
-     * `presentation_submission` metadata to identify and extract tokens from the `vp_token`.
+     * In DCQL (Digital Credential Query Language), the response contains a 'vp_token'
+     * which can be a single token string or a map of credential IDs to tokens.
      */
     private fun parseClaims(responseJsonString: String): List<CredentialClaim> {
         val claims = mutableListOf<CredentialClaim>()
         try {
             val responseJson = JSONObject(responseJsonString)
-            
-            // Check for 'data' wrapper or flat structure as per documentation
             val data = responseJson.optJSONObject("data") ?: responseJson
             val vpToken = data.opt("vp_token") ?: return emptyList()
 
-            // Extract Presentation Submission metadata if available
-            val submissionJson = data.optJSONObject("presentation_submission")
-            val submission = submissionJson?.let { parsePresentationSubmission(it) }
-
-            if (submission != null) {
-                // Robust parsing using standardized descriptor maps
-                for (descriptor in submission.descriptor_map) {
-                    val rawToken = extractTokenByDescriptor(vpToken, descriptor) ?: continue
-                    when (descriptor.format) {
-                        "mso_mdoc" -> claims.addAll(parseMdocClaims(rawToken))
-                        "dc+sd-jwt", "vc+sd-jwt" -> claims.addAll(parseSdJwtClaims(rawToken))
-                        else -> Log.w("CredentialManagerUtil", "Unsupported format: ${descriptor.format}")
+            when (vpToken) {
+                is JSONObject -> {
+                    // Handle map of IDs to tokens/arrays
+                    val keys = vpToken.keys()
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        val token = when (val value = vpToken.get(key)) {
+                            is JSONArray -> if (value.length() > 0) value.getString(0) else null
+                            is String -> value
+                            else -> null
+                        }
+                        token?.let { claims.addAll(parseToken(it)) }
                     }
                 }
-            } else {
-                // Fallback for cases where presentation_submission is missing
-                handleLegacyParsing(vpToken, claims)
+                is JSONArray -> {
+                    // Handle array of tokens
+                    for (i in 0 until vpToken.length()) {
+                        val token = vpToken.optString(i)
+                        if (token.isNotEmpty()) claims.addAll(parseToken(token))
+                    }
+                }
+                is String -> {
+                    // Handle single token string
+                    claims.addAll(parseToken(vpToken))
+                }
             }
         } catch (e: Exception) {
             Log.e("CredentialManagerUtil", "Failed to parse claims", e)
@@ -244,74 +247,13 @@ object CredentialManagerUtil {
     }
 
     /**
-     * Parses a [com.example.digitalcredentialsapp.data.PresentationSubmission] from its JSON representation.
+     * Identifies the format of a raw token and parses its claims.
      */
-    private fun parsePresentationSubmission(json: JSONObject): PresentationSubmission {
-        val descriptorMap = mutableListOf<DescriptorMapping>()
-        val descriptors = json.optJSONArray("descriptor_map")
-        if (descriptors != null) {
-            for (i in 0 until descriptors.length()) {
-                val desc = descriptors.getJSONObject(i)
-                descriptorMap.add(
-                    DescriptorMapping(
-                        id = desc.getString("id"),
-                        format = desc.getString("format"),
-                        path = desc.getString("path")
-                    )
-                )
-            }
-        }
-        return PresentationSubmission(
-            id = json.getString("id"),
-            definition_id = json.getString("definition_id"),
-            descriptor_map = descriptorMap
-        )
-    }
-
-    /**
-     * Extracts a raw token (Base64 mDoc or SD-JWT string) from the vp_token based on a descriptor's path.
-     */
-    private fun extractTokenByDescriptor(vpToken: Any, descriptor: DescriptorMapping): String? {
-        return try {
-            if (vpToken is JSONObject) {
-                // Handle cases where vp_token is an object with credential IDs as keys (typical for DCQL)
-                val token = vpToken.opt(descriptor.id) ?: vpToken.opt("digital_credential_query")
-                when (token) {
-                    is JSONArray -> if (token.length() > 0) token.getString(0) else null
-                    is String -> token
-                    else -> null
-                }
-            } else if (vpToken is JSONArray && vpToken.length() > 0) {
-                // Handle standard array vp_tokens
-                vpToken.getString(0)
-            } else vpToken as? String
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    /**
-     * Fallback parsing logic for responses that don't include formal presentation_submission metadata.
-     */
-    private fun handleLegacyParsing(vpToken: Any, claims: MutableList<CredentialClaim>) {
-        try {
-            if (vpToken is JSONObject) {
-                val keys = vpToken.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    val tokenArray = vpToken.optJSONArray(key)
-                    if (tokenArray != null && tokenArray.length() > 0) {
-                        val rawToken = tokenArray.getString(0)
-                        if (rawToken.contains("~")) {
-                            claims.addAll(parseSdJwtClaims(rawToken))
-                        } else {
-                            claims.addAll(parseMdocClaims(rawToken))
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("CredentialManagerUtil", "Fallback parsing failed", e)
+    private fun parseToken(rawToken: String): List<CredentialClaim> {
+        return if (rawToken.contains("~")) {
+            parseSdJwtClaims(rawToken)
+        } else {
+            parseMdocClaims(rawToken)
         }
     }
 
