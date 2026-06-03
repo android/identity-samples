@@ -32,6 +32,14 @@ var __webauthn_hooks__;
             var encodedString = CM_base64url_encode(temppk.user.id);
             temppk.user.id = encodedString;
         }
+        if (temppk.hasOwnProperty('excludeCredentials')) {
+            for (var i = 0; i < temppk.excludeCredentials.length; i++) {
+                if (temppk.excludeCredentials[i].hasOwnProperty('id')) {
+                    var encodedId = CM_base64url_encode(temppk.excludeCredentials[i].id);
+                    temppk.excludeCredentials[i].id = encodedId;
+                }
+            }
+        }
         var jsonObj = {"type":"create", "request":temppk}
 
         var json = JSON.stringify(jsonObj);
