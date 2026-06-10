@@ -217,9 +217,7 @@ object CredentialManagerUtil {
             when (vpToken) {
                 is JSONObject -> {
                     // Handle map of IDs to tokens/arrays
-                    val keys = vpToken.keys()
-                    while (keys.hasNext()) {
-                        val key = keys.next()
+                    for (key in vpToken.keys()) {
                         val token = when (val value = vpToken.get(key)) {
                             is JSONArray -> if (value.length() > 0) value.getString(0) else null
                             is String -> value
