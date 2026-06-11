@@ -16,6 +16,9 @@
 
 package com.example.digitalcredentialsapp.data
 
+import org.json.JSONArray
+import org.json.JSONObject
+
 /**
  * Represents a claim being requested in a Digital Credential query.
  *
@@ -55,38 +58,39 @@ object Requests {
         meta: String,
         requestedClaims: List<RequestedClaim>
     ): String {
-        val claimsJson = requestedClaims.joinToString(",") { claim ->
-            """{"path": ${claim.path.map { "\"$it\"" }}}"""
+        val claimsJson = JSONObject().apply {
+            put("response_type", "vp_token")
+            put("response_mode", "dc_api")
+            clientId?.let { put("client_id", it) }
+            clientMetadata?.let { put("client_metadata", JSONObject(it)) }
+            put("nonce", nonce)
+            put("dcql_query", JSONObject().apply {
+                put("credentials", JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("id", "cred1")
+                        put("format", format)
+                        put("meta", JSONObject(meta))
+                        put("claims", JSONArray().apply {
+                            for (claim in requestedClaims) {
+                                put(JSONObject().apply {
+                                    put("path", JSONArray(claim.path))
+                                })
+                            }
+                        })
+                    })
+                })
+            })
         }
 
-        val clientIdJson = if (clientId != null) """ "client_id": "$clientId", """ else ""
-        val clientMetadataJson = if (clientMetadata != null) """ "client_metadata": $clientMetadata, """ else ""
-
-        return """
-        {
-          "requests": [
-            {
-              "protocol": "$protocol",
-              "data": {
-                "response_type": "vp_token",
-                "response_mode": "dc_api",
-                $clientIdJson
-                $clientMetadataJson
-                "nonce": "$nonce",
-                "dcql_query": {
-                  "credentials": [
-                    {
-                      "id": "cred1",
-                      "format": "$format",
-                      "meta": $meta,
-                      "claims": [$claimsJson]
-                    }
-                  ]
-                }
-              }
-            }
-          ]
+        val openId4VPJson = JSONObject().apply {
+            put("requests", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("protocol", protocol)
+                    put("data", claimsJson)
+                })
+            })
         }
-        """.trimIndent()
+
+        return openId4VPJson.toString(2)
     }
 }
