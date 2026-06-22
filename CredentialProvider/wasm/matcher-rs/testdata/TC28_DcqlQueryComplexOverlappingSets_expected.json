@@ -1,0 +1,179 @@
+{
+  "entrySets": {
+    "req:0;set:0;option:0": {
+      "entries": {
+        "0": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                "John"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "John's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        },
+        "1": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Family Name",
+                "Doe"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "John's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          },
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Family Name",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Jane's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:0",
+      "setLength": 2
+    },
+    "req:0;set:0;option:1": {
+      "entries": {
+        "0": {
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Jane's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        },
+        "1": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Family Name",
+                "Doe"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "John's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          },
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Family Name",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Jane's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:1",
+      "setLength": 2
+    },
+    "req:0;set:0;option:2": {
+      "entries": {
+        "0": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                "John"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "John's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        },
+        "1": {
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Jane's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:2",
+      "setLength": 2
+    }
+  },
+  "standaloneEntries": []
+}

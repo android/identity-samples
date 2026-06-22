@@ -1,0 +1,81 @@
+{
+  "entrySets": {
+    "req:0;null": {
+      "entries": {
+        "0": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Over 21",
+                "Yes"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "John's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          },
+          "mdoc_cred_3": {
+            "additional_info": "",
+            "credId": "mdoc_cred_3",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Over 21",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Alice's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          },
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Over 21",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Jane's Driving License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;null",
+      "setLength": 1
+    }
+  },
+  "standaloneEntries": [
+    {
+      "additional_info": "",
+      "credId": "issuance_mdl_1",
+      "disclaimer": "",
+      "fields": [],
+      "merchant_name": "",
+      "metadata_display_text": "",
+      "subtitle": "From your local DMV",
+      "title": "Get a New mDL",
+      "transaction_amount": "",
+      "type": "InlineIssuance",
+      "warning": ""
+    }
+  ]
+}

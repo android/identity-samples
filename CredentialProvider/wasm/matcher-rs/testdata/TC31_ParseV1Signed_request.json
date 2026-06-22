@@ -1,0 +1,10 @@
+{
+  "requests": [
+    {
+      "data": {
+        "request": "header.eyJkY3FsX3F1ZXJ5Ijp7ImNyZWRlbnRpYWxzIjpbeyJmb3JtYXQiOiJtc29fbWRvYyIsImlkIjoibWRsIiwibWV0YSI6eyJkb2N0eXBlX3ZhbHVlIjoib3JnLmlzby4xODAxMy41LjEubURMIn19XX19.signature"
+      },
+      "protocol": "openid4vp-v1-signed"
+    }
+  ]
+}

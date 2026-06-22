@@ -63,26 +63,14 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             if matcher_data.filter.matches(&regularized) {
                 log::info!("Match found for request {} with protocol {}", i, r.protocol);
                 let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
-                let entry_id = CString::new(matcher_data.entry_id.clone())?;
-                let title = matcher_data
-                    .title
-                    .as_ref()
-                    .map(|s| CString::new(s.clone()))
-                    .transpose()?;
-                let subtitle = matcher_data
-                    .subtitle
-                    .as_ref()
-                    .map(|s| CString::new(s.clone()))
-                    .transpose()?;
-
                 log::debug!("Adding string ID entry: {}", matcher_data.entry_id);
                 credman.add_string_id_entry(
-                    &entry_id,
-                    if icon.is_empty() { None } else { Some(icon) },
-                    title.as_deref(),
-                    subtitle.as_deref(),
-                    None,
-                    None,
+                    &matcher_data.entry_id,
+                    icon,
+                    &matcher_data.title,
+                    &matcher_data.subtitle,
+                    "",
+                    "",
                 );
                 // Assuming we only need to add one entry if any request matches
                 break;
@@ -130,23 +118,101 @@ mod test {
             result
         }
 
+        fn get_wasm_version(&self) -> u32 {
+            1
+        }
         fn add_string_id_entry(
             &mut self,
-            entry_id: &CStr,
-            icon: Option<&[u8]>,
-            title: Option<&CStr>,
-            subtitle: Option<&CStr>,
-            disclaimer: Option<&CStr>,
-            warning: Option<&CStr>,
+            entry_id: &str,
+            icon: &[u8],
+            title: &str,
+            subtitle: &str,
+            disclaimer: &str,
+            warning: &str,
         ) {
             self.added_entries.push(AddedEntry {
-                entry_id: entry_id.to_owned(),
-                icon: icon.map(|i| i.to_vec()),
-                title: title.map(|c| c.to_owned()),
-                subtitle: subtitle.map(|c| c.to_owned()),
-                disclaimer: disclaimer.map(|c| c.to_owned()),
-                warning: warning.map(|c| c.to_owned()),
+                entry_id: CString::new(entry_id).unwrap(),
+                icon: if icon.is_empty() {
+                    None
+                } else {
+                    Some(icon.to_vec())
+                },
+                title: if title.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(title).unwrap())
+                },
+                subtitle: if subtitle.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(subtitle).unwrap())
+                },
+                disclaimer: if disclaimer.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(disclaimer).unwrap())
+                },
+                warning: if warning.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(warning).unwrap())
+                },
             });
+        }
+        fn add_entry_set(&mut self, _set_id: &str, _set_length: i32) {}
+        fn add_entry_to_set(
+            &mut self,
+            _cred_id: &str,
+            _icon: &[u8],
+            _title: &str,
+            _subtitle: &str,
+            _disclaimer: &str,
+            _warning: &str,
+            _metadata: &str,
+            _set_id: &str,
+            _set_index: i32,
+        ) {
+        }
+        fn add_field_to_entry_set(
+            &mut self,
+            _cred_id: &str,
+            _field_display_name: &str,
+            _field_display_value: &str,
+            _set_id: &str,
+            _set_index: i32,
+        ) {
+        }
+        fn add_payment_entry_to_set_v2(
+            &mut self,
+            _cred_id: &str,
+            _merchant_name: &str,
+            _payment_method_name: &str,
+            _payment_method_subtitle: &str,
+            _payment_method_icon: &[u8],
+            _transaction_amount: &str,
+            _bank_icon: &[u8],
+            _payment_provider_icon: &[u8],
+            _additional_info: &str,
+            _metadata: &str,
+            _set_id: &str,
+            _set_index: i32,
+        ) {
+        }
+        fn add_inline_issuance_entry(
+            &mut self,
+            _cred_id: &str,
+            _icon: &[u8],
+            _title: &str,
+            _subtitle: &str,
+        ) {
+        }
+        fn add_metadata_display_text_to_entry_set(
+            &mut self,
+            _cred_id: &str,
+            _metadata_display_text: &str,
+            _set_id: &str,
+            _set_index: i32,
+        ) {
         }
     }
 

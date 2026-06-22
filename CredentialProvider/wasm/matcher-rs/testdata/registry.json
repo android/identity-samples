@@ -1,0 +1,449 @@
+{
+  "credentials": {
+    "mso_mdoc": {
+      "org.iso.18013.5.1.mDL": [
+        {
+          "id": "mdoc_cred_1",
+          "display": {
+            "verification": {
+              "title": "John's Driving License",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "org.iso.18013.5.1": {
+              "family_name": {
+                "value": "Doe",
+                "display": {
+                  "verification": {
+                    "display": "Family Name",
+                    "display_value": "Doe"
+                  }
+                }
+              },
+              "given_name": {
+                "value": "John",
+                "display": {
+                  "verification": {
+                    "display": "Given Name",
+                    "display_value": "John"
+                  }
+                }
+              },
+              "age": {
+                "value": 21,
+                "display": {
+                  "verification": {
+                    "display": "Age"
+                  }
+                }
+              },
+              "age_over_21": {
+                "value": true,
+                "display": {
+                  "verification": {
+                    "display": "Over 21",
+                    "display_value": "Yes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "mdoc_cred_underage",
+          "display": {
+            "verification": {
+              "title": "Underage License",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "org.iso.18013.5.1": {
+              "age": {
+                "value": 18,
+                "display": {
+                  "verification": {
+                    "display": "Age"
+                  }
+                }
+              },
+              "age_over_21": {
+                "value": false,
+                "display": {
+                  "verification": {
+                    "display": "Over 21",
+                    "display_value": "Yes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "mdoc_cred_3",
+          "display": {
+            "verification": {
+              "title": "Alice's Driving License",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "org.iso.18013.5.1": {
+              "family_name": {
+                "value": "Smith",
+                "display": {
+                  "verification": {
+                    "display": "Family Name"
+                  }
+                }
+              },
+              "given_name": {
+                "value": "Alice",
+                "display": {
+                  "verification": {
+                    "display": "Given Name"
+                  }
+                }
+              },
+              "age": {
+                "value": 25,
+                "display": {
+                  "verification": {
+                    "display": "Age"
+                  }
+                }
+              },
+              "age_over_21": {
+                "value": true,
+                "display": {
+                  "verification": {
+                    "display": "Over 21"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "mdoc_cred_4",
+          "display": {
+            "verification": {
+              "title": "Jane's Driving License",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "org.iso.18013.5.1": {
+              "family_name": {
+                "value": "Doe",
+                "display": {
+                  "verification": {
+                    "display": "Family Name"
+                  }
+                }
+              },
+              "given_name": {
+                "value": "Jane",
+                "display": {
+                  "verification": {
+                    "display": "Given Name"
+                  }
+                }
+              },
+              "age": {
+                "value": 30,
+                "display": {
+                  "verification": {
+                    "display": "Age"
+                  }
+                }
+              },
+              "age_over_21": {
+                "value": true,
+                "display": {
+                  "verification": {
+                    "display": "Over 21"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dc+sd-jwt": {
+      "urn:eu.europa.ec.eudi:pid:1": [
+        {
+          "id": "sdjwt_cred_1",
+          "display": {
+            "verification": {
+              "title": "My EU PID",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "user": {
+              "address": {
+                "locality": {
+                  "value": "Brussels",
+                  "display": {
+                    "verification": {
+                      "display": "City",
+                      "display_value": "Brussels"
+                    }
+                  }
+                },
+                "country": {
+                  "value": "BE",
+                  "display": {
+                    "verification": {
+                      "display": "Country",
+                      "display_value": "Belgium"
+                    }
+                  }
+                }
+              },
+              "name": {
+                "first": {
+                  "value": "Jane",
+                  "display": {
+                    "verification": {
+                      "display": "First Name",
+                      "display_value": "Jane"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "https://credentials.example.com/identity_credential": [
+        {
+          "id": "sdjwt_spec_pid",
+          "display": {
+            "verification": {
+              "title": "Spec PID",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "given_name": {
+              "value": "Alice",
+              "display": {
+                "verification": {
+                  "display": "Given Name"
+                }
+              }
+            },
+            "family_name": {
+              "value": "Smith",
+              "display": {
+                "verification": {
+                  "display": "Family Name"
+                }
+              }
+            },
+            "address": {
+              "street_address": {
+                "value": "123 Spec St",
+                "display": {
+                  "verification": {
+                    "display": "Street"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "https://othercredentials.example/pid": [
+        {
+          "id": "sdjwt_spec_other_pid",
+          "display": {
+            "verification": {
+              "title": "Other PID",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "given_name": {
+              "value": "Bob",
+              "display": {
+                "verification": {
+                  "display": "Given Name"
+                }
+              }
+            },
+            "family_name": {
+              "value": "Jones",
+              "display": {
+                "verification": {
+                  "display": "Family Name"
+                }
+              }
+            },
+            "address": {
+              "street_address": {
+                "value": "456 Other St",
+                "display": {
+                  "verification": {
+                    "display": "Street"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "https://credentials.example.com/reduced_identity_credential": [
+        {
+          "id": "sdjwt_spec_reduced_1",
+          "display": {
+            "verification": {
+              "title": "Reduced PID",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "given_name": {
+              "value": "Charlie",
+              "display": {
+                "verification": {
+                  "display": "Given Name"
+                }
+              }
+            },
+            "family_name": {
+              "value": "Brown",
+              "display": {
+                "verification": {
+                  "display": "Family Name"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "https://cred.example/residence_credential": [
+        {
+          "id": "sdjwt_spec_reduced_2",
+          "display": {
+            "verification": {
+              "title": "Residence Cred",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "postal_code": {
+              "value": "12345",
+              "display": {
+                "verification": {
+                  "display": "Zip"
+                }
+              }
+            },
+            "locality": {
+              "value": "Townsville",
+              "display": {
+                "verification": {
+                  "display": "City"
+                }
+              }
+            },
+            "region": {
+              "value": "State",
+              "display": {
+                "verification": {
+                  "display": "Region"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "https://company.example/company_rewards": [
+        {
+          "id": "sdjwt_spec_rewards",
+          "display": {
+            "verification": {
+              "title": "Rewards",
+              "icon": {
+                "start": 4,
+                "length": 10
+              }
+            }
+          },
+          "paths": {
+            "rewards_number": {
+              "value": "9999",
+              "display": {
+                "verification": {
+                  "display": "Rewards No"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "issuance": {
+      "mso_mdoc": [
+        {
+          "id": "issuance_mdl_1",
+          "title": "Get a New mDL",
+          "subtitle": "From your local DMV",
+          "icon": {
+            "start": 4,
+            "length": 10
+          },
+          "supported": [
+            "org.iso.18013.5.1.mDL"
+          ]
+        }
+      ],
+      "dc+sd-jwt": [
+        {
+          "id": "issuance_pid_1",
+          "title": "Get a New EU PID",
+          "subtitle": "Official Digital ID",
+          "icon": {
+            "start": 4,
+            "length": 10
+          },
+          "supported": [
+            "urn:eu.europa.ec.eudi:pid:1"
+          ]
+        }
+      ]
+    }
+  }
+}

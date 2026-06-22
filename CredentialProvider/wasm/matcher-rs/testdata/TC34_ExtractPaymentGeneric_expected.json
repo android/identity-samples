@@ -1,0 +1,79 @@
+{
+  "entrySets": {
+    "req:0;null": {
+      "entries": {
+        "0": {
+          "mdoc_cred_1": {
+            "additional_info": "",
+            "credId": "mdoc_cred_1",
+            "disclaimer": "",
+            "fields": [],
+            "merchant_name": "Merchant Z",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "",
+            "transaction_amount": "Free",
+            "type": "Payment",
+            "warning": ""
+          },
+          "mdoc_cred_3": {
+            "additional_info": "",
+            "credId": "mdoc_cred_3",
+            "disclaimer": "",
+            "fields": [],
+            "merchant_name": "Merchant Z",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "",
+            "transaction_amount": "Free",
+            "type": "Payment",
+            "warning": ""
+          },
+          "mdoc_cred_4": {
+            "additional_info": "",
+            "credId": "mdoc_cred_4",
+            "disclaimer": "",
+            "fields": [],
+            "merchant_name": "Merchant Z",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "",
+            "transaction_amount": "Free",
+            "type": "Payment",
+            "warning": ""
+          },
+          "mdoc_cred_underage": {
+            "additional_info": "",
+            "credId": "mdoc_cred_underage",
+            "disclaimer": "",
+            "fields": [],
+            "merchant_name": "Merchant Z",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "",
+            "transaction_amount": "Free",
+            "type": "Payment",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;null",
+      "setLength": 1
+    }
+  },
+  "standaloneEntries": [
+    {
+      "additional_info": "",
+      "credId": "issuance_mdl_1",
+      "disclaimer": "",
+      "fields": [],
+      "merchant_name": "",
+      "metadata_display_text": "",
+      "subtitle": "From your local DMV",
+      "title": "Get a New mDL",
+      "transaction_amount": "",
+      "type": "InlineIssuance",
+      "warning": ""
+    }
+  ]
+}

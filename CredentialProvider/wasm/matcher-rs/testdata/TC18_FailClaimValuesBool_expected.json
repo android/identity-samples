@@ -1,0 +1,45 @@
+{
+  "entrySets": {
+    "req:0;null": {
+      "entries": {
+        "0": {
+          "mdoc_cred_underage": {
+            "additional_info": "",
+            "credId": "mdoc_cred_underage",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Over 21",
+                "Yes"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Underage License",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;null",
+      "setLength": 1
+    }
+  },
+  "standaloneEntries": [
+    {
+      "additional_info": "",
+      "credId": "issuance_mdl_1",
+      "disclaimer": "",
+      "fields": [],
+      "merchant_name": "",
+      "metadata_display_text": "",
+      "subtitle": "From your local DMV",
+      "title": "Get a New mDL",
+      "transaction_amount": "",
+      "type": "InlineIssuance",
+      "warning": ""
+    }
+  ]
+}

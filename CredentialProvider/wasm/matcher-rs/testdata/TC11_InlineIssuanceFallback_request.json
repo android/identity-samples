@@ -1,0 +1,21 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "mdl",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            }
+          ],
+          "offer": true
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

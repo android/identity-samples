@@ -1,0 +1,81 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credential_sets": [
+            {
+              "options": [
+                [ "req_mdl_1" ],
+                [ "req_mdl_3" ]
+              ]
+            },
+            {
+              "options": [
+                [ "req_mdl_4" ],
+                [ "req_sdjwt_1" ]
+              ]
+            },
+            {
+              "options": [
+                [ "req_sdjwt_spec" ],
+                [ "req_sdjwt_other" ]
+              ]
+            }
+          ],
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "req_mdl_1",
+              "meta": { "doctype_value": "org.iso.18013.5.1.mDL" },
+              "claims": [
+                { "id": "gn", "path": [ "org.iso.18013.5.1", "given_name" ], "values": [ "John" ] }
+              ]
+            },
+            {
+              "format": "mso_mdoc",
+              "id": "req_mdl_3",
+              "meta": { "doctype_value": "org.iso.18013.5.1.mDL" },
+              "claims": [
+                { "id": "gn", "path": [ "org.iso.18013.5.1", "given_name" ], "values": [ "Alice" ] }
+              ]
+            },
+            {
+              "format": "mso_mdoc",
+              "id": "req_mdl_4",
+              "meta": { "doctype_value": "org.iso.18013.5.1.mDL" },
+              "claims": [
+                { "id": "gn", "path": [ "org.iso.18013.5.1", "given_name" ], "values": [ "Jane" ] }
+              ]
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_sdjwt_1",
+              "meta": { "vct_values": [ "urn:eu.europa.ec.eudi:pid:1" ] },
+              "claims": [
+                { "id": "fn", "path": [ "user", "name", "first" ], "values": [ "Jane" ] }
+              ]
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_sdjwt_spec",
+              "meta": { "vct_values": [ "https://credentials.example.com/identity_credential" ] },
+              "claims": [
+                { "id": "gn", "path": [ "given_name" ], "values": [ "Alice" ] }
+              ]
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_sdjwt_other",
+              "meta": { "vct_values": [ "https://othercredentials.example/pid" ] },
+              "claims": [
+                { "id": "gn", "path": [ "given_name" ], "values": [ "Bob" ] }
+              ]
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

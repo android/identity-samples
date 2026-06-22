@@ -1,0 +1,85 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credential_sets": [
+            {
+              "options": [
+                [
+                  "mdl1",
+                  "mdl3"
+                ],
+                [
+                  "mdl2",
+                  "mdl3"
+                ],
+                [
+                  "mdl1",
+                  "mdl2"
+                ]
+              ]
+            }
+          ],
+          "credentials": [
+            {
+              "claims": [
+                {
+                  "path": [
+                    "org.iso.18013.5.1",
+                    "given_name"
+                  ],
+                  "values": [
+                    "John"
+                  ]
+                }
+              ],
+              "format": "mso_mdoc",
+              "id": "mdl1",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "org.iso.18013.5.1",
+                    "given_name"
+                  ],
+                  "values": [
+                    "Jane"
+                  ]
+                }
+              ],
+              "format": "mso_mdoc",
+              "id": "mdl2",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "org.iso.18013.5.1",
+                    "family_name"
+                  ],
+                  "values": [
+                    "Doe"
+                  ]
+                }
+              ],
+              "format": "mso_mdoc",
+              "id": "mdl3",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

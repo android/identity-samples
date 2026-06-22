@@ -1,0 +1,53 @@
+{
+  "entrySets": {
+    "req:0;null": {
+      "entries": {
+        "0": {
+          "sdjwt_cred_1": {
+            "additional_info": "",
+            "credId": "sdjwt_cred_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "City",
+                "Brussels"
+              ],
+              [
+                "Country",
+                "Belgium"
+              ],
+              [
+                "First Name",
+                "Jane"
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "My EU PID",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;null",
+      "setLength": 1
+    }
+  },
+  "standaloneEntries": [
+    {
+      "additional_info": "",
+      "credId": "issuance_pid_1",
+      "disclaimer": "",
+      "fields": [],
+      "merchant_name": "",
+      "metadata_display_text": "",
+      "subtitle": "Official Digital ID",
+      "title": "Get a New EU PID",
+      "transaction_amount": "",
+      "type": "InlineIssuance",
+      "warning": ""
+    }
+  ]
+}

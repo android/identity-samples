@@ -10,6 +10,8 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 nanoserde = "0.1"
 log = "0.4"
+indexmap = { version = "2.2", features = ["std"] }
+rustc-hash = "2.0"
 
 [features]
 default = ["static_log_off"]
