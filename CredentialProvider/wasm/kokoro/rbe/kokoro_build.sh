@@ -30,6 +30,7 @@ rustup component add rust-src --toolchain nightly
 
 # Build matcher-rs
 cd "${KOKORO_ARTIFACTS_DIR}/github/wasm/CredentialProvider/wasm/matcher-rs"
+bash ./test.sh
 bash ./build.sh
 bash ./generate_license.sh
 mv target/THIRD_PARTY_LICENSES "${KOKORO_ARTIFACTS_DIR}/github/wasm/CredentialProvider/wasm/matcher-rs/target/wasm32-unknown-unknown/release/"

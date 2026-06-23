@@ -1,0 +1,47 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credential_sets": [
+            {
+              "options": [
+                [
+                  "mdl"
+                ]
+              ],
+              "required": true
+            },
+            {
+              "options": [
+                [
+                  "pid"
+                ]
+              ],
+              "required": false
+            }
+          ],
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "mdl",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "pid",
+              "meta": {
+                "vct_values": [
+                  "UNKNOWN"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 use matcher_rs::{credman::CredmanApiImpl, issuance::issuance_main};
 
+#[cfg(target_arch = "wasm32")]
+#[global_allocator]
+static ALLOCATOR: matcher_rs::simple_allocator::SimpleAllocator =
+    matcher_rs::simple_allocator::SimpleAllocator;
+
 fn main() {
     matcher_rs::logger::init();
     issuance_main(&mut CredmanApiImpl {}).unwrap();

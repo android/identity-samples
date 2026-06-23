@@ -1,0 +1,131 @@
+{
+  "entrySets": {
+    "req:0;set:0;option:0": {
+      "entries": {
+        "0": {
+          "sdjwt_spec_pid": {
+            "additional_info": "",
+            "credId": "sdjwt_spec_pid",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                ""
+              ],
+              [
+                "Family Name",
+                ""
+              ],
+              [
+                "Street",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Spec PID",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:0",
+      "setLength": 1
+    },
+    "req:0;set:0;option:1": {
+      "entries": {
+        "0": {
+          "sdjwt_spec_other_pid": {
+            "additional_info": "",
+            "credId": "sdjwt_spec_other_pid",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Given Name",
+                ""
+              ],
+              [
+                "Family Name",
+                ""
+              ],
+              [
+                "Street",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Other PID",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:1",
+      "setLength": 1
+    },
+    "req:0;set:0;option:2": {
+      "entries": {
+        "0": {
+          "sdjwt_spec_reduced_1": {
+            "additional_info": "",
+            "credId": "sdjwt_spec_reduced_1",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Family Name",
+                ""
+              ],
+              [
+                "Given Name",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Reduced PID",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        },
+        "1": {
+          "sdjwt_spec_reduced_2": {
+            "additional_info": "",
+            "credId": "sdjwt_spec_reduced_2",
+            "disclaimer": "",
+            "fields": [
+              [
+                "Zip",
+                ""
+              ],
+              [
+                "City",
+                ""
+              ],
+              [
+                "Region",
+                ""
+              ]
+            ],
+            "merchant_name": "",
+            "metadata_display_text": "",
+            "subtitle": "",
+            "title": "Residence Cred",
+            "transaction_amount": "",
+            "type": "Verification",
+            "warning": ""
+          }
+        }
+      },
+      "setId": "req:0;set:0;option:2",
+      "setLength": 2
+    }
+  },
+  "standaloneEntries": []
+}

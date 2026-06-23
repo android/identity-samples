@@ -1,7 +1,7 @@
 #![allow(unused)]
 
+use crate::json_value::DeterministicMap;
 use nanoserde::DeJson;
-use std::collections::HashMap;
 
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
@@ -21,7 +21,7 @@ pub struct OpenId4VciRequest {
 pub struct OpenId4VciRequestData {
     pub credential_issuer: String,
     pub credential_configuration_ids: Vec<String>,
-    pub grants: HashMap<String, credential_offer::Grant>,
+    pub grants: DeterministicMap<String, credential_offer::Grant>,
     pub credential_issuer_metadata: Option<credential_issuer_metadata::CredentialIssuerMetadata>,
 }
 
@@ -31,7 +31,7 @@ pub struct OpenId4VciRequestData {
 pub struct RegularizedOpenId4VciRequestData<'a> {
     pub credential_issuer: &'a str,
     pub credential_configuration_ids: &'a [String],
-    pub grants: &'a HashMap<String, credential_offer::Grant>,
+    pub grants: &'a DeterministicMap<String, credential_offer::Grant>,
     // Borrow the metadata
     pub credential_issuer_metadata:
         Option<&'a credential_issuer_metadata::CredentialIssuerMetadata>,
@@ -87,8 +87,8 @@ pub mod credential_offer {
 }
 
 mod credential_issuer_metadata {
+    use crate::json_value::{DeterministicMap, DeterministicSet};
     use nanoserde::DeJson;
-    use std::collections::{HashMap, HashSet};
 
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
@@ -103,14 +103,14 @@ mod credential_issuer_metadata {
         // pub credential_response_encryption: Option<CredentialResponseEncryption>,
         pub batch_credential_issuance: Option<BatchCredentialIssuance>,
         // pub display: Option<Vec<Display>>,
-        pub credential_configurations_supported: HashMap<String, CredentialConfiguration>,
+        pub credential_configurations_supported: DeterministicMap<String, CredentialConfiguration>,
     }
 
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
     pub struct CredentialRequestEncryption {
         // pub jwks: nanoserde::DeJson, // nanoserde doesn't have a Value type
-        pub enc_values_supported: HashSet<String>,
+        pub enc_values_supported: DeterministicSet<String>,
         // pub zip_values_supported: Option<Vec<String>>,
         pub encryption_required: bool,
     }
@@ -118,8 +118,8 @@ mod credential_issuer_metadata {
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
     pub struct CredentialResponseEncryption {
-        pub alg_values_supported: HashSet<String>,
-        pub enc_values_supported: HashSet<String>,
+        pub alg_values_supported: DeterministicSet<String>,
+        pub enc_values_supported: DeterministicSet<String>,
         // pub zip_values_supported: Vec<String>,
         pub encryption_required: bool,
     }
@@ -153,8 +153,8 @@ mod credential_issuer_metadata {
         pub doctype: String,
         pub vct: String,
         pub credential_signing_alg_values_supported: Vec<String>,
-        pub cryptographic_binding_methods_supported: Option<Vec<String>>,
-        pub proof_types_supported: HashMap<String, ProofType>,
+        pub cryptographic_binding_methods_supported: Vec<String>,
+        pub proof_types_supported: DeterministicMap<String, ProofType>,
     }
 
     #[derive(DeJson, Debug, Default)]
@@ -167,7 +167,7 @@ mod credential_issuer_metadata {
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
     pub struct KeyAttestationsRequired {
-        pub key_storage: Option<Vec<String>>,
-        pub user_authentication: Option<Vec<String>>,
+        pub key_storage: Vec<String>,
+        pub user_authentication: Vec<String>,
     }
 }

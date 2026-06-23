@@ -1,0 +1,73 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credential_sets": [
+            {
+              "options": [
+                [ "req_mdl_all" ],
+                [ "req_mdl_1" ]
+              ]
+            },
+            {
+              "options": [
+                [ "req_sdjwt_all" ],
+                [ "req_sdjwt_1" ]
+              ]
+            },
+            {
+              "options": [
+                [ "req_spec_all" ],
+                [ "req_spec_pid" ]
+              ]
+            }
+          ],
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "req_mdl_all",
+              "meta": { "doctype_value": "org.iso.18013.5.1.mDL" }
+            },
+            {
+              "format": "mso_mdoc",
+              "id": "req_mdl_1",
+              "meta": { "doctype_value": "org.iso.18013.5.1.mDL" },
+              "claims": [
+                { "id": "gn", "path": [ "org.iso.18013.5.1", "given_name" ], "values": [ "John" ] }
+              ]
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_sdjwt_all"
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_sdjwt_1",
+              "meta": { "vct_values": [ "urn:eu.europa.ec.eudi:pid:1" ] },
+              "claims": [
+                { "id": "fn", "path": [ "user", "name", "first" ], "values": [ "Jane" ] }
+              ]
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_spec_all",
+              "meta": {
+                "vct_values": [
+                  "https://credentials.example.com/identity_credential",
+                  "https://othercredentials.example/pid"
+                ]
+              }
+            },
+            {
+              "format": "dc+sd-jwt",
+              "id": "req_spec_pid",
+              "meta": { "vct_values": [ "https://credentials.example.com/identity_credential" ] }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

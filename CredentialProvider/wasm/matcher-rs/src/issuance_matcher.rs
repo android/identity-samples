@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use crate::json_value::DeterministicSet;
 
 use nanoserde::DeJson;
 
@@ -7,19 +7,35 @@ use crate::openid4vci::RegularizedOpenId4VciRequestData;
 #[derive(DeJson, Debug)]
 pub enum OpenId4VciFilter {
     Unit {}, // A placeholder that always matches
-    And { filters: Vec<OpenId4VciFilter> },
-    Or { filters: Vec<OpenId4VciFilter> },
-    Not { filter: Box<OpenId4VciFilter> },
-    AllowsIssuers { issuers: HashSet<String> },
-    AllowsConfigurationIds { configuration_ids: HashSet<String> },
+    And {
+        filters: Vec<OpenId4VciFilter>,
+    },
+    Or {
+        filters: Vec<OpenId4VciFilter>,
+    },
+    Not {
+        filter: Box<OpenId4VciFilter>,
+    },
+    AllowsIssuers {
+        issuers: DeterministicSet<String>,
+    },
+    AllowsConfigurationIds {
+        configuration_ids: DeterministicSet<String>,
+    },
     SupportsAuthCodeFlow {},
     SupportsPreAuthFlow {},
     SupportsNonceEndpoint {},
     SupportsDeferredCredentialEndpoint {},
     SupportsNotificationEndpoint {},
-    RequiresBatchIssuance { min_batch_size: u32 },
-    SupportsMdocDoctype { doctypes: HashSet<String> },
-    SupportsSdJwtVct { vcts: HashSet<String> },
+    RequiresBatchIssuance {
+        min_batch_size: u32,
+    },
+    SupportsMdocDoctype {
+        doctypes: DeterministicSet<String>,
+    },
+    SupportsSdJwtVct {
+        vcts: DeterministicSet<String>,
+    },
 }
 
 impl Default for OpenId4VciFilter {
@@ -139,7 +155,7 @@ impl OpenId4VciFilter {
 pub struct IssuanceMatcherData {
     pub entry_id: String,
     pub icon: (usize, usize),
-    pub title: Option<String>,
-    pub subtitle: Option<String>,
+    pub title: String,
+    pub subtitle: String,
     pub filter: OpenId4VciFilter,
 }

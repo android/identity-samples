@@ -1,0 +1,154 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credential_sets": [
+            {
+              "options": [
+                [
+                  "pid"
+                ],
+                [
+                  "other_pid"
+                ],
+                [
+                  "pid_reduced_cred_1",
+                  "pid_reduced_cred_2"
+                ]
+              ]
+            },
+            {
+              "options": [
+                [
+                  "nice_to_have"
+                ]
+              ],
+              "required": false
+            }
+          ],
+          "credentials": [
+            {
+              "claims": [
+                {
+                  "path": [
+                    "given_name"
+                  ]
+                },
+                {
+                  "path": [
+                    "family_name"
+                  ]
+                },
+                {
+                  "path": [
+                    "address",
+                    "street_address"
+                  ]
+                }
+              ],
+              "format": "dc+sd-jwt",
+              "id": "pid",
+              "meta": {
+                "vct_values": [
+                  "https://credentials.example.com/identity_credential"
+                ]
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "given_name"
+                  ]
+                },
+                {
+                  "path": [
+                    "family_name"
+                  ]
+                },
+                {
+                  "path": [
+                    "address",
+                    "street_address"
+                  ]
+                }
+              ],
+              "format": "dc+sd-jwt",
+              "id": "other_pid",
+              "meta": {
+                "vct_values": [
+                  "https://othercredentials.example/pid"
+                ]
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "family_name"
+                  ]
+                },
+                {
+                  "path": [
+                    "given_name"
+                  ]
+                }
+              ],
+              "format": "dc+sd-jwt",
+              "id": "pid_reduced_cred_1",
+              "meta": {
+                "vct_values": [
+                  "https://credentials.example.com/reduced_identity_credential"
+                ]
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "postal_code"
+                  ]
+                },
+                {
+                  "path": [
+                    "locality"
+                  ]
+                },
+                {
+                  "path": [
+                    "region"
+                  ]
+                }
+              ],
+              "format": "dc+sd-jwt",
+              "id": "pid_reduced_cred_2",
+              "meta": {
+                "vct_values": [
+                  "https://cred.example/residence_credential"
+                ]
+              }
+            },
+            {
+              "claims": [
+                {
+                  "path": [
+                    "rewards_number"
+                  ]
+                }
+              ],
+              "format": "dc+sd-jwt",
+              "id": "nice_to_have",
+              "meta": {
+                "vct_values": [
+                  "https://company.example/company_rewards"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

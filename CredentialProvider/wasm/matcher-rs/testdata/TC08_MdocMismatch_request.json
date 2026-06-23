@@ -1,0 +1,20 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "mdl",
+              "meta": {
+                "doctype_value": "UNKNOWN"
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

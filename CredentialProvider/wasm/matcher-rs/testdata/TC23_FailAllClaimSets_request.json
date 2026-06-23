@@ -1,0 +1,44 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "claim_sets": [
+                [
+                  "unknown"
+                ],
+                [
+                  "another_unknown"
+                ]
+              ],
+              "claims": [
+                {
+                  "id": "unknown",
+                  "path": [
+                    "org.iso.18013.5.1",
+                    "unknown"
+                  ]
+                },
+                {
+                  "id": "another_unknown",
+                  "path": [
+                    "org.iso.18013.5.1",
+                    "another_unknown"
+                  ]
+                }
+              ],
+              "format": "mso_mdoc",
+              "id": "mdl",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

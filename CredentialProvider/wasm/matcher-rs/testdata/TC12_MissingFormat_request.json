@@ -1,0 +1,22 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "format": "w3c_vc",
+              "id": "w3c",
+              "meta": {
+                "vct_values": [
+                  "some_vct"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}

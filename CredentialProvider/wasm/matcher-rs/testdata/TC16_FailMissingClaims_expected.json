@@ -1,0 +1,18 @@
+{
+  "entrySets": {},
+  "standaloneEntries": [
+    {
+      "additional_info": "",
+      "credId": "issuance_pid_1",
+      "disclaimer": "",
+      "fields": [],
+      "merchant_name": "",
+      "metadata_display_text": "",
+      "subtitle": "Official Digital ID",
+      "title": "Get a New EU PID",
+      "transaction_amount": "",
+      "type": "InlineIssuance",
+      "warning": ""
+    }
+  ]
+}

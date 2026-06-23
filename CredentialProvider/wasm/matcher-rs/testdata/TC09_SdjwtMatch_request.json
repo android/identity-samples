@@ -1,0 +1,22 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "format": "dc+sd-jwt",
+              "id": "pid",
+              "meta": {
+                "vct_values": [
+                  "urn:eu.europa.ec.eudi:pid:1"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    }
+  ]
+}
