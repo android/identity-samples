@@ -13,6 +13,7 @@
 
 # generated files
 bin/
+!CredentialProvider/wasm/matcher-rs/src/bin/
 gen/
 
 # Ignore gradle files
