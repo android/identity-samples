@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">Digital Credentials App</string>
-    <string name="header_title">Digital Credentials API sample app</string>
-    <string name="get_digital_credential">Get Digital Credential from Wallets</string>
-    <string name="get_verified_email">Get Verified Email from Device</string>
-    <string name="results_placeholder">Results will appear here</string>
-    <string name="requesting_credential">Requesting credential...</string>
-    <string name="no_claims_extracted">No claims were extracted from the response. This may happen if the credential format is unrecognized.</string>
-</resources>
