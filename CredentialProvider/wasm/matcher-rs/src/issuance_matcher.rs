@@ -6,7 +6,7 @@ use crate::openid4vci::RegularizedOpenId4VciRequestData;
 
 #[derive(DeJson, Debug)]
 pub enum OpenId4VciFilter {
-    Unit {}, // A placeholder that always matches
+    Pass {}, // A placeholder that always matches
     And {
         filters: Vec<OpenId4VciFilter>,
     },
@@ -16,10 +16,10 @@ pub enum OpenId4VciFilter {
     Not {
         filter: Box<OpenId4VciFilter>,
     },
-    AllowsIssuers {
+    AllowedIssuers {
         issuers: DeterministicSet<String>,
     },
-    AllowsConfigurationIds {
+    AllowedConfigurationIds {
         configuration_ids: DeterministicSet<String>,
     },
     SupportsAuthCodeFlow {},
@@ -30,25 +30,25 @@ pub enum OpenId4VciFilter {
     RequiresBatchIssuance {
         min_batch_size: u32,
     },
-    SupportsMdocDoctype {
+    AllowedMdocDoctypes {
         doctypes: DeterministicSet<String>,
     },
-    SupportsSdJwtVct {
+    AllowedSdJwtVcts {
         vcts: DeterministicSet<String>,
     },
 }
 
 impl Default for OpenId4VciFilter {
     fn default() -> Self {
-        Self::Unit {}
+        Self::Pass {}
     }
 }
 
 impl OpenId4VciFilter {
     pub fn matches(&self, request: &RegularizedOpenId4VciRequestData) -> bool {
         let matched = match &self {
-            Self::Unit {} => {
-                log::trace!("Filter Unit matched");
+            Self::Pass {} => {
+                log::trace!("Filter Pass matched");
                 true
             }
             Self::And { filters } => {
@@ -66,21 +66,21 @@ impl OpenId4VciFilter {
                 log::trace!("Filter Not matched: {}", res);
                 res
             }
-            Self::AllowsIssuers { issuers } => {
+            Self::AllowedIssuers { issuers } => {
                 let res = issuers.contains(request.credential_issuer);
                 log::trace!(
-                    "Filter AllowsIssuers (issuer={}) matched: {}",
+                    "Filter AllowedIssuers (issuer={}) matched: {}",
                     request.credential_issuer,
                     res
                 );
                 res
             }
-            Self::AllowsConfigurationIds { configuration_ids } => {
+            Self::AllowedConfigurationIds { configuration_ids } => {
                 let res = request
                     .credential_configuration_ids
                     .iter()
                     .any(|id| configuration_ids.contains(id));
-                log::trace!("Filter AllowsConfigurationIds matched: {}", res);
+                log::trace!("Filter AllowedConfigurationIds matched: {}", res);
                 res
             }
             Self::SupportsAuthCodeFlow {} => {
@@ -129,20 +129,20 @@ impl OpenId4VciFilter {
                 );
                 res
             }
-            Self::SupportsMdocDoctype { doctypes } => {
+            Self::AllowedMdocDoctypes { doctypes } => {
                 let res = request
                     .credential_configurations
                     .iter()
                     .any(|c| doctypes.contains(&c.doctype));
-                log::trace!("Filter SupportsMdocDoctype matched: {}", res);
+                log::trace!("Filter AllowedMdocDoctypes matched: {}", res);
                 res
             }
-            Self::SupportsSdJwtVct { vcts } => {
+            Self::AllowedSdJwtVcts { vcts } => {
                 let res = request
                     .credential_configurations
                     .iter()
                     .any(|c| vcts.contains(&c.vct));
-                log::trace!("Filter SupportsSdJwtVct matched: {}", res);
+                log::trace!("Filter AllowedSdJwtVcts matched: {}", res);
                 res
             }
         };
