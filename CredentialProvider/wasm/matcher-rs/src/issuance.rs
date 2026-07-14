@@ -248,11 +248,11 @@ mod test {
         "filter": {
           "And": {
             "filters": [{
-              "AllowsConfigurationIds": {
+              "AllowedConfigurationIds": {
                 "configuration_ids": ["US_SOCIAL_SECURITY_NUMBER", "EU_AGE"]
               }
             }, {
-              "AllowsIssuers": {
+              "AllowedIssuers": {
                 "issuers": ["ccb", "https://issuer.my"]
               }
             }]
@@ -302,7 +302,7 @@ mod test {
         "title": "TTTT",
         "subtitle": "SSSSS",
         "icon": [0, 0],
-        "filter": {"Unit": {}}"#,
+        "filter": {"Pass": {}}"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
         };
@@ -349,7 +349,7 @@ mod test {
     "And": {
       "filters": [
         {
-          "AllowsConfigurationIds": {
+          "AllowedConfigurationIds": {
             "configuration_ids": [
               "US_SOCIAL_SECURITY_NUMBER",
               "EU_AGE"
@@ -357,7 +357,7 @@ mod test {
           }
         },
         {
-          "AllowsIssuers": {
+          "AllowedIssuers": {
             "issuers": [
               "ccb",
               "https://issuer.my"
@@ -427,7 +427,7 @@ mod test {
     "Or": {
       "filters": [
         {
-          "AllowsConfigurationIds": {
+          "AllowedConfigurationIds": {
             "configuration_ids": [
               "US_SOCIAL_SECURITY_NUMBER",
               "EU_AGE"
@@ -435,14 +435,14 @@ mod test {
           }
         },
         {
-          "AllowsIssuers": {
+          "AllowedIssuers": {
             "issuers": [
               "ccb"
             ]
           }
         },
         {
-          "SupportsMdocDoctype": {
+          "AllowedMdocDoctypes": {
             "doctypes": [
               "org.iso.18013.5.1.mDL"
             ]
