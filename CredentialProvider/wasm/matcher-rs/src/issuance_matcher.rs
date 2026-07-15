@@ -158,4 +158,5 @@ pub struct IssuanceMatcherData {
     pub title: String,
     pub subtitle: String,
     pub filter: OpenId4VciFilter,
+    pub allowed_protocols: Vec<String>,
 }

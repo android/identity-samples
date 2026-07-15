@@ -15,6 +15,14 @@ const ALLOWED_PROTOCOLS: [&str; 4] = [
     "openid4vci1.1",
 ];
 
+fn is_protocol_allowed(protocol: &String, configured: &[String]) -> bool {
+    if configured.is_empty() {
+        ALLOWED_PROTOCOLS.contains(&protocol.as_str())
+    } else {
+        configured.contains(protocol)
+    }
+}
+
 pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::error::Error>> {
     log::info!("Starting issuance matching process");
     let matcher_data_buffer = credman.get_registered_data();
@@ -58,19 +66,19 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
 
     for (i, r) in request.requests.iter().enumerate() {
         log::trace!("Checking request {}: protocol={}", i, r.protocol);
-        if ALLOWED_PROTOCOLS.iter().any(|s| r.protocol == *s) {
+        if is_protocol_allowed(&r.protocol, &matcher_data.allowed_protocols) {
             let regularized = RegularizedOpenId4VciRequestData::from(&r.data);
             if matcher_data.filter.matches(&regularized) {
                 log::info!("Match found for request {} with protocol {}", i, r.protocol);
                 let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
                 log::debug!("Adding string ID entry: {}", matcher_data.entry_id);
                 credman.add_string_id_entry(
-                    &matcher_data.entry_id,
-                    icon,
-                    &matcher_data.title,
-                    &matcher_data.subtitle,
-                    "",
-                    "",
+                     &matcher_data.entry_id,
+                     icon,
+                     &matcher_data.title,
+                     &matcher_data.subtitle,
+                     "",
+                     "",
                 );
                 // Assuming we only need to add one entry if any request matches
                 break;
@@ -460,4 +468,91 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 1);
     }
+
+    #[test]
+    fn match_custom_protocol() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "my-custom-protocol",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "title": "TTTT",
+        "subtitle": "SSSSS",
+        "icon": [0, 0],
+        "allowed_protocols": ["my-custom-protocol"],
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+    }
+
+    #[test]
+    fn nomatch_default_protocol_when_custom_configured() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "title": "TTTT",
+        "subtitle": "SSSSS",
+        "icon": [0, 0],
+        "allowed_protocols": ["my-custom-protocol"],
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 0);
+    }
 }
+
