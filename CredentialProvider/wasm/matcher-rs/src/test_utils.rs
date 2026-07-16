@@ -48,6 +48,7 @@ pub struct AddedEntry {
     pub subtitle: String,
     pub disclaimer: String,
     pub warning: String,
+    pub explainer: String,
 }
 
 #[derive(SerJson, DeJson, PartialEq, Debug, Clone)]
@@ -116,6 +117,25 @@ impl CredmanApi for FakeCredman {
             subtitle: subtitle.to_string(),
             disclaimer: disclaimer.to_string(),
             warning: warning.to_string(),
+            explainer: String::new(),
+        });
+    }
+    fn add_issuance_entry(
+        &mut self,
+        id: &str,
+        icon: &[u8],
+        title: &str,
+        subtitle: &str,
+        explainer: &str,
+    ) {
+        self.added_entries.push(AddedEntry {
+            entry_id: id.to_string(),
+            icon: icon.to_vec(),
+            title: title.to_string(),
+            subtitle: subtitle.to_string(),
+            disclaimer: String::new(),
+            warning: String::new(),
+            explainer: explainer.to_string(),
         });
     }
     fn add_entry_set(&mut self, set_id: &str, set_length: i32) {

@@ -2,7 +2,7 @@ use std::{ffi::CString, os::raw::c_void};
 
 use crate::bindings::{
     AddEntrySet, AddEntryToSet, AddFieldToEntrySet, AddInlineIssuanceEntry,
-    AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, GetCredentialsSize,
+    AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, AddIssuanceEntry, GetCredentialsSize,
     GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer,
 };
 
@@ -18,6 +18,14 @@ pub trait CredmanApi {
         subtitle: &str,
         disclaimer: &str,
         warning: &str,
+    );
+    fn add_issuance_entry(
+        &mut self,
+        entry_id: &str,
+        icon: &[u8],
+        title: &str,
+        subtitle: &str,
+        explainer: &str,
     );
     fn add_entry_set(&mut self, set_id: &str, set_length: i32);
     fn add_entry_to_set(
@@ -154,6 +162,49 @@ impl CredmanApi for CredmanApiImpl {
                     .as_ref()
                     .map_or(std::ptr::null(), |c| c.as_ptr()),
                 warning_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+            );
+        }
+    }
+    fn add_issuance_entry(
+        &mut self,
+        entry_id: &str,
+        icon: &[u8],
+        title: &str,
+        subtitle: &str,
+        explainer: &str,
+    ) {
+        let entry_id_c = CString::new(entry_id).unwrap();
+        let title_c = if title.is_empty() {
+            None
+        } else {
+            Some(CString::new(title).unwrap())
+        };
+        let subtitle_c = if subtitle.is_empty() {
+            None
+        } else {
+            Some(CString::new(subtitle).unwrap())
+        };
+        let explainer_c = if explainer.is_empty() {
+            None
+        } else {
+            Some(CString::new(explainer).unwrap())
+        };
+
+        let icon_bytes = if icon.is_empty() {
+            std::ptr::null()
+        } else {
+            icon.as_ptr()
+        } as *const std::os::raw::c_char;
+        let icon_length = icon.len();
+
+        unsafe {
+            AddIssuanceEntry(
+                entry_id_c.as_ptr(),
+                icon_bytes,
+                icon_length,
+                title_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+                subtitle_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+                explainer_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
             );
         }
     }
