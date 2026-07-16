@@ -1,4 +1,3 @@
-
 use crate::{
     credman::CredmanApi,
     issuance_matcher::IssuanceMatcherData,
@@ -435,7 +434,7 @@ mod test {
         {
           "Not": {
             "filter": {
-              "SupportsNonceEndpoint": {
+              "Pass": {
               }
             }
           }
@@ -680,4 +679,3 @@ mod test {
         assert!(entry.explainer.is_none());
     }
 }
-

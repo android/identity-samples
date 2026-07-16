@@ -1,8 +1,8 @@
 use std::{ffi::CString, os::raw::c_void};
 
 use crate::bindings::{
-    AddEntrySet, AddEntryToSet, AddFieldToEntrySet, AddInlineIssuanceEntry,
-    AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, AddIssuanceEntry, GetCredentialsSize,
+    AddEntrySet, AddEntryToSet, AddFieldToEntrySet, AddInlineIssuanceEntry, AddIssuanceEntry,
+    AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, GetCredentialsSize,
     GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer,
 };
 

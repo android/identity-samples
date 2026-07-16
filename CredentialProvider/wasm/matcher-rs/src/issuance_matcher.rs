@@ -22,14 +22,7 @@ pub enum OpenId4VciFilter {
     AllowedConfigurationIds {
         configuration_ids: DeterministicSet<String>,
     },
-    SupportsAuthCodeFlow {},
-    SupportsPreAuthFlow {},
-    SupportsNonceEndpoint {},
-    SupportsDeferredCredentialEndpoint {},
-    SupportsNotificationEndpoint {},
-    RequiresBatchIssuance {
-        min_batch_size: u32,
-    },
+
     AllowedMdocDoctypes {
         doctypes: DeterministicSet<String>,
     },
@@ -83,52 +76,7 @@ impl OpenId4VciFilter {
                 log::trace!("Filter AllowedConfigurationIds matched: {}", res);
                 res
             }
-            Self::SupportsAuthCodeFlow {} => {
-                let res = request.grants.contains_key("authorization_code");
-                log::trace!("Filter SupportsAuthCodeFlow matched: {}", res);
-                res
-            }
-            Self::SupportsPreAuthFlow {} => {
-                let res = request
-                    .grants
-                    .contains_key("urn:ietf:params:oauth:grant-type:pre-authorized_code");
-                log::trace!("Filter SupportsPreAuthFlow matched: {}", res);
-                res
-            }
-            Self::SupportsNonceEndpoint {} => {
-                let res = request
-                    .credential_issuer_metadata
-                    .is_some_and(|m| !m.nonce_endpoint.is_empty());
-                log::trace!("Filter SupportsNonceEndpoint matched: {}", res);
-                res
-            }
-            Self::SupportsDeferredCredentialEndpoint {} => {
-                let res = request
-                    .credential_issuer_metadata
-                    .is_some_and(|m| !m.deferred_credential_endpoint.is_empty());
-                log::trace!("Filter SupportsDeferredCredentialEndpoint matched: {}", res);
-                res
-            }
-            Self::SupportsNotificationEndpoint {} => {
-                let res = request
-                    .credential_issuer_metadata
-                    .is_some_and(|m| !m.notification_endpoint.is_empty());
-                log::trace!("Filter SupportsNotificationEndpoint matched: {}", res);
-                res
-            }
-            Self::RequiresBatchIssuance { min_batch_size } => {
-                let res = request.credential_issuer_metadata.is_some_and(|m| {
-                    m.batch_credential_issuance
-                        .as_ref()
-                        .is_some_and(|b| b.batch_size >= *min_batch_size)
-                });
-                log::trace!(
-                    "Filter RequiresBatchIssuance (min={}) matched: {}",
-                    min_batch_size,
-                    res
-                );
-                res
-            }
+
             Self::AllowedMdocDoctypes { doctypes } => {
                 let res = request
                     .credential_configurations
