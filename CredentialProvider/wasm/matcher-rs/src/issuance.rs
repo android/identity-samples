@@ -1,4 +1,3 @@
-use std::ffi::CString;
 
 use crate::{
     credman::CredmanApi,
@@ -71,15 +70,27 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             if matcher_data.filter.matches(&regularized) {
                 log::info!("Match found for request {} with protocol {}", i, r.protocol);
                 let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
-                log::debug!("Adding string ID entry: {}", matcher_data.entry_id);
-                credman.add_string_id_entry(
-                     &matcher_data.entry_id,
-                     icon,
-                     &matcher_data.title,
-                     &matcher_data.subtitle,
-                     "",
-                     "",
-                );
+                let version = credman.get_wasm_version();
+                if version >= 9 {
+                    log::debug!("Adding issuance entry (v>=9): {}", matcher_data.entry_id);
+                    credman.add_issuance_entry(
+                        &matcher_data.entry_id,
+                        icon,
+                        &matcher_data.title,
+                        &matcher_data.subtitle,
+                        "",
+                    );
+                } else {
+                    log::debug!("Adding string ID entry (v<9): {}", matcher_data.entry_id);
+                    credman.add_string_id_entry(
+                        &matcher_data.entry_id,
+                        icon,
+                        &matcher_data.title,
+                        &matcher_data.subtitle,
+                        "",
+                        "",
+                    );
+                }
                 // Assuming we only need to add one entry if any request matches
                 break;
             }
@@ -97,6 +108,12 @@ mod test {
     use super::*;
     use std::ffi::{CStr, CString};
 
+    #[derive(Debug, PartialEq, Clone, Copy)]
+    enum CallType {
+        StringId,
+        Issuance,
+    }
+
     struct AddedEntry {
         entry_id: CString,
         icon: Option<Vec<u8>>,
@@ -104,6 +121,8 @@ mod test {
         subtitle: Option<CString>,
         disclaimer: Option<CString>,
         warning: Option<CString>,
+        explainer: Option<CString>,
+        call_type: CallType,
     }
 
     struct FakeCredman {
@@ -111,6 +130,7 @@ mod test {
         registered_json: &'static str,
         icon: Vec<u8>,
         added_entries: Vec<AddedEntry>,
+        wasm_version: u32,
     }
 
     impl CredmanApi for FakeCredman {
@@ -127,7 +147,7 @@ mod test {
         }
 
         fn get_wasm_version(&self) -> u32 {
-            1
+            self.wasm_version
         }
         fn add_string_id_entry(
             &mut self,
@@ -165,6 +185,43 @@ mod test {
                 } else {
                     Some(CString::new(warning).unwrap())
                 },
+                explainer: None,
+                call_type: CallType::StringId,
+            });
+        }
+        fn add_issuance_entry(
+            &mut self,
+            entry_id: &str,
+            icon: &[u8],
+            title: &str,
+            subtitle: &str,
+            explainer: &str,
+        ) {
+            self.added_entries.push(AddedEntry {
+                entry_id: CString::new(entry_id).unwrap(),
+                icon: if icon.is_empty() {
+                    None
+                } else {
+                    Some(icon.to_vec())
+                },
+                title: if title.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(title).unwrap())
+                },
+                subtitle: if subtitle.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(subtitle).unwrap())
+                },
+                disclaimer: None,
+                warning: None,
+                explainer: if explainer.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(explainer).unwrap())
+                },
+                call_type: CallType::Issuance,
             });
         }
         fn add_entry_set(&mut self, _set_id: &str, _set_length: i32) {}
@@ -269,6 +326,7 @@ mod test {
       }"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -279,6 +337,7 @@ mod test {
         assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
+        assert_eq!(entry.call_type, CallType::StringId);
     }
 
     #[test]
@@ -313,6 +372,7 @@ mod test {
         "filter": {"Pass": {}}"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         let errmsg = format!("{:?}", issuance_main(&mut credman).unwrap_err());
@@ -386,6 +446,7 @@ mod test {
 }"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -462,6 +523,7 @@ mod test {
 }"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -505,11 +567,13 @@ mod test {
       }"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         issuance_main(&mut credman).unwrap();
 
         assert_eq!(credman.added_entries.len(), 1);
+        assert_eq!(credman.added_entries[0].call_type, CallType::StringId);
     }
 
     #[test]
@@ -548,11 +612,72 @@ mod test {
       }"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
+            wasm_version: 1,
         };
 
         issuance_main(&mut credman).unwrap();
 
         assert_eq!(credman.added_entries.len(), 0);
+    }
+
+    #[test]
+    fn match_case_v9() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "title": "TTTT",
+        "subtitle": "SSSSS",
+        "icon": [0, 0],
+        "filter": {
+          "And": {
+            "filters": [{
+              "AllowedConfigurationIds": {
+                "configuration_ids": ["US_SOCIAL_SECURITY_NUMBER", "EU_AGE"]
+              }
+            }, {
+              "AllowedIssuers": {
+                "issuers": ["ccb", "https://issuer.my"]
+              }
+            }]
+          }
+        }
+      }"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+            wasm_version: 9,
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+        let entry = &credman.added_entries[0];
+        assert_eq!(entry.entry_id, c"C");
+        assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
+        assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
+        assert!(entry.icon.is_none());
+        assert_eq!(entry.call_type, CallType::Issuance);
+        assert!(entry.explainer.is_none());
     }
 }
 

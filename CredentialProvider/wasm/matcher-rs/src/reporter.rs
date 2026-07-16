@@ -431,6 +431,15 @@ mod tests {
             _warning: &str,
         ) {
         }
+        fn add_issuance_entry(
+            &mut self,
+            _entry_id: &str,
+            _icon: &[u8],
+            _title: &str,
+            _subtitle: &str,
+            _explainer: &str,
+        ) {
+        }
         fn add_entry_set(&mut self, set_id: &str, length: i32) {
             self.added_entry_sets.push((set_id.to_string(), length));
         }

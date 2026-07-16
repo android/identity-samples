@@ -84,6 +84,14 @@ unsafe extern "C" {
         disclaimer: *const c_char,
         warning: *const c_char,
     );
+    pub fn AddIssuanceEntry(
+        cred_id: *const c_char,
+        icon: *const c_char,
+        icon_len: usize,
+        title: *const c_char,
+        subtitle: *const c_char,
+        explainer: *const c_char,
+    );
     pub fn AddFieldForStringIdEntry(
         cred_id: *const c_char,
         field_display_name: *const c_char,
