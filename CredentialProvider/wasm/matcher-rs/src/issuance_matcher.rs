@@ -100,11 +100,17 @@ impl OpenId4VciFilter {
 
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
-pub struct IssuanceMatcherData {
-    pub entry_id: String,
+pub struct IssuanceDisplayData {
     pub icon: (usize, usize),
     pub title: String,
     pub subtitle: String,
+}
+
+#[derive(DeJson, Debug, Default)]
+#[nserde(default)]
+pub struct IssuanceMatcherData {
+    pub entry_id: String,
+    pub entries: Vec<IssuanceDisplayData>,
     pub filter: OpenId4VciFilter,
     pub allowed_protocols: Vec<String>,
 }
