@@ -68,27 +68,30 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             let regularized = RegularizedOpenId4VciRequestData::from(&r.data);
             if matcher_data.filter.matches(&regularized) {
                 log::info!("Match found for request {} with protocol {}", i, r.protocol);
-                let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
                 let version = credman.get_wasm_version();
-                if version >= 9 {
-                    log::debug!("Adding issuance entry (v>=9): {}", matcher_data.entry_id);
-                    credman.add_issuance_entry(
-                        &matcher_data.entry_id,
-                        icon,
-                        &matcher_data.title,
-                        &matcher_data.subtitle,
-                        "",
-                    );
-                } else {
-                    log::debug!("Adding string ID entry (v<9): {}", matcher_data.entry_id);
-                    credman.add_string_id_entry(
-                        &matcher_data.entry_id,
-                        icon,
-                        &matcher_data.title,
-                        &matcher_data.subtitle,
-                        "",
-                        "",
-                    );
+                for (index, entry) in matcher_data.entries.iter().enumerate() {
+                    let entry_id = format!("{}_{}", matcher_data.entry_id, index);
+                    let icon = &matcher_data_buffer[entry.icon.0..entry.icon.1];
+                    if version >= 9 {
+                        log::debug!("Adding issuance entry (v>=9): {}", entry_id);
+                        credman.add_issuance_entry(
+                            &entry_id,
+                            icon,
+                            &entry.title,
+                            &entry.subtitle,
+                            "",
+                        );
+                    } else {
+                        log::debug!("Adding string ID entry (v<9): {}", entry_id);
+                        credman.add_string_id_entry(
+                            &entry_id,
+                            icon,
+                            &entry.title,
+                            &entry.subtitle,
+                            "",
+                            "",
+                        );
+                    }
                 }
                 // Assuming we only need to add one entry if any request matches
                 break;
@@ -306,9 +309,13 @@ mod test {
             registered_json: r#"
       {
         "entry_id": "C",
-        "title": "TTTT",
-        "subtitle": "SSSSS",
-        "icon": [0, 0],
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
         "filter": {
           "And": {
             "filters": [{
@@ -332,7 +339,7 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
-        assert_eq!(entry.entry_id, c"C");
+        assert_eq!(entry.entry_id, c"C_0");
         assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
@@ -365,9 +372,13 @@ mod test {
             registered_json: r#"
       {
         "entry_id": "C",
-        "title": "TTTT",
-        "subtitle": "SSSSS",
-        "icon": [0, 0],
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
         "filter": {"Pass": {}}"#,
             icon: Vec::new(),
             added_entries: Vec::new(),
@@ -406,11 +417,15 @@ mod test {
             registered_json: r#"
 {
   "entry_id": "C",
-  "title": "TTTT",
-  "subtitle": "SSSSS",
-  "icon": [
-    0,
-    0
+  "entries": [
+    {
+      "title": "TTTT",
+      "subtitle": "SSSSS",
+      "icon": [
+        0,
+        0
+      ]
+    }
   ],
   "filter": {
     "And": {
@@ -485,11 +500,15 @@ mod test {
             registered_json: r#"
 {
   "entry_id": "C",
-  "title": "TTTT",
-  "subtitle": "SSSSS",
-  "icon": [
-    0,
-    0
+  "entries": [
+    {
+      "title": "TTTT",
+      "subtitle": "SSSSS",
+      "icon": [
+        0,
+        0
+      ]
+    }
   ],
   "filter": {
     "Or": {
@@ -556,9 +575,13 @@ mod test {
             registered_json: r#"
       {
         "entry_id": "C",
-        "title": "TTTT",
-        "subtitle": "SSSSS",
-        "icon": [0, 0],
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
         "allowed_protocols": ["my-custom-protocol"],
         "filter": {
           "Pass": {}
@@ -573,6 +596,7 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 1);
         assert_eq!(credman.added_entries[0].call_type, CallType::StringId);
+        assert_eq!(credman.added_entries[0].entry_id, c"C_0");
     }
 
     #[test]
@@ -601,9 +625,13 @@ mod test {
             registered_json: r#"
       {
         "entry_id": "C",
-        "title": "TTTT",
-        "subtitle": "SSSSS",
-        "icon": [0, 0],
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
         "allowed_protocols": ["my-custom-protocol"],
         "filter": {
           "Pass": {}
@@ -645,9 +673,13 @@ mod test {
             registered_json: r#"
       {
         "entry_id": "C",
-        "title": "TTTT",
-        "subtitle": "SSSSS",
-        "icon": [0, 0],
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
         "filter": {
           "And": {
             "filters": [{
@@ -671,11 +703,67 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
-        assert_eq!(entry.entry_id, c"C");
+        assert_eq!(entry.entry_id, c"C_0");
         assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
         assert!(entry.explainer.is_none());
+    }
+
+    #[test]
+    fn match_multiple_entries() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "entries": [
+          {
+            "title": "TTTT1",
+            "subtitle": "SSSSS1",
+            "icon": [0, 0]
+          },
+          {
+            "title": "TTTT2",
+            "subtitle": "SSSSS2",
+            "icon": [0, 0]
+          }
+        ],
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+            wasm_version: 9,
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 2);
+        assert_eq!(credman.added_entries[0].entry_id, c"C_0");
+        assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"TTTT1");
+        assert_eq!(credman.added_entries[1].entry_id, c"C_1");
+        assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"TTTT2");
     }
 }
