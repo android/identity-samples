@@ -1,4 +1,4 @@
-use crate::json_value::DeterministicSet;
+use crate::json_value::{DeterministicSet, DeterministicMap};
 
 use nanoserde::DeJson;
 
@@ -100,10 +100,18 @@ impl OpenId4VciFilter {
 
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
+pub struct IssuanceExplainer {
+    pub per_issuer: DeterministicMap<String, String>,
+    pub default: String,
+}
+
+#[derive(DeJson, Debug, Default)]
+#[nserde(default)]
 pub struct IssuanceDisplayData {
     pub icon: (usize, usize),
     pub title: String,
     pub subtitle: String,
+    pub explainer: IssuanceExplainer,
 }
 
 #[derive(DeJson, Debug, Default)]

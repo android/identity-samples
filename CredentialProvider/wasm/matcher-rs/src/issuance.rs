@@ -98,6 +98,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
         req_index,
         request.requests[req_index].protocol
     );
+    let matched_req = &request.requests[req_index];
+    let issuer_id = &matched_req.data.credential_issuer;
     let version = credman.get_wasm_version();
     for (index, entry) in matcher_data.entries.iter().enumerate() {
         let entry_id = format!("{}_{}", matcher_data.entry_id, index);
@@ -108,12 +110,14 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                 eidx: index,
                 ridx: req_index,
             });
+            let explainer = entry.explainer.per_issuer.get(issuer_id)
+                .unwrap_or(&entry.explainer.default);
             credman.add_issuance_entry(
                 &entry_id,
                 icon,
                 &entry.title,
                 &entry.subtitle,
-                "",
+                explainer,
                 &metadata,
             );
         } else {
@@ -713,7 +717,13 @@ mod test {
           {
             "title": "TTTT",
             "subtitle": "SSSSS",
-            "icon": [0, 0]
+            "icon": [0, 0],
+            "explainer": {
+              "per_issuer": {
+                "https://issuer.my": "Issuer explainer"
+              },
+              "default": "Default explainer"
+            }
           }
         ],
         "filter": {
@@ -744,7 +754,7 @@ mod test {
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
-        assert!(entry.explainer.is_none());
+        assert_eq!(entry.explainer.as_ref().unwrap(), c"Issuer explainer");
         assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
     }
 
@@ -778,12 +788,24 @@ mod test {
           {
             "title": "TTTT1",
             "subtitle": "SSSSS1",
-            "icon": [0, 0]
+            "icon": [0, 0],
+            "explainer": {
+              "per_issuer": {
+                "https://issuer.my": "Explainer 1"
+              },
+              "default": "Default 1"
+            }
           },
           {
             "title": "TTTT2",
             "subtitle": "SSSSS2",
-            "icon": [0, 0]
+            "icon": [0, 0],
+            "explainer": {
+              "per_issuer": {
+                "https://other.issuer": "Explainer 2"
+              },
+              "default": "Default 2"
+            }
           }
         ],
         "filter": {
@@ -800,9 +822,11 @@ mod test {
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
         assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"TTTT1");
+        assert_eq!(credman.added_entries[0].explainer.as_ref().unwrap(), c"Explainer 1");
         assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
         assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"TTTT2");
+        assert_eq!(credman.added_entries[1].explainer.as_ref().unwrap(), c"Default 2");
         assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
     }
 
