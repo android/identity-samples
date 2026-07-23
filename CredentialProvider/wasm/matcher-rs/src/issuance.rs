@@ -1,7 +1,7 @@
 use crate::{
     credman::CredmanApi,
     issuance_matcher::IssuanceMatcherData,
-    openid4vci::{DigitalCredentialCreationRequest, RegularizedOpenId4VciRequestData},
+    openid4vci::{DigitalCredentialCreationRequest, OpenId4VciRequest, RegularizedOpenId4VciRequestData},
 };
 
 use nanoserde::{DeJson, SerJson};
@@ -9,6 +9,7 @@ use nanoserde::{DeJson, SerJson};
 #[derive(SerJson)]
 struct IssuanceMetadata {
     eidx: usize,
+    ridx: usize,
 }
 
 const ALLOWED_PROTOCOLS: [&str; 4] = [
@@ -17,14 +18,6 @@ const ALLOWED_PROTOCOLS: [&str; 4] = [
     "openid4vci-1.1",
     "openid4vci1.1",
 ];
-
-fn is_protocol_allowed(protocol: &String, configured: &[String]) -> bool {
-    if configured.is_empty() {
-        ALLOWED_PROTOCOLS.contains(&protocol.as_str())
-    } else {
-        configured.contains(protocol)
-    }
-}
 
 pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::error::Error>> {
     log::info!("Starting issuance matching process");
@@ -67,44 +60,72 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
         request.requests.len()
     );
 
-    for (i, r) in request.requests.iter().enumerate() {
-        log::trace!("Checking request {}: protocol={}", i, r.protocol);
-        if is_protocol_allowed(&r.protocol, &matcher_data.allowed_protocols) {
-            let regularized = RegularizedOpenId4VciRequestData::from(&r.data);
-            if matcher_data.filter.matches(&regularized) {
-                log::info!("Match found for request {} with protocol {}", i, r.protocol);
-                let version = credman.get_wasm_version();
-                for (index, entry) in matcher_data.entries.iter().enumerate() {
-                    let entry_id = format!("{}_{}", matcher_data.entry_id, index);
-                    let icon = &matcher_data_buffer[entry.icon.0..entry.icon.1];
-                    if version >= 9 {
-                        log::debug!("Adding issuance entry (v>=9): {}", entry_id);
-                        let metadata = SerJson::serialize_json(&IssuanceMetadata { eidx: index });
-                        credman.add_issuance_entry(
-                            &entry_id,
-                            icon,
-                            &entry.title,
-                            &entry.subtitle,
-                            "",
-                            &metadata,
-                        );
-                    } else {
-                        log::debug!("Adding string ID entry (v<9): {}", entry_id);
-                        credman.add_string_id_entry(
-                            &entry_id,
-                            icon,
-                            &entry.title,
-                            &entry.subtitle,
-                            "",
-                            "",
-                        );
-                    }
+    let passes_filter = |r: &OpenId4VciRequest| {
+        let regularized = RegularizedOpenId4VciRequestData::from(&r.data);
+        matcher_data.filter.matches(&regularized)
+    };
+
+    let matched_request_index = if !matcher_data.preferred_protocols.is_empty() {
+        // If preferred_protocols is set, we prioritize matching them in the order of preference.
+        // For each preferred protocol, we search for a matching request that passes the filter.
+        matcher_data.preferred_protocols.iter().find_map(|preferred_proto| {
+            request.requests.iter().enumerate()
+                .find(|(_, r)| &r.protocol == preferred_proto && passes_filter(r))
+                .map(|(index, _)| index)
+        })
+    } else {
+        // If preferred_protocols is empty, we fall back to iterating over the requests in order,
+        // and matching the first one that is allowed and passes the filter.
+        request.requests.iter().enumerate().find_map(|(req_index, r)| {
+            if ALLOWED_PROTOCOLS.contains(&r.protocol.as_str()) {
+                if passes_filter(r) {
+                    return Some(req_index);
                 }
-                // Assuming we only need to add one entry if any request matches
-                break;
+            } else {
+                log::warn!("Unsupported protocol: {}", r.protocol);
             }
+            None
+        })
+    };
+
+    let Some(req_index) = matched_request_index else {
+        log::info!("Issuance matching process completed");
+        return Ok(());
+    };
+
+    log::info!(
+        "Match found for request {} with protocol {}",
+        req_index,
+        request.requests[req_index].protocol
+    );
+    let version = credman.get_wasm_version();
+    for (index, entry) in matcher_data.entries.iter().enumerate() {
+        let entry_id = format!("{}_{}", matcher_data.entry_id, index);
+        let icon = &matcher_data_buffer[entry.icon.0..entry.icon.1];
+        if version >= 9 {
+            log::debug!("Adding issuance entry (v>=9): {}", entry_id);
+            let metadata = SerJson::serialize_json(&IssuanceMetadata {
+                eidx: index,
+                ridx: req_index,
+            });
+            credman.add_issuance_entry(
+                &entry_id,
+                icon,
+                &entry.title,
+                &entry.subtitle,
+                "",
+                &metadata,
+            );
         } else {
-            log::warn!("Unsupported protocol: {}", r.protocol);
+            log::debug!("Adding string ID entry (v<9): {}", entry_id);
+            credman.add_string_id_entry(
+                &entry_id,
+                icon,
+                &entry.title,
+                &entry.subtitle,
+                "",
+                "",
+            );
         }
     }
 
@@ -597,7 +618,7 @@ mod test {
             "icon": [0, 0]
           }
         ],
-        "allowed_protocols": ["my-custom-protocol"],
+        "preferred_protocols": ["my-custom-protocol"],
         "filter": {
           "Pass": {}
         }
@@ -647,7 +668,7 @@ mod test {
             "icon": [0, 0]
           }
         ],
-        "allowed_protocols": ["my-custom-protocol"],
+        "preferred_protocols": ["my-custom-protocol"],
         "filter": {
           "Pass": {}
         }
@@ -724,7 +745,7 @@ mod test {
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
         assert!(entry.explainer.is_none());
-        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0}");
+        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
     }
 
     #[test]
@@ -779,9 +800,75 @@ mod test {
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
         assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"TTTT1");
-        assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0}");
+        assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
         assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"TTTT2");
-        assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1}");
+        assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
+    }
+
+    #[test]
+    fn match_preferred_protocol_order() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.0",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    },
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "entries": [
+          {
+            "title": "TTTT",
+            "subtitle": "SSSSS",
+            "icon": [0, 0]
+          }
+        ],
+        "preferred_protocols": ["openid4vci-1.1", "openid4vci-1.0"],
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+            wasm_version: 9,
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+        let entry = &credman.added_entries[0];
+        assert_eq!(entry.entry_id, c"C_0");
+        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":1}");
     }
 }

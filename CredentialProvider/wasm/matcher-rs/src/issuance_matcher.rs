@@ -112,5 +112,5 @@ pub struct IssuanceMatcherData {
     pub entry_id: String,
     pub entries: Vec<IssuanceDisplayData>,
     pub filter: OpenId4VciFilter,
-    pub allowed_protocols: Vec<String>,
+    pub preferred_protocols: Vec<String>,
 }
