@@ -26,6 +26,7 @@ pub trait CredmanApi {
         title: &str,
         subtitle: &str,
         explainer: &str,
+        metadata: &str,
     );
     fn add_entry_set(&mut self, set_id: &str, set_length: i32);
     fn add_entry_to_set(
@@ -172,6 +173,7 @@ impl CredmanApi for CredmanApiImpl {
         title: &str,
         subtitle: &str,
         explainer: &str,
+        metadata: &str,
     ) {
         let entry_id_c = CString::new(entry_id).unwrap();
         let title_c = if title.is_empty() {
@@ -189,6 +191,11 @@ impl CredmanApi for CredmanApiImpl {
         } else {
             Some(CString::new(explainer).unwrap())
         };
+        let metadata_c = if metadata.is_empty() {
+            None
+        } else {
+            Some(CString::new(metadata).unwrap())
+        };
 
         let icon_bytes = if icon.is_empty() {
             std::ptr::null()
@@ -205,6 +212,7 @@ impl CredmanApi for CredmanApiImpl {
                 title_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
                 subtitle_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
                 explainer_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+                metadata_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
             );
         }
     }

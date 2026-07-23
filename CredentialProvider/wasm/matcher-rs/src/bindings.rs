@@ -91,6 +91,7 @@ unsafe extern "C" {
         title: *const c_char,
         subtitle: *const c_char,
         explainer: *const c_char,
+        metadata: *const c_char,
     );
     pub fn AddFieldForStringIdEntry(
         cred_id: *const c_char,

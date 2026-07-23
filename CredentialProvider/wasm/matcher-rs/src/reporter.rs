@@ -438,6 +438,7 @@ mod tests {
             _title: &str,
             _subtitle: &str,
             _explainer: &str,
+            _metadata: &str,
         ) {
         }
         fn add_entry_set(&mut self, set_id: &str, length: i32) {

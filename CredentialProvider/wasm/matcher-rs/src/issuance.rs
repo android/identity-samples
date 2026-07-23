@@ -4,7 +4,12 @@ use crate::{
     openid4vci::{DigitalCredentialCreationRequest, RegularizedOpenId4VciRequestData},
 };
 
-use nanoserde::DeJson;
+use nanoserde::{DeJson, SerJson};
+
+#[derive(SerJson)]
+struct IssuanceMetadata {
+    eidx: usize,
+}
 
 const ALLOWED_PROTOCOLS: [&str; 4] = [
     "openid4vci-1.0",
@@ -74,12 +79,14 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                     let icon = &matcher_data_buffer[entry.icon.0..entry.icon.1];
                     if version >= 9 {
                         log::debug!("Adding issuance entry (v>=9): {}", entry_id);
+                        let metadata = SerJson::serialize_json(&IssuanceMetadata { eidx: index });
                         credman.add_issuance_entry(
                             &entry_id,
                             icon,
                             &entry.title,
                             &entry.subtitle,
                             "",
+                            &metadata,
                         );
                     } else {
                         log::debug!("Adding string ID entry (v<9): {}", entry_id);
@@ -124,6 +131,7 @@ mod test {
         disclaimer: Option<CString>,
         warning: Option<CString>,
         explainer: Option<CString>,
+        metadata: Option<CString>,
         call_type: CallType,
     }
 
@@ -188,6 +196,7 @@ mod test {
                     Some(CString::new(warning).unwrap())
                 },
                 explainer: None,
+                metadata: None,
                 call_type: CallType::StringId,
             });
         }
@@ -198,6 +207,7 @@ mod test {
             title: &str,
             subtitle: &str,
             explainer: &str,
+            metadata: &str,
         ) {
             self.added_entries.push(AddedEntry {
                 entry_id: CString::new(entry_id).unwrap(),
@@ -222,6 +232,11 @@ mod test {
                     None
                 } else {
                     Some(CString::new(explainer).unwrap())
+                },
+                metadata: if metadata.is_empty() {
+                    None
+                } else {
+                    Some(CString::new(metadata).unwrap())
                 },
                 call_type: CallType::Issuance,
             });
@@ -709,6 +724,7 @@ mod test {
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
         assert!(entry.explainer.is_none());
+        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0}");
     }
 
     #[test]
@@ -763,7 +779,9 @@ mod test {
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
         assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"TTTT1");
+        assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
         assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"TTTT2");
+        assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1}");
     }
 }
