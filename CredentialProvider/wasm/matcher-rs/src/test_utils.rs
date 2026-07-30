@@ -290,6 +290,12 @@ impl CredmanApi for FakeCredman {
             .unwrap()
             .metadata_display_text = metadata_display_text.to_string();
     }
+    fn self_declare_package_info(
+        &mut self,
+        _package_display_name: &str,
+        _package_icon: &[u8],
+    ) {
+    }
 }
 
 pub fn create_registry_blob(json_str: &str) -> Vec<u8> {

@@ -3,7 +3,7 @@ use std::{ffi::CString, os::raw::c_void};
 use crate::bindings::{
     AddEntrySet, AddEntryToSet, AddFieldToEntrySet, AddInlineIssuanceEntry, AddIssuanceEntry,
     AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, GetCredentialsSize,
-    GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer,
+    GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer, SelfDeclarePackageInfo,
 };
 
 pub trait CredmanApi {
@@ -77,6 +77,11 @@ pub trait CredmanApi {
         metadata_display_text: &str,
         set_id: &str,
         set_index: i32,
+    );
+    fn self_declare_package_info(
+        &mut self,
+        package_display_name: &str,
+        package_icon: &[u8],
     );
 }
 
@@ -465,6 +470,32 @@ impl CredmanApi for CredmanApiImpl {
                 metadata_display_text_c.as_ptr(),
                 set_id_c.as_ptr(),
                 set_index,
+            );
+        }
+    }
+    fn self_declare_package_info(
+        &mut self,
+        package_display_name: &str,
+        package_icon: &[u8],
+    ) {
+        let package_display_name_c = if package_display_name.is_empty() {
+            None
+        } else {
+            Some(CString::new(package_display_name).unwrap())
+        };
+
+        let icon_bytes = if package_icon.is_empty() {
+            std::ptr::null()
+        } else {
+            package_icon.as_ptr()
+        } as *const std::os::raw::c_char;
+        let icon_length = package_icon.len();
+
+        unsafe {
+            SelfDeclarePackageInfo(
+                package_display_name_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+                icon_bytes,
+                icon_length,
             );
         }
     }

@@ -108,10 +108,15 @@ pub struct IssuanceExplainer {
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
 pub struct IssuanceDisplayData {
-    pub icon: (usize, usize),
-    pub title: String,
     pub subtitle: String,
     pub explainer: IssuanceExplainer,
+}
+
+#[derive(DeJson, Debug, Default)]
+#[nserde(default)]
+pub struct SelfDeclaredPackageInfo {
+    pub name: String,
+    pub icon: (usize, usize),
 }
 
 #[derive(DeJson, Debug, Default)]
@@ -121,4 +126,5 @@ pub struct IssuanceMatcherData {
     pub entries: Vec<IssuanceDisplayData>,
     pub filter: OpenId4VciFilter,
     pub preferred_protocols: Vec<String>,
+    pub self_declared_package_info: Option<SelfDeclaredPackageInfo>,
 }

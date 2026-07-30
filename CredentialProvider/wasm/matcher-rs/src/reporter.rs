@@ -506,6 +506,12 @@ mod tests {
             _set_index: i32,
         ) {
         }
+        fn self_declare_package_info(
+            &mut self,
+            _package_display_name: &str,
+            _package_icon: &[u8],
+        ) {
+        }
     }
 
     #[test]
