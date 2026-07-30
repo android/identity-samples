@@ -101,9 +101,13 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
     let matched_req = &request.requests[req_index];
     let issuer_id = &matched_req.data.credential_issuer;
     let version = credman.get_wasm_version();
+    if let Some(package_info) = &matcher_data.self_declared_package_info {
+        let package_icon = &matcher_data_buffer[package_info.icon.0..package_info.icon.1];
+        credman.self_declare_package_info(&package_info.name, package_icon);
+    }
+
     for (index, entry) in matcher_data.entries.iter().enumerate() {
         let entry_id = format!("{}_{}", matcher_data.entry_id, index);
-        let icon = &matcher_data_buffer[entry.icon.0..entry.icon.1];
         if version >= 9 {
             log::debug!("Adding issuance entry (v>=9): {}", entry_id);
             let metadata = SerJson::serialize_json(&IssuanceMetadata {
@@ -114,8 +118,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                 .unwrap_or(&entry.explainer.default);
             credman.add_issuance_entry(
                 &entry_id,
-                icon,
-                &entry.title,
+                &[], // no icon in entry
+                "",  // no title in entry
                 &entry.subtitle,
                 explainer,
                 &metadata,
@@ -124,8 +128,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             log::debug!("Adding string ID entry (v<9): {}", entry_id);
             credman.add_string_id_entry(
                 &entry_id,
-                icon,
-                &entry.title,
+                &[], // no icon in entry
+                "",  // no title in entry
                 &entry.subtitle,
                 "",
                 "",
@@ -166,6 +170,7 @@ mod test {
         icon: Vec<u8>,
         added_entries: Vec<AddedEntry>,
         wasm_version: u32,
+        declared_package_info: Option<(CString, Vec<u8>)>,
     }
 
     impl CredmanApi for FakeCredman {
@@ -321,6 +326,16 @@ mod test {
             _set_index: i32,
         ) {
         }
+        fn self_declare_package_info(
+            &mut self,
+            package_display_name: &str,
+            package_icon: &[u8],
+        ) {
+            self.declared_package_info = Some((
+                CString::new(package_display_name).unwrap(),
+                package_icon.to_vec(),
+            ));
+        }
     }
 
     #[test]
@@ -373,6 +388,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -380,10 +396,11 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
+        assert!(entry.title.is_none());
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::StringId);
+        assert!(credman.declared_package_info.is_none());
     }
 
     #[test]
@@ -423,6 +440,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         let errmsg = format!("{:?}", issuance_main(&mut credman).unwrap_err());
@@ -501,6 +519,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -582,6 +601,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -630,6 +650,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -680,6 +701,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 1,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -743,6 +765,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 9,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -750,12 +773,13 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.title.as_ref().unwrap(), c"TTTT");
+        assert!(entry.title.is_none());
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
         assert_eq!(entry.explainer.as_ref().unwrap(), c"Issuer explainer");
         assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
+        assert!(credman.declared_package_info.is_none());
     }
 
     #[test]
@@ -815,19 +839,21 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 9,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
 
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
-        assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"TTTT1");
+        assert!(credman.added_entries[0].title.is_none());
         assert_eq!(credman.added_entries[0].explainer.as_ref().unwrap(), c"Explainer 1");
         assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
-        assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"TTTT2");
+        assert!(credman.added_entries[1].title.is_none());
         assert_eq!(credman.added_entries[1].explainer.as_ref().unwrap(), c"Default 2");
         assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
+        assert!(credman.declared_package_info.is_none());
     }
 
     #[test]
@@ -886,6 +912,7 @@ mod test {
             icon: Vec::new(),
             added_entries: Vec::new(),
             wasm_version: 9,
+            declared_package_info: None,
         };
 
         issuance_main(&mut credman).unwrap();
@@ -894,5 +921,63 @@ mod test {
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
         assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":1}");
+    }
+
+    #[test]
+    fn match_case_with_package_info() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "entries": [
+          {
+            "subtitle": "SSSSS"
+          }
+        ],
+        "self_declared_package_info": {
+          "name": "Test Wallet",
+          "icon": [4, 8]
+        },
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: vec![1, 2, 3, 4],
+            added_entries: Vec::new(),
+            wasm_version: 9,
+            declared_package_info: None,
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+        let entry = &credman.added_entries[0];
+        assert_eq!(entry.entry_id, c"C_0");
+        assert!(entry.title.is_none());
+        assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
+        
+        let (declared_name, declared_icon) = credman.declared_package_info.as_ref().unwrap();
+        assert_eq!(declared_name, &CString::new("Test Wallet").unwrap());
+        assert_eq!(declared_icon, &vec![1, 2, 3, 4]);
     }
 }
