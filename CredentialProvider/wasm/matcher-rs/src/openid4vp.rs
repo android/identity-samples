@@ -1,9 +1,50 @@
 use crate::base64url::decode_base64url;
 use crate::credman::CredmanApi;
+use crate::json_value::JsonValue;
 pub use crate::openid4vp_models::*;
 use crate::reporter::report_match_result;
 use nanoserde::DeJson;
 use std::borrow::Cow;
+
+fn extract_multisigned_payload<'a>(
+    pr: &'a ProtocolRequest,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let json_str: &str = if let Some(data) = &pr.data {
+        match data {
+            ProtocolRequestData::String(s) => s.as_str(),
+            ProtocolRequestData::Object(obj) => obj.request.as_str(),
+        }
+    } else if !pr.request.is_empty() {
+        pr.request.as_str()
+    } else {
+        return Err("Missing multisigned request data".into());
+    };
+
+    let parsed: JsonValue = DeJson::deserialize_json(json_str)?;
+
+    let payload = match &parsed {
+        JsonValue::Object(map) => {
+            if let Some(JsonValue::Object(req_map)) = map.get("request") {
+                if let Some(JsonValue::String(p)) = req_map.get("payload") {
+                    p.clone()
+                } else {
+                    return Err("Missing 'payload' in 'request' object".into());
+                }
+            } else if let Some(JsonValue::String(p)) = map.get("payload") {
+                p.clone()
+            } else {
+                return Err("Missing 'payload' field in multisigned request".into());
+            }
+        }
+        _ => return Err("Multisigned request must be a JSON object".into()),
+    };
+
+    if payload.is_empty() {
+        return Err("Empty payload in multisigned request".into());
+    }
+
+    Ok(payload)
+}
 
 fn parse_protocol_request_data<'a>(
     pr: &'a ProtocolRequest,
@@ -36,7 +77,14 @@ fn parse_protocol_request_data<'a>(
         return Ok(Cow::Owned(DeJson::deserialize_json(std::str::from_utf8(
             &decoded,
         )?)?));
-    }
+    } else if pr.protocol == "openid4vp-v1-multisigned" {
+        log::debug!("Handling multisigned OpenID4VP request");
+        let payload_str = extract_multisigned_payload(pr)?;
+        let decoded = decode_base64url(&payload_str)?;
+        return Ok(Cow::Owned(DeJson::deserialize_json(std::str::from_utf8(
+            &decoded,
+        )?)?));
+    } 
 
     log::debug!("Handling unsigned OpenID4VP request");
     if let Some(data) = &pr.data {
@@ -110,7 +158,10 @@ pub fn openid4vp_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::
                 continue;
             }
             log::debug!("Processing request {}: protocol={}", i, pr.protocol);
-            if pr.protocol != "openid4vp-v1-unsigned" && pr.protocol != "openid4vp-v1-signed" {
+            if pr.protocol != "openid4vp-v1-unsigned"
+                && pr.protocol != "openid4vp-v1-signed"
+                && pr.protocol != "openid4vp-v1-multisigned"
+            {
                 log::warn!("Unsupported protocol: {}", pr.protocol);
                 continue;
             }
@@ -173,6 +224,28 @@ mod tests {
         assert!(err.to_string().contains("Missing unsigned request data"));
     }
 
+    #[test]
+    fn test_parse_protocol_request_data_multisigned_valid() {
+        let json = r#"{
+            "protocol": "openid4vp-v1-multisigned",
+            "data": "{\"request\": {\"payload\": \"eyJkY3FsX3F1ZXJ5Ijp7ImNyZWRlbnRpYWxzIjpbXX19\"}}"
+        }"#;
+        let pr: ProtocolRequest = DeJson::deserialize_json(json).unwrap();
+        let data = parse_protocol_request_data(&pr).unwrap();
+        assert!(data.dcql_query.is_some());
+    }
+
+    #[test]
+    fn test_parse_protocol_request_data_multisigned_invalid_payload() {
+        let json = r#"{
+            "protocol": "openid4vp-v1-multisigned",
+            "data": "{\"request\": {}}"
+        }"#;
+        let pr: ProtocolRequest = DeJson::deserialize_json(json).unwrap();
+        let err = parse_protocol_request_data(&pr).unwrap_err();
+        assert!(err.to_string().contains("Missing 'payload'"));
+    }
+
     use crate::test_utils::*;
 
     macro_rules! define_test {
@@ -221,6 +294,7 @@ mod tests {
     );
     define_test!(tc30_parse_v1_unsigned, "TC30_ParseV1Unsigned");
     define_test!(tc31_parse_v1_signed, "TC31_ParseV1Signed");
+    define_test!(tc42_parse_v1_multisigned, "TC42_ParseV1Multisigned");
     define_test!(tc32_extract_payment_sca1, "TC32_ExtractPaymentSca1");
     define_test!(tc33_extract_payment_details, "TC33_ExtractPaymentDetails");
     define_test!(tc34_extract_payment_generic, "TC34_ExtractPaymentGeneric");
