@@ -103,18 +103,31 @@ pub fn openid4vp_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::
     };
     log::info!("Found {} protocol requests", protocol_requests.len());
 
-    for (i, pr) in protocol_requests.iter().enumerate() {
-        log::debug!("Processing request {}: protocol={}", i, pr.protocol);
-        if pr.protocol != "openid4vp-v1-unsigned" && pr.protocol != "openid4vp-v1-signed" {
-            log::warn!("Unsupported protocol: {}", pr.protocol);
-            continue;
+    for target_protocol in &registry.supported_protocols {
+        log::debug!("Matching requests for protocol={}", target_protocol);
+        for (i, pr) in protocol_requests.iter().enumerate() {
+            if pr.protocol != *target_protocol {
+                continue;
+            }
+            log::debug!("Processing request {}: protocol={}", i, pr.protocol);
+            if pr.protocol != "openid4vp-v1-unsigned" && pr.protocol != "openid4vp-v1-signed" {
+                log::warn!("Unsupported protocol: {}", pr.protocol);
+                continue;
+            }
+
+            let data_json = parse_protocol_request_data(pr)?;
+            let query = data_json.dcql_query.as_ref().ok_or("Missing dcql_query")?;
+            let match_result = crate::dcql::dcql_query(query, &registry);
+
+            let has_matches = !match_result.matched_credential_sets.is_empty()
+                || match_result.inline_issuance.is_some();
+            if has_matches {
+                // If there are multiple requests of the same preferred protocol,
+                // we only process the first request that yields a match.
+                report_match_result(credman, &match_result, i, &data_json, &matcher_data_buffer)?;
+                return Ok(());
+            }
         }
-
-        let data_json = parse_protocol_request_data(pr)?;
-        let query = data_json.dcql_query.as_ref().ok_or("Missing dcql_query")?;
-        let match_result = crate::dcql::dcql_query(query, &registry);
-
-        report_match_result(credman, &match_result, i, &data_json, &matcher_data_buffer)?;
     }
 
     log::info!("OpenID4VP matching process completed");
@@ -230,5 +243,63 @@ mod tests {
             registry_json.insert_str(pos, "\"metadata_display_text\": \"Verified Member\", ");
         }
         run_openid4vp_test("TC37_WasmMetadataText", Some(&registry_json));
+    }
+
+    /// Replaces the `"supported_protocols": [...]` array inside a JSON registry string
+    /// with the provided slice of protocol strings.
+    fn replace_supported_protocols(registry_json: &str, protocols: &[&str]) -> String {
+        let start_key = "\"supported_protocols\": [";
+        if let (Some(start_idx), Some(end_rel)) = (
+            registry_json.find(start_key),
+            registry_json.find(start_key).and_then(|idx| registry_json[idx..].find("],")),
+        ) {
+            let end_idx = start_idx + end_rel + 2;
+            let formatted_protocols = protocols
+                .iter()
+                .map(|p| format!("    \"{}\"", p))
+                .collect::<Vec<_>>()
+                .join(",\n");
+            let new_section = format!("\"supported_protocols\": [\n{}\n  ],", formatted_protocols);
+            let mut result = String::with_capacity(registry_json.len() + new_section.len());
+            result.push_str(&registry_json[..start_idx]);
+            result.push_str(&new_section);
+            result.push_str(&registry_json[end_idx..]);
+            result
+        } else {
+            registry_json.to_string()
+        }
+    }
+
+    #[test]
+    fn tc40_match_most_preferred_supported_protocol_available() {
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let testdata_dir = std::path::PathBuf::from(manifest_dir).join("testdata");
+        let registry_json = std::fs::read_to_string(testdata_dir.join("registry.json")).unwrap();
+
+        // Inject custom supported_protocols preference order: signed then unsigned
+        let modified_registry = replace_supported_protocols(
+            &registry_json,
+            &["openid4vp-v1-signed", "openid4vp-v1-unsigned"],
+        );
+
+        run_openid4vp_test(
+            "TC40_MatchMostPreferredSupportedProtocolAvailable",
+            Some(&modified_registry),
+        );
+    }
+
+    #[test]
+    fn tc41_no_match_if_no_requests_for_supported_protocols() {
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let testdata_dir = std::path::PathBuf::from(manifest_dir).join("testdata");
+        let registry_json = std::fs::read_to_string(testdata_dir.join("registry.json")).unwrap();
+
+        // Inject custom supported_protocols containing only "openid4vp-v1-signed"
+        let modified_registry = replace_supported_protocols(&registry_json, &["openid4vp-v1-signed"]);
+
+        run_openid4vp_test(
+            "TC41_NoMatchIfNoRequestsForSupportedProtocols",
+            Some(&modified_registry),
+        );
     }
 }

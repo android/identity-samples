@@ -1,4 +1,9 @@
 {
+  "supported_protocols": [
+    "openid4vp-v1-signed",
+    "openid4vp-v1-unsigned",
+    "openid4vp-v1-multisigned"
+  ],
   "credentials": {
     "mso_mdoc": {
       "org.iso.18013.5.1.mDL": [
