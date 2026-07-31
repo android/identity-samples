@@ -119,7 +119,9 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             credman.add_issuance_entry(
                 &entry_id,
                 &[], // no icon in entry
-                "",  // no title in entry
+                // Workaround: Older CredMan versions mistakenly mandate a non-blank title,
+                // even though title and icon are currently unused in issuance.
+                "wallet",
                 &entry.subtitle,
                 explainer,
                 &metadata,
@@ -129,7 +131,9 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             credman.add_string_id_entry(
                 &entry_id,
                 &[], // no icon in entry
-                "",  // no title in entry
+                // Workaround: Older CredMan versions mistakenly mandate a non-blank title,
+                // even though title and icon are currently unused in issuance.
+                "wallet",
                 &entry.subtitle,
                 "",
                 "",
@@ -396,7 +400,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert!(entry.title.is_none());
+        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::StringId);
@@ -773,7 +777,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert!(entry.title.is_none());
+        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
@@ -846,11 +850,11 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
-        assert!(credman.added_entries[0].title.is_none());
+        assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"wallet");
         assert_eq!(credman.added_entries[0].explainer.as_ref().unwrap(), c"Explainer 1");
         assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
-        assert!(credman.added_entries[1].title.is_none());
+        assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"wallet");
         assert_eq!(credman.added_entries[1].explainer.as_ref().unwrap(), c"Default 2");
         assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
         assert!(credman.declared_package_info.is_none());
@@ -973,7 +977,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert!(entry.title.is_none());
+        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         
         let (declared_name, declared_icon) = credman.declared_package_info.as_ref().unwrap();
