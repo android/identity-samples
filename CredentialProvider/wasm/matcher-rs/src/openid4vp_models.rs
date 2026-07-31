@@ -44,6 +44,8 @@ pub struct DcqlCredentialSet {
 #[nserde(default)]
 pub struct Registry {
     pub credentials: RegistryCredentials,
+    #[nserde(default)]
+    pub supported_protocols: Vec<String>,
 }
 
 #[derive(DeJson, Debug, Clone, Default)]

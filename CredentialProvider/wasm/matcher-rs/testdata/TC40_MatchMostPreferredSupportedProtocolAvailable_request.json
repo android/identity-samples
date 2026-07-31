@@ -1,0 +1,32 @@
+{
+  "requests": [
+    {
+      "data": {
+        "dcql_query": {
+          "credentials": [
+            {
+              "format": "mso_mdoc",
+              "id": "mdl",
+              "meta": {
+                "doctype_value": "org.iso.18013.5.1.mDL"
+              }
+            }
+          ]
+        }
+      },
+      "protocol": "openid4vp-v1-unsigned"
+    },
+    {
+      "data": {
+        "request": "header.eyJkY3FsX3F1ZXJ5Ijp7ImNyZWRlbnRpYWxzIjpbeyJmb3JtYXQiOiJtc29fbWRvYyIsImlkIjoibWRsIiwibWV0YSI6eyJkb2N0eXBlX3ZhbHVlIjoib3JnLmlzby4xODAxMy41LjEubURMIn19XX19.signature"
+      },
+      "protocol": "openid4vp-v1-signed"
+    },
+    {
+      "data": {
+        "request": "header.eyJkY3FsX3F1ZXJ5Ijp7ImNyZWRlbnRpYWxzIjpbeyJmb3JtYXQiOiJtc29fbWRvYyIsImlkIjoibWRsIiwibWV0YSI6eyJkb2N0eXBlX3ZhbHVlIjoib3JnLmlzby4xODAxMy41LjEubURMIn19XX19.signature"
+      },
+      "protocol": "openid4vp-v1-signed"
+    }
+  ]
+}
