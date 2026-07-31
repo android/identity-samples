@@ -6,37 +6,49 @@ use crate::reporter::report_match_result;
 use nanoserde::DeJson;
 use std::borrow::Cow;
 
-fn extract_multisigned_payload<'a>(
+fn extract_request_str<'a>(
     pr: &'a ProtocolRequest,
-) -> Result<String, Box<dyn std::error::Error>> {
-    let json_str: &str = if let Some(data) = &pr.data {
+) -> Result<&'a str, Box<dyn std::error::Error>> {
+    if let Some(data) = &pr.data {
         match data {
-            ProtocolRequestData::String(s) => s.as_str(),
-            ProtocolRequestData::Object(obj) => obj.request.as_str(),
-        }
-    } else if !pr.request.is_empty() {
-        pr.request.as_str()
-    } else {
-        return Err("Missing multisigned request data".into());
-    };
-
-    let parsed: JsonValue = DeJson::deserialize_json(json_str)?;
-
-    let payload = match &parsed {
-        JsonValue::Object(map) => {
-            if let Some(JsonValue::Object(req_map)) = map.get("request") {
-                if let Some(JsonValue::String(p)) = req_map.get("payload") {
-                    p.clone()
-                } else {
-                    return Err("Missing 'payload' in 'request' object".into());
+            ProtocolRequestData::String(s) => Ok(s.as_str()),
+            ProtocolRequestData::Object(obj) => {
+                if obj.request.is_empty() {
+                    return Err("Missing 'request' field in data object".into());
                 }
-            } else if let Some(JsonValue::String(p)) = map.get("payload") {
-                p.clone()
-            } else {
-                return Err("Missing 'payload' field in multisigned request".into());
+                Ok(obj.request.as_str())
             }
         }
-        _ => return Err("Multisigned request must be a JSON object".into()),
+    } else if !pr.request.is_empty() {
+        Ok(pr.request.as_str())
+    } else {
+        Err("Missing request data".into())
+    }
+}
+
+fn extract_multisigned_payload(
+    pr: &ProtocolRequest,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let json_str = extract_request_str(pr)?;
+    let parsed: JsonValue = DeJson::deserialize_json(json_str)?;
+
+    let JsonValue::Object(mut map) = parsed else {
+        return Err("Multisigned request must be a JSON object".into());
+    };
+
+    let payload = if let Some(req_val) = map.shift_remove("request") {
+        let JsonValue::Object(mut req_map) = req_val else {
+            return Err("Missing 'payload' in 'request' object".into());
+        };
+        let Some(JsonValue::String(p)) = req_map.shift_remove("payload") else {
+            return Err("Missing 'payload' in 'request' object".into());
+        };
+        p
+    } else {
+        let Some(JsonValue::String(p)) = map.shift_remove("payload") else {
+            return Err("Missing 'payload' field in multisigned request".into());
+        };
+        p
     };
 
     if payload.is_empty() {
@@ -51,21 +63,7 @@ fn parse_protocol_request_data<'a>(
 ) -> Result<Cow<'a, OpenId4VpData>, Box<dyn std::error::Error>> {
     if pr.protocol == "openid4vp-v1-signed" {
         log::debug!("Handling signed OpenID4VP request");
-        let jws: &'a str = if let Some(data) = &pr.data {
-            match data {
-                ProtocolRequestData::String(s) => s,
-                ProtocolRequestData::Object(obj) => {
-                    if obj.request.is_empty() {
-                        return Err("Missing 'request' field in signed data object".into());
-                    }
-                    &obj.request
-                }
-            }
-        } else if !pr.request.is_empty() {
-            &pr.request
-        } else {
-            return Err("Missing signed request data".into());
-        };
+        let jws = extract_request_str(pr)?;
 
         let parts: Vec<&str> = jws.split('.').collect();
         if parts.len() < 2 {
