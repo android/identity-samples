@@ -58,10 +58,38 @@ pub struct RegistryCredentials {
     pub issuance: Option<RegistryIssuance>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[repr(i32)]
+pub enum DelegationType {
+    #[default]
+    None = 0,
+    Full = 1,
+}
+
+impl From<i32> for DelegationType {
+    fn from(val: i32) -> Self {
+        match val {
+            1 => DelegationType::Full,
+            _ => DelegationType::None,
+        }
+    }
+}
+
+impl nanoserde::DeJson for DelegationType {
+    fn de_json(
+        state: &mut nanoserde::DeJsonState,
+        input: &mut std::str::Chars,
+    ) -> Result<Self, nanoserde::DeJsonErr> {
+        let val = i32::de_json(state, input)?;
+        Ok(DelegationType::from(val))
+    }
+}
+
 #[derive(DeJson, Debug, Clone, Default)]
 #[nserde(default)]
 pub struct RegistryCredential {
     pub id: String,
+    pub delegation_type: DelegationType,
     pub display: RegistryDisplay,
     pub paths: DeterministicMap<String, JsonValue>, // Recursive structure
 }
@@ -120,6 +148,7 @@ pub struct MatchedClaim<'a> {
 #[derive(Debug, Clone)]
 pub struct MatchedCredential<'a> {
     pub id: &'a str,
+    pub delegation_type: DelegationType,
     pub display: &'a RegistryDisplay,
     pub matched_claim_names: Vec<&'a JsonValue>, // RegistryClaimDisplay
     pub matched_claim_metadata: Vec<&'a [String]>,
@@ -435,5 +464,20 @@ mod tests {
 
         // Validate that the string can be parsed into JsonValue
         let _: JsonValue = DeJson::deserialize_json(&json).expect("Serialized JSON is invalid");
+    }
+
+    #[test]
+    fn test_parse_delegation_type() {
+        let json_none = r#"{"id":"c1","delegation_type":0,"display":{"verification":{"title":"","subtitle":"","explainer":"","warning":"","metadata_display_text":""}},"paths":{}}"#;
+        let cred_none: RegistryCredential = DeJson::deserialize_json(json_none).unwrap();
+        assert_eq!(cred_none.delegation_type, DelegationType::None);
+
+        let json_full = r#"{"id":"c2","delegation_type":1,"display":{"verification":{"title":"","subtitle":"","explainer":"","warning":"","metadata_display_text":""}},"paths":{}}"#;
+        let cred_full: RegistryCredential = DeJson::deserialize_json(json_full).unwrap();
+        assert_eq!(cred_full.delegation_type, DelegationType::Full);
+
+        let json_default = r#"{"id":"c3","display":{"verification":{"title":"","subtitle":"","explainer":"","warning":"","metadata_display_text":""}},"paths":{}}"#;
+        let cred_default: RegistryCredential = DeJson::deserialize_json(json_default).unwrap();
+        assert_eq!(cred_default.delegation_type, DelegationType::None);
     }
 }

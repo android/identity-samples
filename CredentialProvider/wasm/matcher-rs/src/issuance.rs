@@ -297,6 +297,7 @@ mod test {
             _metadata: &str,
             _set_id: &str,
             _set_index: i32,
+            _delegation_type: crate::openid4vp_models::DelegationType,
         ) {
         }
         fn add_field_to_entry_set(
@@ -322,6 +323,7 @@ mod test {
             _metadata: &str,
             _set_id: &str,
             _set_index: i32,
+            _delegation_type: crate::openid4vp_models::DelegationType,
         ) {
         }
         fn add_inline_issuance_entry(
@@ -439,7 +441,7 @@ mod test {
       }
     }
   ]
-"#,
+}"#,
             registered_json: r#"
       {
         "entry_id": "C",

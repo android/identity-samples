@@ -164,6 +164,7 @@ fn match_candidate_claims<'a>(
         add_all_claims(&mut matched_claim_names, &candidate.paths);
         return Some(MatchedCredential {
             id: &candidate.id,
+            delegation_type: candidate.delegation_type,
             display: &candidate.display,
             matched_claim_names,
             matched_claim_metadata: Vec::new(),
@@ -216,6 +217,7 @@ fn match_candidate_claims<'a>(
                 );
                 Some(MatchedCredential {
                     id: &candidate.id,
+                    delegation_type: candidate.delegation_type,
                     display: &candidate.display,
                     matched_claim_names: current_set_names,
                     matched_claim_metadata: current_set_metadata,
@@ -256,6 +258,7 @@ fn match_candidate_claims<'a>(
     log::debug!("Candidate {}: all claims matched", candidate.id);
     Some(MatchedCredential {
         id: &candidate.id,
+        delegation_type: candidate.delegation_type,
         display: &candidate.display,
         matched_claim_names,
         matched_claim_metadata,
@@ -587,6 +590,7 @@ mod tests {
         );
         creds.push(RegistryCredential {
             id: "mdoc_cred_1".to_string(),
+            delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
         });
@@ -629,6 +633,7 @@ mod tests {
         );
         creds.push(RegistryCredential {
             id: "mdoc_cred_1".to_string(),
+            delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
         });
@@ -674,6 +679,7 @@ mod tests {
         );
         creds.push(RegistryCredential {
             id: "mdoc_cred_1".to_string(),
+            delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
         });
@@ -709,6 +715,7 @@ mod tests {
         let mut creds = Vec::new();
         creds.push(RegistryCredential {
             id: "mdoc_cred_1".to_string(),
+            delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths: DeterministicMap::new(),
         });
@@ -863,6 +870,7 @@ mod tests {
 
             RegistryCredential {
                 id: id.to_string(),
+                delegation_type: DelegationType::None,
                 display: RegistryDisplay::default(),
                 paths,
             }
@@ -950,6 +958,7 @@ mod tests {
 
         let cred1 = RegistryCredential {
             id: "cred1".to_string(),
+            delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
         };

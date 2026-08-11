@@ -5,6 +5,7 @@ use crate::bindings::{
     AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, GetCredentialsSize,
     GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer, SelfDeclarePackageInfo,
 };
+use crate::openid4vp_models::DelegationType;
 
 pub trait CredmanApi {
     fn get_request_buffer(&self) -> Vec<u8>;
@@ -40,6 +41,7 @@ pub trait CredmanApi {
         metadata: &str,
         set_id: &str,
         set_index: i32,
+        delegation_type: DelegationType,
     );
     fn add_field_to_entry_set(
         &mut self,
@@ -63,6 +65,7 @@ pub trait CredmanApi {
         metadata: &str,
         set_id: &str,
         set_index: i32,
+        delegation_type: DelegationType,
     );
     fn add_inline_issuance_entry(
         &mut self,
@@ -238,6 +241,7 @@ impl CredmanApi for CredmanApiImpl {
         metadata: &str,
         set_id: &str,
         set_index: i32,
+        delegation_type: DelegationType,
     ) {
         let cred_id_c = CString::new(cred_id).unwrap();
         let title_c = if title.is_empty() {
@@ -289,6 +293,14 @@ impl CredmanApi for CredmanApiImpl {
                 set_id_c.as_ptr(),
                 set_index,
             );
+            if self.get_wasm_version() >= 7 && delegation_type != DelegationType::None {
+                crate::bindings::SetDelegationTypeForEntryInSet(
+                    cred_id_c.as_ptr(),
+                    delegation_type as i32,
+                    set_id_c.as_ptr(),
+                    set_index,
+                );
+            }
         }
     }
     fn add_field_to_entry_set(
@@ -334,6 +346,7 @@ impl CredmanApi for CredmanApiImpl {
         metadata: &str,
         set_id: &str,
         set_index: i32,
+        delegation_type: DelegationType,
     ) {
         let cred_id_c = CString::new(cred_id).unwrap();
         let merchant_name_c = if merchant_name.is_empty() {
@@ -415,6 +428,14 @@ impl CredmanApi for CredmanApiImpl {
                 set_id_c.as_ptr(),
                 set_index,
             );
+            if self.get_wasm_version() >= 7 && delegation_type != DelegationType::None {
+                crate::bindings::SetDelegationTypeForEntryInSet(
+                    cred_id_c.as_ptr(),
+                    delegation_type as i32,
+                    set_id_c.as_ptr(),
+                    set_index,
+                );
+            }
         }
     }
     fn add_inline_issuance_entry(

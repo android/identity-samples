@@ -164,6 +164,7 @@ impl CredmanApi for FakeCredman {
         _metadata: &str,
         set_id: &str,
         set_index: i32,
+        _delegation_type: crate::openid4vp_models::DelegationType,
     ) {
         let s_id = set_id.to_string();
         let c_id = cred_id.to_string();
@@ -225,6 +226,7 @@ impl CredmanApi for FakeCredman {
         _metadata: &str,
         set_id: &str,
         set_index: i32,
+        _delegation_type: crate::openid4vp_models::DelegationType,
     ) {
         let s_id = set_id.to_string();
         let c_id = cred_id.to_string();
