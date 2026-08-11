@@ -35,6 +35,12 @@ unsafe extern "C" {
         set_id: *const c_char,
         set_index: i32,
     );
+    pub fn SetDelegationTypeForEntryInSet(
+        cred_id: *const c_char,
+        delegation_type: i32,
+        set_id: *const c_char,
+        set_index: i32,
+    );
     pub fn AddFieldToEntrySet(
         cred_id: *const c_char,
         field_display_name: *const c_char,

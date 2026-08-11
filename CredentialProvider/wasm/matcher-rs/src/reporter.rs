@@ -41,6 +41,7 @@ fn report_payment_transaction_entry(
         selection_metadata_json,
         credential_set_id,
         document_index,
+        matched_credential.delegation_type,
     );
     Ok(())
 }
@@ -77,6 +78,7 @@ fn report_standard_verification_entry(
         selection_metadata_json,
         credential_set_id,
         document_index,
+        matched_credential.delegation_type,
     );
 
     log::trace!(
@@ -405,6 +407,7 @@ mod tests {
     struct MockCredman {
         wasm_version: u32,
         added_entries: Vec<String>,
+        added_delegations: Vec<(String, DelegationType)>,
         added_fields: Vec<(String, String, String)>,
         payment_entries: Vec<String>,
         inline_entries: Vec<String>,
@@ -455,8 +458,10 @@ mod tests {
             _metadata: &str,
             _set_id: &str,
             _set_index: i32,
+            delegation_type: DelegationType,
         ) {
             self.added_entries.push(cred_id.to_string());
+            self.added_delegations.push((cred_id.to_string(), delegation_type));
         }
         fn add_field_to_entry_set(
             &mut self,
@@ -486,8 +491,10 @@ mod tests {
             _metadata: &str,
             _set_id: &str,
             _set_index: i32,
+            delegation_type: DelegationType,
         ) {
             self.payment_entries.push(cred_id.to_string());
+            self.added_delegations.push((cred_id.to_string(), delegation_type));
         }
         fn add_inline_issuance_entry(
             &mut self,
@@ -519,6 +526,7 @@ mod tests {
         let mut mock = MockCredman {
             wasm_version: 1,
             added_entries: vec![],
+            added_delegations: vec![],
             added_fields: vec![],
             payment_entries: vec![],
             inline_entries: vec![],
@@ -541,6 +549,7 @@ mod tests {
         let mut mock = MockCredman {
             wasm_version: 1,
             added_entries: vec![],
+            added_delegations: vec![],
             added_fields: vec![],
             payment_entries: vec![],
             inline_entries: vec![],
@@ -565,6 +574,7 @@ mod tests {
                 id: "cred1",
                 matched: vec![MatchedCredential {
                     id: "cred1",
+                    delegation_type: DelegationType::None,
                     display: &display,
                     matched_claim_names: vec![],
                     matched_claim_metadata: vec![],
@@ -586,6 +596,128 @@ mod tests {
         report_match_result(&mut mock, &match_result, 0, &openid4vp_data, &[]).unwrap();
 
         assert_eq!(mock.added_entries, vec!["cred1"]);
+        assert_eq!(mock.added_delegations, vec![("cred1".to_string(), DelegationType::None)]);
+    }
+
+    #[test]
+    fn test_report_standard_entry_with_delegation_full() {
+        let mut mock = MockCredman {
+            wasm_version: 7,
+            added_entries: vec![],
+            added_delegations: vec![],
+            added_fields: vec![],
+            payment_entries: vec![],
+            inline_entries: vec![],
+            added_entry_sets: vec![],
+        };
+
+        let display = RegistryDisplay {
+            verification: RegistryVerification {
+                title: "Delegated Cred".to_string(),
+                subtitle: "".to_string(),
+                explainer: "".to_string(),
+                warning: "".to_string(),
+                metadata_display_text: "".to_string(),
+                icon: None,
+            },
+        };
+
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert(
+            "cred_full",
+            DcqlMatchedCredentialEntry {
+                id: "cred_full",
+                matched: vec![MatchedCredential {
+                    id: "cred_full",
+                    delegation_type: DelegationType::Full,
+                    display: &display,
+                    matched_claim_names: vec![],
+                    matched_claim_metadata: vec![],
+                }],
+            },
+        );
+
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed("set1"),
+                option_id: Cow::Borrowed("opt1"),
+                matched_credential_ids: vec!["cred_full"],
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+        let openid4vp_data = OpenId4VpData::default();
+
+        report_match_result(&mut mock, &match_result, 0, &openid4vp_data, &[]).unwrap();
+
+        assert_eq!(mock.added_entries, vec!["cred_full"]);
+        assert_eq!(
+            mock.added_delegations,
+            vec![("cred_full".to_string(), DelegationType::Full)]
+        );
+    }
+
+    #[test]
+    fn test_report_payment_entry_with_delegation_full() {
+        let mut mock = MockCredman {
+            wasm_version: 7,
+            added_entries: vec![],
+            added_delegations: vec![],
+            added_fields: vec![],
+            payment_entries: vec![],
+            inline_entries: vec![],
+            added_entry_sets: vec![],
+        };
+
+        let display = RegistryDisplay {
+            verification: RegistryVerification {
+                title: "Payment Card".to_string(),
+                subtitle: "".to_string(),
+                explainer: "".to_string(),
+                warning: "".to_string(),
+                metadata_display_text: "".to_string(),
+                icon: None,
+            },
+        };
+
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert(
+            "cred_pay",
+            DcqlMatchedCredentialEntry {
+                id: "cred_pay",
+                matched: vec![MatchedCredential {
+                    id: "cred_pay",
+                    delegation_type: DelegationType::Full,
+                    display: &display,
+                    matched_claim_names: vec![],
+                    matched_claim_metadata: vec![],
+                }],
+            },
+        );
+
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed("set1"),
+                option_id: Cow::Borrowed("opt1"),
+                matched_credential_ids: vec!["cred_pay"],
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        let td_b64 = "eyJ0eXBlIjoidXJuOmV1ZGk6c2NhOnBheW1lbnQ6MSIsInBheWxvYWQiOnsicGF5ZWUiOnsibmFtZSI6Ik1lcmNoYW50IFgifSwiYW1vdW50X2Rpc3BsYXkiOiJFVVIgNTAuMDAifSwiY3JlZGVudGlhbF9pZHMiOlsibWRsIiwiY3JlZF9wYXkiXX0";
+        let openid4vp_data = OpenId4VpData {
+            transaction_data: vec![td_b64.to_string()],
+            ..Default::default()
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &openid4vp_data, &[]).unwrap();
+
+        assert_eq!(mock.payment_entries, vec!["cred_pay"]);
+        assert_eq!(
+            mock.added_delegations,
+            vec![("cred_pay".to_string(), DelegationType::Full)]
+        );
     }
 
     #[test]
@@ -593,6 +725,7 @@ mod tests {
         let mut mock = MockCredman {
             wasm_version: 1,
             added_entries: vec![],
+            added_delegations: vec![],
             added_fields: vec![],
             payment_entries: vec![],
             inline_entries: vec![],
@@ -624,6 +757,7 @@ mod tests {
         let mut mock = MockCredman {
             wasm_version: 2,
             added_entries: vec![],
+            added_delegations: vec![],
             added_fields: vec![],
             payment_entries: vec![],
             inline_entries: vec![],
@@ -676,6 +810,7 @@ mod tests {
                     id,
                     matched: vec![MatchedCredential {
                         id,
+                        delegation_type: DelegationType::None,
                         display: &display,
                         matched_claim_names: vec![],
                         matched_claim_metadata: vec![],
