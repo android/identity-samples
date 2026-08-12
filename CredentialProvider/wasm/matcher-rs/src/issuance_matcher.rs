@@ -112,10 +112,14 @@ pub struct IssuanceDisplayData {
     pub explainer: IssuanceExplainer,
 }
 
+/// Holds display information for the package (app name and icon offsets in the packed blob).
+/// This can be either self-declared by a privileged app (representing a package it wants to spoof/represent)
+/// or auto-resolved from the calling package's actual package manager info.
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
-pub struct SelfDeclaredPackageInfo {
+pub struct PackageInfo {
     pub name: String,
+    /// Tuple of (start_offset, end_offset) of the icon bytes packed at the beginning of the registry blob.
     pub icon: (usize, usize),
 }
 
@@ -126,5 +130,6 @@ pub struct IssuanceMatcherData {
     pub entries: Vec<IssuanceDisplayData>,
     pub filter: OpenId4VciFilter,
     pub preferred_protocols: Vec<String>,
-    pub self_declared_package_info: Option<SelfDeclaredPackageInfo>,
+    pub self_declared_package_info: Option<PackageInfo>,
+    pub package_info: Option<PackageInfo>,
 }

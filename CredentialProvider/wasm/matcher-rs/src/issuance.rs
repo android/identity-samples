@@ -106,6 +106,20 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
         credman.self_declare_package_info(&package_info.name, package_icon);
     }
 
+    let (icon_bytes, title) = if let Some(info) = matcher_data.self_declared_package_info.as_ref()
+        .or(matcher_data.package_info.as_ref()) {
+        let start = info.icon.0;
+        let end = info.icon.1;
+        let icon_bytes = if end > start && end <= matcher_data_buffer.len() {
+            &matcher_data_buffer[start..end]
+        } else {
+            &[]
+        };
+        (icon_bytes, info.name.as_str())
+    } else {
+        (&[][..], "")
+    };
+
     for (index, entry) in matcher_data.entries.iter().enumerate() {
         let entry_id = format!("{}_{}", matcher_data.entry_id, index);
         if version >= 9 {
@@ -118,10 +132,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                 .unwrap_or(&entry.explainer.default);
             credman.add_issuance_entry(
                 &entry_id,
-                &[], // no icon in entry
-                // Workaround: Older CredMan versions mistakenly mandate a non-blank title,
-                // even though title and icon are currently unused in issuance.
-                "wallet",
+                &[], // no icon in entry for v>=9
+                "", // empty title
                 &entry.subtitle,
                 explainer,
                 &metadata,
@@ -130,10 +142,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
             log::debug!("Adding string ID entry (v<9): {}", entry_id);
             credman.add_string_id_entry(
                 &entry_id,
-                &[], // no icon in entry
-                // Workaround: Older CredMan versions mistakenly mandate a non-blank title,
-                // even though title and icon are currently unused in issuance.
-                "wallet",
+                icon_bytes, // use package icon for v<9
+                title,      // use package name as title for v<9
                 &entry.subtitle,
                 "",
                 "",
@@ -400,7 +410,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
+        assert!(entry.title.is_none());
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::StringId);
@@ -777,7 +787,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
+        assert!(entry.title.is_none());
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
@@ -850,11 +860,11 @@ mod test {
 
         assert_eq!(credman.added_entries.len(), 2);
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
-        assert_eq!(credman.added_entries[0].title.as_ref().unwrap(), c"wallet");
+        assert!(credman.added_entries[0].title.is_none());
         assert_eq!(credman.added_entries[0].explainer.as_ref().unwrap(), c"Explainer 1");
         assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
-        assert_eq!(credman.added_entries[1].title.as_ref().unwrap(), c"wallet");
+        assert!(credman.added_entries[1].title.is_none());
         assert_eq!(credman.added_entries[1].explainer.as_ref().unwrap(), c"Default 2");
         assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
         assert!(credman.declared_package_info.is_none());
@@ -977,11 +987,71 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.title.as_ref().unwrap(), c"wallet");
+        assert!(entry.title.is_none());
         assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
         
         let (declared_name, declared_icon) = credman.declared_package_info.as_ref().unwrap();
         assert_eq!(declared_name, &CString::new("Test Wallet").unwrap());
         assert_eq!(declared_icon, &vec![1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn match_case_with_resolved_package_info_v1() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
+        },
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my"
+        }
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+      {
+        "entry_id": "C",
+        "entries": [
+          {
+            "subtitle": "SSSSS"
+          }
+        ],
+        "package_info": {
+          "name": "Test Wallet",
+          "icon": [4, 8]
+        },
+        "filter": {
+          "Pass": {}
+        }
+      }"#,
+            icon: vec![1, 2, 3, 4],
+            added_entries: Vec::new(),
+            wasm_version: 1,
+            declared_package_info: None,
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+        let entry = &credman.added_entries[0];
+        assert_eq!(entry.entry_id, c"C_0");
+        assert_eq!(
+            entry.title.as_ref().unwrap(),
+            &CString::new("Test Wallet").unwrap()
+        );
+        assert_eq!(entry.subtitle.as_ref().unwrap(), c"SSSSS");
+        assert_eq!(entry.icon.as_ref().unwrap(), &vec![1, 2, 3, 4]);
+        assert_eq!(entry.call_type, CallType::StringId);
+        assert!(credman.declared_package_info.is_none());
     }
 }
