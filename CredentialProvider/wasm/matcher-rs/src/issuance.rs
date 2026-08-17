@@ -8,7 +8,7 @@ use nanoserde::{DeJson, SerJson};
 
 #[derive(SerJson)]
 struct IssuanceMetadata {
-    eidx: usize,
+    eid: String,
     ridx: usize,
 }
 
@@ -125,7 +125,7 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
         if version >= 9 {
             log::debug!("Adding issuance entry (v>=9): {}", entry_id);
             let metadata = SerJson::serialize_json(&IssuanceMetadata {
-                eidx: index,
+                eid: if entry.id.is_empty() { index.to_string() } else { entry.id.clone() },
                 ridx: req_index,
             });
             let explainer = entry.explainer.per_issuer.get(issuer_id)
@@ -792,7 +792,7 @@ mod test {
         assert!(entry.icon.is_none());
         assert_eq!(entry.call_type, CallType::Issuance);
         assert_eq!(entry.explainer.as_ref().unwrap(), c"Issuer explainer");
-        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
+        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eid\":\"0\",\"ridx\":0}");
         assert!(credman.declared_package_info.is_none());
     }
 
@@ -824,6 +824,7 @@ mod test {
         "entry_id": "C",
         "entries": [
           {
+            "id": "id_1",
             "title": "TTTT1",
             "subtitle": "SSSSS1",
             "icon": [0, 0],
@@ -835,6 +836,7 @@ mod test {
             }
           },
           {
+            "id": "id_2",
             "title": "TTTT2",
             "subtitle": "SSSSS2",
             "icon": [0, 0],
@@ -862,11 +864,11 @@ mod test {
         assert_eq!(credman.added_entries[0].entry_id, c"C_0");
         assert!(credman.added_entries[0].title.is_none());
         assert_eq!(credman.added_entries[0].explainer.as_ref().unwrap(), c"Explainer 1");
-        assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":0}");
+        assert_eq!(credman.added_entries[0].metadata.as_ref().unwrap(), c"{\"eid\":\"id_1\",\"ridx\":0}");
         assert_eq!(credman.added_entries[1].entry_id, c"C_1");
         assert!(credman.added_entries[1].title.is_none());
         assert_eq!(credman.added_entries[1].explainer.as_ref().unwrap(), c"Default 2");
-        assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eidx\":1,\"ridx\":0}");
+        assert_eq!(credman.added_entries[1].metadata.as_ref().unwrap(), c"{\"eid\":\"id_2\",\"ridx\":0}");
         assert!(credman.declared_package_info.is_none());
     }
 
@@ -934,7 +936,7 @@ mod test {
         assert_eq!(credman.added_entries.len(), 1);
         let entry = &credman.added_entries[0];
         assert_eq!(entry.entry_id, c"C_0");
-        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eidx\":0,\"ridx\":1}");
+        assert_eq!(entry.metadata.as_ref().unwrap(), c"{\"eid\":\"0\",\"ridx\":1}");
     }
 
     #[test]

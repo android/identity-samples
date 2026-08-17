@@ -108,6 +108,7 @@ pub struct IssuanceExplainer {
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
 pub struct IssuanceDisplayData {
+    pub id: String,
     pub subtitle: String,
     pub explainer: IssuanceExplainer,
 }
