@@ -40,6 +40,7 @@ import androidx.credentials.SignalUnknownCredentialRequest
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
+import androidx.credentials.exceptions.restorecredential.E2eeUnavailableException
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.authentication.shrine.repository.AuthRepository.Companion.RP_ID_KEY
@@ -227,12 +228,23 @@ class CredentialManagerUtils @Inject constructor(
             return GenericCredentialManagerResponse.Error(errorMessage = passkeysEligibility.reason)
         }
 
-        val restoreCredentialRequest = CreateRestoreCredentialRequest(requestResult.toString())
         try {
-            credentialResponse = credentialManager.createCredential(
-                context,
-                restoreCredentialRequest,
-            ) as CreateRestoreCredentialResponse
+            credentialResponse = try {
+                credentialManager.createCredential(
+                    context,
+                    CreateRestoreCredentialRequest(requestResult.toString()),
+                ) as CreateRestoreCredentialResponse
+            } catch (e: E2eeUnavailableException) {
+                // The device does not meet the cloud backup requirements, so retry locally.
+                // https://developer.android.com/identity/sign-in/restore-credentials#previous-device
+                credentialManager.createCredential(
+                    context,
+                    CreateRestoreCredentialRequest(
+                        requestResult.toString(),
+                        isCloudBackupEnabled = false,
+                    ),
+                ) as CreateRestoreCredentialResponse
+            }
         } catch (e: Exception) {
             return GenericCredentialManagerResponse.Error(errorMessage = e.message ?: "")
         }
