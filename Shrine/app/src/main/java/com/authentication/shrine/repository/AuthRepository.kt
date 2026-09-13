@@ -332,7 +332,7 @@ class AuthRepository @Inject constructor(
     suspend fun signInWithPasskeyOrPasswordResponse(credentialResponse: GetCredentialResponse): AuthResult<Unit> {
         return try {
             val credential = credentialResponse.credential
-            if (credential is PublicKeyCredential) {
+            if (credential is PublicKeyCredential || credential is RestoreCredential) {
                 val signInResponse =
                     credential.data.getString(
                         if (credential.type == RestoreCredential.TYPE_RESTORE_CREDENTIAL) {
