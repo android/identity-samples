@@ -153,6 +153,7 @@ fn report_matched_credential(
     credential_set_id: &str,
     dcql_set_idx: Option<&str>,
     dcql_option_idx: Option<&str>,
+    only_fully_delegated: bool,
     credentials_blob: &[u8],
     transaction_info: &Option<(Vec<String>, String, String, String)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -163,6 +164,13 @@ fn report_matched_credential(
         document_index
     );
     for matched_credential in &matched_credential_entry.matched {
+        if only_fully_delegated && !is_effectively_fully_delegated(matched_credential, wasm_version) {
+            log::debug!(
+                "Skipping {}: not fully delegated and the entry set is partial",
+                matched_credential.id
+            );
+            continue;
+        }
         let metadata = SelectionMetadata {
             claims: &matched_credential.matched_claim_metadata,
             dc_request_index: request_idx,
@@ -275,8 +283,49 @@ fn extract_transaction_info(
     )))
 }
 
+/// Minimum Wasm API version at which Credential Manager understands delegation types
+/// (`SetDelegationTypeForEntryInSet`).
+const WASM_VERSION_DELEGATION: u32 = 7;
+
+/// Returns true if `matched_credential` will be fulfilled by Credential Manager through this
+/// provider's background service rather than its UI. On hosts older than
+/// [`WASM_VERSION_DELEGATION`] the delegation type cannot be communicated, so every entry is
+/// effectively non-delegated there.
+fn is_effectively_fully_delegated(
+    matched_credential: &MatchedCredential<'_>,
+    wasm_version: u32,
+) -> bool {
+    wasm_version >= WASM_VERSION_DELEGATION
+        && matched_credential.delegation_type == DelegationType::Full
+}
+
+/// Returns true if `option` contributes at least one entry to an entry set, given whether only
+/// fully delegated entries may be reported.
+fn option_has_reportable_entry(
+    option: &MatchedCredentialSetInfo<'_>,
+    candidate_matched_credentials: &DeterministicMap<&str, DcqlMatchedCredentialEntry<'_>>,
+    only_fully_delegated: bool,
+    wasm_version: u32,
+) -> bool {
+    option.matched_credential_ids.iter().any(|id| {
+        candidate_matched_credentials.get(*id).is_some_and(|entry| {
+            entry.matched.iter().any(|m| {
+                !only_fully_delegated || is_effectively_fully_delegated(m, wasm_version)
+            })
+        })
+    })
+}
+
 /// Main entry point for reporting match results to Credential Manager.
 /// It generates the Cartesian product of all options across all matched sets.
+///
+/// Each combination of one option per required set is reported as a single entry set. If this
+/// provider matched every credential of the combination, all entries are reported. If the
+/// combination is only partially matched, the missing slots can only be filled by other
+/// providers' entries, which Credential Manager does exclusively for fully delegated entries;
+/// therefore only this provider's [`DelegationType::Full`] entries are reported in that case,
+/// and the entry set is omitted entirely if that leaves nothing to report. On hosts that predate
+/// delegation support (Wasm API < 7) no entry is delegated, so partial sets are never reported.
 pub fn report_match_result(
     credman: &mut impl CredmanApi,
     match_result: &DcqlMatchResult<'_>,
@@ -303,11 +352,34 @@ pub fn report_match_result(
         ) -> Result<(), Box<dyn std::error::Error>> {
             if selected_option_indices.len() == credential_sets.len() {
                 // We have selected one option from each set. Now report this combination.
+                let selected_options: Vec<&MatchedCredentialSetInfo<'_>> = selected_option_indices
+                    .iter()
+                    .enumerate()
+                    .map(|(set_idx, &option_idx)| &credential_sets[set_idx][option_idx])
+                    .collect();
+
+                // A partial entry set may only contain fully delegated entries (see the doc
+                // comment on `report_match_result`).
+                let only_fully_delegated = selected_options.iter().any(|o| o.is_partial());
+                if !selected_options.iter().any(|option| {
+                    option_has_reportable_entry(
+                        option,
+                        candidate_matched_credentials,
+                        only_fully_delegated,
+                        wasm_version,
+                    )
+                }) {
+                    log::info!(
+                        "Skipping partial combination {:?}: no fully delegated entries",
+                        selected_option_indices
+                    );
+                    return Ok(());
+                }
+
                 let mut set_id_parts = vec![format!("req:{}", request_idx)];
                 let mut total_length = 0;
 
-                for (set_idx, &option_idx) in selected_option_indices.iter().enumerate() {
-                    let option = &credential_sets[set_idx][option_idx];
+                for option in &selected_options {
                     if !option.set_id.is_empty() {
                         set_id_parts
                             .push(format!("set:{};option:{}", option.set_id, option.option_id));
@@ -333,8 +405,7 @@ pub fn report_match_result(
                 // i.e. the index the verifier assigned to it. For a partial match this leaves
                 // gaps that other providers are expected to fill.
                 let mut option_offset = 0;
-                for (set_idx, &option_idx) in selected_option_indices.iter().enumerate() {
-                    let option = &credential_sets[set_idx][option_idx];
+                for option in &selected_options {
                     for (matched_credential_id, &index_in_option) in option
                         .matched_credential_ids
                         .iter()
@@ -354,6 +425,7 @@ pub fn report_match_result(
                             &set_id_str,
                             Some(&option.set_id),
                             Some(&option.option_id),
+                            only_fully_delegated,
                             credentials_blob,
                             transaction_info,
                         )?;
@@ -954,6 +1026,246 @@ mod tests {
         assert_eq!(mock.added_entry_sets, vec![("req:0;set:0;option:0".to_string(), 2)]);
         assert_eq!(mock.added_entry_indices, vec![("email".to_string(), 1)]);
         assert_eq!(mock.added_delegations, vec![("email".to_string(), DelegationType::Full)]);
+    }
+
+    fn no_delegation_entry<'a>(
+        id: &'a str,
+        display: &'a RegistryDisplay,
+    ) -> DcqlMatchedCredentialEntry<'a> {
+        DcqlMatchedCredentialEntry {
+            id,
+            matched: vec![MatchedCredential {
+                id,
+                delegation_type: DelegationType::None,
+                display,
+                matched_claim_names: vec![],
+                matched_claim_metadata: vec![],
+            }],
+        }
+    }
+
+    fn new_mock(wasm_version: u32) -> MockCredman {
+        MockCredman {
+            wasm_version,
+            added_entries: vec![],
+            added_delegations: vec![],
+            added_fields: vec![],
+            payment_entries: vec![],
+            inline_entries: vec![],
+            added_entry_sets: vec![],
+            added_entry_indices: vec![],
+        }
+    }
+
+    #[test]
+    fn test_report_partial_option_without_full_delegation_reports_nothing() {
+        let mut mock = new_mock(7);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("email", no_delegation_entry("email", &display));
+
+        // ["phone", "email"] requested, only "email" matched and it is not delegated: nothing
+        // could ever complete this set, so it must not be declared at all.
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed("0"),
+                option_id: Cow::Borrowed("0"),
+                matched_credential_ids: vec!["email"],
+                matched_indices: vec![1],
+                option_length: 2,
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert!(mock.added_entry_sets.is_empty());
+        assert!(mock.added_entries.is_empty());
+    }
+
+    #[test]
+    fn test_report_partial_set_is_not_reported_before_delegation_support() {
+        // Same as test_report_partial_option_uses_verifier_length_and_index, but on a host
+        // that predates delegation (Wasm API < 7): the FULL entry cannot be flagged as such, so
+        // it is effectively non-delegated and the partial set must not be declared.
+        let mut mock = new_mock(6);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("email", full_delegation_entry("email", &display));
+
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed("0"),
+                option_id: Cow::Borrowed("0"),
+                matched_credential_ids: vec!["email"],
+                matched_indices: vec![1],
+                option_length: 2,
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert!(mock.added_entry_sets.is_empty());
+        assert!(mock.added_entries.is_empty());
+    }
+
+    #[test]
+    fn test_report_complete_set_before_delegation_support_reports_all_entries() {
+        let mut mock = new_mock(6);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("a", full_delegation_entry("a", &display));
+        matched_credentials.insert("c", no_delegation_entry("c", &display));
+
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("0"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["a"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("1"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["c"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+            ],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert_eq!(
+            mock.added_entry_sets,
+            vec![("req:0;set:0;option:0;set:1;option:0".to_string(), 2)]
+        );
+        assert_eq!(mock.added_entries, vec!["a", "c"]);
+    }
+
+    #[test]
+    fn test_report_partial_set_drops_non_delegated_entries_only() {
+        let mut mock = new_mock(7);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("a", full_delegation_entry("a", &display));
+        matched_credentials.insert("c", no_delegation_entry("c", &display));
+
+        // Set 0 option 0 = ["a", "b"]: partial, "a" FULL.
+        // Set 1 option 0 = ["c"]: complete but not delegated.
+        // The combined entry set is partial, so "a" is reported (another provider may fill
+        // "b") while "c" is withheld: it could only be fulfilled through this provider's UI,
+        // which Credential Manager cannot combine with other providers' entries.
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("0"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["a"],
+                    matched_indices: vec![0],
+                    option_length: 2,
+                }],
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("1"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["c"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+            ],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert_eq!(
+            mock.added_entry_sets,
+            vec![("req:0;set:0;option:0;set:1;option:0".to_string(), 3)]
+        );
+        assert_eq!(mock.added_entries, vec!["a"]);
+        assert_eq!(mock.added_entry_indices, vec![("a".to_string(), 0)]);
+    }
+
+    #[test]
+    fn test_report_complete_set_reports_mixed_delegation_entries() {
+        let mut mock = new_mock(7);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("a", full_delegation_entry("a", &display));
+        matched_credentials.insert("c", no_delegation_entry("c", &display));
+
+        // Every requested credential is matched by this provider, so the entry set is
+        // self-contained and non-delegated entries are reported as before.
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("0"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["a"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("1"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["c"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+            ],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert_eq!(
+            mock.added_entry_sets,
+            vec![("req:0;set:0;option:0;set:1;option:0".to_string(), 2)]
+        );
+        assert_eq!(mock.added_entries, vec!["a", "c"]);
+        assert_eq!(
+            mock.added_delegations,
+            vec![
+                ("a".to_string(), DelegationType::Full),
+                ("c".to_string(), DelegationType::None)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_report_implicit_partial_set_only_reports_delegated_entries() {
+        let mut mock = new_mock(7);
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("email", full_delegation_entry("email", &display));
+        matched_credentials.insert("mdl", no_delegation_entry("mdl", &display));
+
+        // No credential_sets: ["phone", "email", "mdl"] all required; "phone" is missing.
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed(""),
+                option_id: Cow::Borrowed(""),
+                matched_credential_ids: vec!["email", "mdl"],
+                matched_indices: vec![1, 2],
+                option_length: 3,
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert_eq!(mock.added_entry_sets, vec![("req:0;null".to_string(), 3)]);
+        assert_eq!(mock.added_entry_indices, vec![("email".to_string(), 1)]);
     }
 
     #[test]

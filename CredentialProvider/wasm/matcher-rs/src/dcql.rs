@@ -386,35 +386,14 @@ fn match_claim<'a>(
     })
 }
 
-/// Returns true if every credential in `cred_ids` matched exclusively with
-/// [`DelegationType::Full`] candidates.
-///
-/// Only such credentials may be reported as part of a *partial* option match: Credential Manager
-/// can merge FULL-delegation entries from several providers into a single entry set and fulfill
-/// them in parallel through the providers' background services, whereas entries that require the
-/// provider's own UI cannot be combined with another provider's entries.
-fn all_fully_delegated<'a>(
-    cred_ids: &[&'a str],
-    candidate_matched_credentials: &DeterministicMap<&'a str, DcqlMatchedCredentialEntry<'a>>,
-) -> bool {
-    cred_ids.iter().all(|cred_id| {
-        candidate_matched_credentials
-            .get(*cred_id)
-            .is_some_and(|entry| {
-                !entry.matched.is_empty()
-                    && entry
-                        .matched
-                        .iter()
-                        .all(|m| m.delegation_type == DelegationType::Full)
-            })
-    })
-}
-
 /// Evaluates a single option (an ordered list of credential ids) of a credential set.
 ///
-/// Returns `None` if the option cannot be satisfied by this provider, otherwise a
+/// Returns `None` if this provider matched none of the option's credentials, otherwise a
 /// [`MatchedCredentialSetInfo`] describing either a complete match (all ids matched) or a partial
-/// match (some ids matched, all of them fully delegated).
+/// match (only some ids matched). Partial matches are reported so that Credential Manager can
+/// combine this provider's fully delegated entries with other providers' entries for the same
+/// option; which entries of a partial match are actually reported is decided in
+/// `reporter::report_match_result`.
 fn evaluate_option<'a>(
     option: &'a [String],
     set_id: Cow<'a, str>,
@@ -438,23 +417,13 @@ fn evaluate_option<'a>(
     }
 
     if matched_credential_ids.is_empty() {
+        log::trace!("Option {} in set {} matched no credentials", option_id, set_id);
         return None;
     }
 
     if matched_credential_ids.len() < option.len() {
-        if !all_fully_delegated(&matched_credential_ids, candidate_matched_credentials) {
-            log::trace!(
-                "Option {} in set {} failed: {} of {} credentials matched and not all of them \
-                 are fully delegated",
-                option_id,
-                set_id,
-                matched_credential_ids.len(),
-                option.len()
-            );
-            return None;
-        }
         log::info!(
-            "Option {} in set {} partially satisfied ({} of {} credentials, fully delegated)",
+            "Option {} in set {} partially satisfied ({} of {} credentials)",
             option_id,
             set_id,
             matched_credential_ids.len(),
@@ -540,26 +509,25 @@ fn evaluate_implicit_credential_sets<'a>(
         }
     }
 
+    if matched_credential_ids.is_empty() {
+        log::info!(
+            "Implicit credential requirements failed: 0 of {} satisfied",
+            credentials_req.len()
+        );
+        return Vec::new();
+    }
+
     if matched_credential_ids.len() == credentials_req.len() {
         log::info!(
             "All {} credential requirements satisfied",
             credentials_req.len()
         );
-    } else if !matched_credential_ids.is_empty()
-        && all_fully_delegated(&matched_credential_ids, candidate_matched_credentials)
-    {
-        log::info!(
-            "Implicit credential requirements partially satisfied: {} of {} (fully delegated)",
-            matched_credential_ids.len(),
-            credentials_req.len()
-        );
     } else {
         log::info!(
-            "Implicit credential requirements failed: {} of {} satisfied",
+            "Implicit credential requirements partially satisfied: {} of {}",
             matched_credential_ids.len(),
             credentials_req.len()
         );
-        return Vec::new();
     }
 
     vec![vec![MatchedCredentialSetInfo {
@@ -1186,25 +1154,28 @@ mod tests {
     }
 
     #[test]
-    fn test_dcql_query_partial_option_rejected_without_full_delegation() {
+    fn test_dcql_query_partial_option_is_matched_regardless_of_delegation() {
+        // Matching does not depend on the delegation type; the reporter decides which entries
+        // of a partial match may be surfaced.
         let (registry, query) = partial_match_fixture(DelegationType::None, pair_or_single_set());
 
         let result = dcql_query(&query, &registry);
 
         assert_eq!(result.matched_credential_sets.len(), 1);
         let options = &result.matched_credential_sets[0];
-        assert_eq!(options.len(), 1, "only the single-credential option matches");
-        assert_eq!(options[0].option_id, "1");
-        assert!(!options[0].is_partial());
+        assert_eq!(options.len(), 2);
+        assert!(options[0].is_partial());
+        assert_eq!(options[0].matched_indices, vec![1]);
+        assert!(!options[1].is_partial());
     }
 
     #[test]
-    fn test_dcql_query_partial_only_option_fails_without_full_delegation() {
-        let pair_only = vec![DcqlCredentialSet {
-            options: vec![vec!["req_missing".to_string(), "req_present".to_string()]],
+    fn test_dcql_query_option_with_no_matching_credential_is_dropped() {
+        let (registry, mut query) = partial_match_fixture(DelegationType::Full, vec![]);
+        query.credential_sets = vec![DcqlCredentialSet {
+            options: vec![vec!["req_missing".to_string()]],
             required: Some(true),
         }];
-        let (registry, query) = partial_match_fixture(DelegationType::None, pair_only);
 
         let result = dcql_query(&query, &registry);
 
@@ -1228,11 +1199,12 @@ mod tests {
     }
 
     #[test]
-    fn test_dcql_query_implicit_partial_rejected_without_full_delegation() {
+    fn test_dcql_query_implicit_partial_is_matched_regardless_of_delegation() {
         let (registry, query) = partial_match_fixture(DelegationType::None, vec![]);
 
         let result = dcql_query(&query, &registry);
 
-        assert!(result.matched_credential_sets.is_empty());
+        assert_eq!(result.matched_credential_sets.len(), 1);
+        assert!(result.matched_credential_sets[0][0].is_partial());
     }
 }
