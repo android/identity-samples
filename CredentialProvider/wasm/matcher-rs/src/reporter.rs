@@ -312,7 +312,10 @@ pub fn report_match_result(
                         set_id_parts
                             .push(format!("set:{};option:{}", option.set_id, option.option_id));
                     }
-                    total_length += option.matched_credential_ids.len();
+                    // Use the option length as requested by the verifier (not just the number
+                    // of credentials this provider matched) so that, for a partial match,
+                    // Credential Manager can fill the remaining slots from other providers.
+                    total_length += option.option_length;
                 }
 
                 // Preserve the "req:N;null" format for implicit sets (no explicit sets matched).
@@ -326,10 +329,17 @@ pub fn report_match_result(
                     credman.add_entry_set(&set_id_str, total_length as i32);
                 }
 
-                let mut document_index = 0;
+                // Each credential is reported at its position within the concatenated options,
+                // i.e. the index the verifier assigned to it. For a partial match this leaves
+                // gaps that other providers are expected to fill.
+                let mut option_offset = 0;
                 for (set_idx, &option_idx) in selected_option_indices.iter().enumerate() {
                     let option = &credential_sets[set_idx][option_idx];
-                    for matched_credential_id in &option.matched_credential_ids {
+                    for (matched_credential_id, &index_in_option) in option
+                        .matched_credential_ids
+                        .iter()
+                        .zip(option.matched_indices.iter())
+                    {
                         let Some(doc) = candidate_matched_credentials.get(*matched_credential_id)
                         else {
                             continue;
@@ -339,7 +349,7 @@ pub fn report_match_result(
                             wasm_version,
                             doc,
                             matched_credential_id,
-                            document_index,
+                            (option_offset + index_in_option) as i32,
                             request_idx,
                             &set_id_str,
                             Some(&option.set_id),
@@ -347,8 +357,8 @@ pub fn report_match_result(
                             credentials_blob,
                             transaction_info,
                         )?;
-                        document_index += 1;
                     }
+                    option_offset += option.option_length;
                 }
                 return Ok(());
             }
@@ -412,6 +422,7 @@ mod tests {
         payment_entries: Vec<String>,
         inline_entries: Vec<String>,
         added_entry_sets: Vec<(String, i32)>,
+        added_entry_indices: Vec<(String, i32)>,
     }
 
     impl CredmanApi for MockCredman {
@@ -457,11 +468,12 @@ mod tests {
             _warning: &str,
             _metadata: &str,
             _set_id: &str,
-            _set_index: i32,
+            set_index: i32,
             delegation_type: DelegationType,
         ) {
             self.added_entries.push(cred_id.to_string());
             self.added_delegations.push((cred_id.to_string(), delegation_type));
+            self.added_entry_indices.push((cred_id.to_string(), set_index));
         }
         fn add_field_to_entry_set(
             &mut self,
@@ -531,6 +543,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
         let match_result = DcqlMatchResult {
             matched_credential_sets: vec![],
@@ -554,6 +567,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
 
         let display = RegistryDisplay {
@@ -587,6 +601,8 @@ mod tests {
                 set_id: Cow::Borrowed("set1"),
                 option_id: Cow::Borrowed("opt1"),
                 matched_credential_ids: vec!["cred1"],
+                matched_indices: vec![0],
+                option_length: 1,
             }]],
             matched_credentials,
             inline_issuance: None,
@@ -609,6 +625,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
 
         let display = RegistryDisplay {
@@ -642,6 +659,8 @@ mod tests {
                 set_id: Cow::Borrowed("set1"),
                 option_id: Cow::Borrowed("opt1"),
                 matched_credential_ids: vec!["cred_full"],
+                matched_indices: vec![0],
+                option_length: 1,
             }]],
             matched_credentials,
             inline_issuance: None,
@@ -667,6 +686,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
 
         let display = RegistryDisplay {
@@ -700,6 +720,8 @@ mod tests {
                 set_id: Cow::Borrowed("set1"),
                 option_id: Cow::Borrowed("opt1"),
                 matched_credential_ids: vec!["cred_pay"],
+                matched_indices: vec![0],
+                option_length: 1,
             }]],
             matched_credentials,
             inline_issuance: None,
@@ -730,6 +752,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
 
         let inline = RegistryIssuanceEntry {
@@ -762,6 +785,7 @@ mod tests {
             payment_entries: vec![],
             inline_entries: vec![],
             added_entry_sets: vec![],
+            added_entry_indices: vec![],
         };
 
         let display = RegistryDisplay::default();
@@ -772,11 +796,15 @@ mod tests {
                         set_id: Cow::Borrowed("set1"),
                         option_id: Cow::Borrowed("opt1"),
                         matched_credential_ids: vec!["cred1"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                     MatchedCredentialSetInfo {
                         set_id: Cow::Borrowed("set1"),
                         option_id: Cow::Borrowed("opt2"),
                         matched_credential_ids: vec!["cred2"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                 ],
                 vec![
@@ -784,11 +812,15 @@ mod tests {
                         set_id: Cow::Borrowed("set2"),
                         option_id: Cow::Borrowed("opt3"),
                         matched_credential_ids: vec!["cred3"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                     MatchedCredentialSetInfo {
                         set_id: Cow::Borrowed("set2"),
                         option_id: Cow::Borrowed("opt4"),
                         matched_credential_ids: vec!["cred4"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                 ],
                 vec![
@@ -796,11 +828,15 @@ mod tests {
                         set_id: Cow::Borrowed("set3"),
                         option_id: Cow::Borrowed("opt5"),
                         matched_credential_ids: vec!["cred5"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                     MatchedCredentialSetInfo {
                         set_id: Cow::Borrowed("set3"),
                         option_id: Cow::Borrowed("opt6"),
                         matched_credential_ids: vec!["cred6"],
+                        matched_indices: vec![0],
+                        option_length: 1,
                     },
                 ],
             ],
@@ -864,5 +900,111 @@ mod tests {
         assert!(set_ids.contains(
             &"req:0;set:set1;option:opt2;set:set2;option:opt4;set:set3;option:opt6".to_string()
         ));
+    }
+
+    fn full_delegation_entry<'a>(
+        id: &'a str,
+        display: &'a RegistryDisplay,
+    ) -> DcqlMatchedCredentialEntry<'a> {
+        DcqlMatchedCredentialEntry {
+            id,
+            matched: vec![MatchedCredential {
+                id,
+                delegation_type: DelegationType::Full,
+                display,
+                matched_claim_names: vec![],
+                matched_claim_metadata: vec![],
+            }],
+        }
+    }
+
+    #[test]
+    fn test_report_partial_option_uses_verifier_length_and_index() {
+        let mut mock = MockCredman {
+            wasm_version: 7,
+            added_entries: vec![],
+            added_delegations: vec![],
+            added_fields: vec![],
+            payment_entries: vec![],
+            inline_entries: vec![],
+            added_entry_sets: vec![],
+            added_entry_indices: vec![],
+        };
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("email", full_delegation_entry("email", &display));
+
+        // The verifier asked for ["phone", "email"]; this provider only holds "email".
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![vec![MatchedCredentialSetInfo {
+                set_id: Cow::Borrowed("0"),
+                option_id: Cow::Borrowed("0"),
+                matched_credential_ids: vec!["email"],
+                matched_indices: vec![1],
+                option_length: 2,
+            }]],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        // The entry set is declared with the full length so Credential Manager can merge another
+        // provider's entry for index 0, and our credential is placed at its own index (1).
+        assert_eq!(mock.added_entry_sets, vec![("req:0;set:0;option:0".to_string(), 2)]);
+        assert_eq!(mock.added_entry_indices, vec![("email".to_string(), 1)]);
+        assert_eq!(mock.added_delegations, vec![("email".to_string(), DelegationType::Full)]);
+    }
+
+    #[test]
+    fn test_report_partial_option_offsets_subsequent_sets() {
+        let mut mock = MockCredman {
+            wasm_version: 7,
+            added_entries: vec![],
+            added_delegations: vec![],
+            added_fields: vec![],
+            payment_entries: vec![],
+            inline_entries: vec![],
+            added_entry_sets: vec![],
+            added_entry_indices: vec![],
+        };
+        let display = RegistryDisplay::default();
+        let mut matched_credentials = DeterministicMap::new();
+        matched_credentials.insert("a", full_delegation_entry("a", &display));
+        matched_credentials.insert("c", full_delegation_entry("c", &display));
+
+        // Set 0 option 0 = ["a", "b"] (partial: only "a"), set 1 option 0 = ["c"] (complete).
+        let match_result = DcqlMatchResult {
+            matched_credential_sets: vec![
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("0"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["a"],
+                    matched_indices: vec![0],
+                    option_length: 2,
+                }],
+                vec![MatchedCredentialSetInfo {
+                    set_id: Cow::Borrowed("1"),
+                    option_id: Cow::Borrowed("0"),
+                    matched_credential_ids: vec!["c"],
+                    matched_indices: vec![0],
+                    option_length: 1,
+                }],
+            ],
+            matched_credentials,
+            inline_issuance: None,
+        };
+
+        report_match_result(&mut mock, &match_result, 0, &OpenId4VpData::default(), &[]).unwrap();
+
+        assert_eq!(
+            mock.added_entry_sets,
+            vec![("req:0;set:0;option:0;set:1;option:0".to_string(), 3)]
+        );
+        // "c" is at index 2 because the (partially matched) first option occupies indices 0..2.
+        assert_eq!(
+            mock.added_entry_indices,
+            vec![("a".to_string(), 0), ("c".to_string(), 2)]
+        );
     }
 }

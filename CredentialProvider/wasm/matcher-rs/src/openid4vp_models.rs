@@ -167,11 +167,31 @@ pub struct DcqlMatchResult<'a> {
     pub inline_issuance: Option<&'a RegistryIssuanceEntry>,
 }
 
+/// One option of a DCQL credential set that this provider can (fully or partially) satisfy.
+///
+/// A *partial* match is one where the provider holds only some of the credentials listed in
+/// the option. Partial matches are only produced when every matched credential uses
+/// [`DelegationType::Full`], because that is the only case in which Credential Manager can
+/// silently combine this provider's entries with another provider's entries for the same
+/// option (multi-provider fulfillment).
 #[derive(Debug, Clone)]
 pub struct MatchedCredentialSetInfo<'a> {
     pub set_id: Cow<'a, str>,
     pub option_id: Cow<'a, str>,
+    /// The credential ids within the option that this provider matched, in option order.
     pub matched_credential_ids: Vec<&'a str>,
+    /// Position of each entry of `matched_credential_ids` within the option.
+    pub matched_indices: Vec<usize>,
+    /// Total number of credential ids in the option as requested by the verifier.
+    /// Greater than `matched_credential_ids.len()` for a partial match.
+    pub option_length: usize,
+}
+
+impl MatchedCredentialSetInfo<'_> {
+    /// Returns true if this provider matched only a subset of the option's credentials.
+    pub fn is_partial(&self) -> bool {
+        self.matched_credential_ids.len() < self.option_length
+    }
 }
 
 #[derive(Debug, Clone)]
