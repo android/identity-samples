@@ -170,10 +170,9 @@ pub struct DcqlMatchResult<'a> {
 /// One option of a DCQL credential set that this provider can (fully or partially) satisfy.
 ///
 /// A *partial* match is one where the provider holds only some of the credentials listed in
-/// the option. Partial matches are only produced when every matched credential uses
-/// [`DelegationType::Full`], because that is the only case in which Credential Manager can
-/// silently combine this provider's entries with another provider's entries for the same
-/// option (multi-provider fulfillment).
+/// the option. Credential Manager can complete such a match with other providers' entries, but
+/// only for entries using [`DelegationType::Full`]; the reporter therefore withholds
+/// non-delegated entries from partial entry sets (multi-provider fulfillment).
 #[derive(Debug, Clone)]
 pub struct MatchedCredentialSetInfo<'a> {
     pub set_id: Cow<'a, str>,
