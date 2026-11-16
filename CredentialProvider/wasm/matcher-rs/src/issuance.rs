@@ -352,6 +352,15 @@ mod test {
                 package_icon.to_vec(),
             ));
         }
+        fn set_dedup_id_and_rank_for_entry_in_set(
+            &mut self,
+            _cred_id: &str,
+            _dedup_id: Option<&str>,
+            _rank: i32,
+            _set_id: &str,
+            _set_index: i32,
+        ) {
+        }
     }
 
     #[test]
