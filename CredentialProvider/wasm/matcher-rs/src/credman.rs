@@ -4,6 +4,7 @@ use crate::bindings::{
     AddEntrySet, AddEntryToSet, AddFieldToEntrySet, AddInlineIssuanceEntry, AddIssuanceEntry,
     AddMetadataDisplayTextToEntrySet, AddPaymentEntryToSetV2, AddStringIdEntry, GetCredentialsSize,
     GetRequestBuffer, GetRequestSize, GetWasmVersion, ReadCredentialsBuffer, SelfDeclarePackageInfo,
+    SetDedupIdAndRankForEntryInSet,
 };
 use crate::openid4vp_models::DelegationType;
 
@@ -85,6 +86,14 @@ pub trait CredmanApi {
         &mut self,
         package_display_name: &str,
         package_icon: &[u8],
+    );
+    fn set_dedup_id_and_rank_for_entry_in_set(
+        &mut self,
+        cred_id: &str,
+        dedup_id: Option<&str>,
+        rank: i32,
+        set_id: &str,
+        set_index: i32,
     );
 }
 
@@ -517,6 +526,28 @@ impl CredmanApi for CredmanApiImpl {
                 package_display_name_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
                 icon_bytes,
                 icon_length,
+            );
+        }
+    }
+    fn set_dedup_id_and_rank_for_entry_in_set(
+        &mut self,
+        cred_id: &str,
+        dedup_id: Option<&str>,
+        rank: i32,
+        set_id: &str,
+        set_index: i32,
+    ) {
+        let cred_id_c = CString::new(cred_id).unwrap();
+        let dedup_id_c = dedup_id.map(|d| CString::new(d).unwrap());
+        let set_id_c = CString::new(set_id).unwrap();
+
+        unsafe {
+            SetDedupIdAndRankForEntryInSet(
+                cred_id_c.as_ptr(),
+                dedup_id_c.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+                rank,
+                set_id_c.as_ptr(),
+                set_index,
             );
         }
     }

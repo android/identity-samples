@@ -165,6 +165,8 @@ fn match_candidate_claims<'a>(
         return Some(MatchedCredential {
             id: &candidate.id,
             delegation_type: candidate.delegation_type,
+            dedup_id: candidate.dedup_id.as_deref(),
+            rank: candidate.rank,
             display: &candidate.display,
             matched_claim_names,
             matched_claim_metadata: Vec::new(),
@@ -218,6 +220,8 @@ fn match_candidate_claims<'a>(
                 Some(MatchedCredential {
                     id: &candidate.id,
                     delegation_type: candidate.delegation_type,
+                    dedup_id: candidate.dedup_id.as_deref(),
+                    rank: candidate.rank,
                     display: &candidate.display,
                     matched_claim_names: current_set_names,
                     matched_claim_metadata: current_set_metadata,
@@ -259,6 +263,8 @@ fn match_candidate_claims<'a>(
     Some(MatchedCredential {
         id: &candidate.id,
         delegation_type: candidate.delegation_type,
+        dedup_id: candidate.dedup_id.as_deref(),
+        rank: candidate.rank,
         display: &candidate.display,
         matched_claim_names,
         matched_claim_metadata,
@@ -649,6 +655,7 @@ mod tests {
             delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
+            ..Default::default()
         });
         mso_mdoc.insert("org.iso.18013.5.1.mDL".to_string(), creds);
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -692,6 +699,7 @@ mod tests {
             delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
+            ..Default::default()
         });
         mso_mdoc.insert("org.iso.18013.5.1.mDL".to_string(), creds);
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -738,6 +746,7 @@ mod tests {
             delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
+            ..Default::default()
         });
         mso_mdoc.insert("org.iso.18013.5.1.mDL".to_string(), creds);
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -774,6 +783,7 @@ mod tests {
             delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths: DeterministicMap::new(),
+            ..Default::default()
         });
         mso_mdoc.insert("org.iso.18013.5.1.mDL".to_string(), creds);
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -929,6 +939,7 @@ mod tests {
                 delegation_type: DelegationType::None,
                 display: RegistryDisplay::default(),
                 paths,
+                ..Default::default()
             }
         };
 
@@ -1017,6 +1028,7 @@ mod tests {
             delegation_type: DelegationType::None,
             display: RegistryDisplay::default(),
             paths,
+            ..Default::default()
         };
         mso_mdoc.insert("doctype1".to_string(), vec![cred1]);
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -1084,6 +1096,7 @@ mod tests {
                 delegation_type,
                 display: RegistryDisplay::default(),
                 paths: DeterministicMap::new(),
+                ..Default::default()
             }],
         );
         registry.credentials.mso_mdoc = Some(mso_mdoc);
@@ -1249,5 +1262,43 @@ mod tests {
 
         assert_eq!(result.matched_credential_sets.len(), 1);
         assert!(result.matched_credential_sets[0][0].is_partial());
+    }
+
+    #[test]
+    fn test_dcql_query_propagates_dedup_id_and_rank() {
+        let mut registry = Registry::default();
+        let mut mso_mdoc = DeterministicMap::new();
+
+        let cred = RegistryCredential {
+            id: "cred_dedup_1".to_string(),
+            dedup_id: Some("sim1".to_string()),
+            rank: Some(2),
+            display: RegistryDisplay::default(),
+            paths: DeterministicMap::new(),
+            ..Default::default()
+        };
+        mso_mdoc.insert("org.iso.18013.5.1.mDL".to_string(), vec![cred]);
+        registry.credentials.mso_mdoc = Some(mso_mdoc);
+
+        let query = DcqlQuery {
+            credential_sets: vec![],
+            credentials: vec![DcqlCredential {
+                id: "mdl".to_string(),
+                format: "mso_mdoc".to_string(),
+                meta: Some(DcqlMeta {
+                    doctype_value: "org.iso.18013.5.1.mDL".to_string(),
+                    vct_values: vec![],
+                }),
+                claims: vec![],
+                claim_sets: vec![],
+            }],
+        };
+
+        let result = dcql_query(&query, &registry);
+        assert_eq!(result.matched_credentials.len(), 1);
+        let matched_entry = result.matched_credentials.get("mdl").unwrap();
+        assert_eq!(matched_entry.matched.len(), 1);
+        assert_eq!(matched_entry.matched[0].dedup_id, Some("sim1"));
+        assert_eq!(matched_entry.matched[0].rank, Some(2));
     }
 }

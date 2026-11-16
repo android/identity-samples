@@ -158,3 +158,14 @@ unsafe extern "C" {
     pub fn fd_write(fd: i32, iovs_ptr: *const c_void, iovs_len: i32, nwritten_ptr: *mut i32)
     -> i32;
 }
+
+#[link(wasm_import_module = "credman_v10")]
+unsafe extern "C" {
+    pub fn SetDedupIdAndRankForEntryInSet(
+        cred_id: *const c_char,
+        dedup_id: *const c_char,
+        rank: i32,
+        set_id: *const c_char,
+        set_index: i32,
+    );
+}

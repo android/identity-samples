@@ -298,6 +298,15 @@ impl CredmanApi for FakeCredman {
         _package_icon: &[u8],
     ) {
     }
+    fn set_dedup_id_and_rank_for_entry_in_set(
+        &mut self,
+        _cred_id: &str,
+        _dedup_id: Option<&str>,
+        _rank: i32,
+        _set_id: &str,
+        _set_index: i32,
+    ) {
+    }
 }
 
 pub fn create_registry_blob(json_str: &str) -> Vec<u8> {
